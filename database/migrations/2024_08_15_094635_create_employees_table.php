@@ -19,7 +19,6 @@ return new class extends Migration
             $table->string('password');
             $table->string('role')->default('employee');
             $table->string('id_card_number')->unique(); // เลขบัตรประจำตัวประชาชน
-            $table->string('id_card_image')->nullable(); // รูปสำเนาบัตรประชาชน
             $table->string('phone_number'); // เบอร์โทรศัพท์
             $table->string('employment_status'); // สถานะการจ้างงาน เช่น ประจำ, ชั่วคราว
             $table->date('start_date')->nullable(); // วันที่เริ่มงาน
@@ -28,12 +27,8 @@ return new class extends Migration
             $table->date('date_of_birth')->nullable(); // วันเดือนปีเกิด (พนักงานกรอกตอนแรกเข้า)
             $table->string('profile_picture')->nullable(); // รูปถ่าย (พนักงานกรอกตอนแรกเข้า)
             $table->text('previous_experience')->nullable(); // ประวัติการทำงานก่อนหน้า (พนักงานกรอกตอนแรกเข้า)
-            $table->text('relevant_education')->nullable(); // ข้อมูลเกี่ยวกับการศึกษาที่เกี่ยวข้อง (พนักงานกรอกตอนแรกเข้า)
             $table->string('bank_account')->nullable(); // บัญชีธนาคาร (พนักงานกรอกตอนแรกเข้า)
             $table->string('bank_account_number')->nullable(); // เลขที่บัญชีธนาคาร (พนักงานกรอกตอนแรกเข้า)
-            $table->text('emergency_contact')->nullable(); // การติดต่อในกรณีฉุกเฉิน (พนักงานกรอกตอนแรกเข้า)
-            $table->text('health_info')->nullable(); // ข้อมูลสุขภาพ (พนักงานกรอกตอนแรกเข้า)
-            $table->string('religion')->nullable(); // ข้อมูลเกี่ยวกับศาสนา (พนักงานกรอกตอนแรกเข้า)
             $table->timestamps();
         });
     }

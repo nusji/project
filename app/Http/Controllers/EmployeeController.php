@@ -57,65 +57,65 @@ class EmployeeController extends Controller
         return redirect()->route('employees.index')->with('success', 'เพิ่มข้อมูลเบื้องต้นพนักงานใหม่เรียบร้อยแล้ว กรุณาแจ้งพนักงานให้เพิ่มข้อมูลส่วนอื่นๆ');
     }
 
-    // แสดงฟอร์มสำหรับกรอกข้อมูลเพิ่มเติม หลังจากที่ล็อกอินครั้งแรก หรือเมื่อพนักงานยังไม่ได้กรอกข้อมูลเพิ่มเติม
-    public function showProfileCompletionForm()
+    public function show($id)
     {
-        return view('employees.complete_profile');
+        $employee = Employee::findOrFail($id);
+        return view('employees.show', compact('employee'));
     }
 
-    public function updateProfile(Request $request)
-{
-    // ตรวจสอบข้อมูลที่ได้รับจากฟอร์ม
-    $validatedData = $request->validate([
-        'address' => 'nullable|string|max:255',
-        'date_of_birth' => 'nullable|date',
-        'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-        'previous_experience' => 'nullable|string',
-        'relevant_education' => 'nullable|string',
-        'bank_account' => 'nullable|string',
-        'bank_account_number' => 'nullable|string',
-        'emergency_contact' => 'nullable|string',
-        'health_info' => 'nullable|string',
-        'religion' => 'nullable|string',
-    ]);
+    public function edit($id)
+    {
+        $employee = Employee::findOrFail($id);
+        return view('employees.edit', compact('employee'));
+    }
 
-    // ค้นหาพนักงานจากผู้ใช้งานที่เข้าสู่ระบบ
-    $employee = Employee::where('user_id', auth()->id())->first();
+    public function update(Request $request, $id)
+    {
+        $employee = Employee::findOrFail($id);
 
-    if ($employee) {
-        // อัปเดตข้อมูลพนักงาน
-        $employee->update([
-            'address' => $validatedData['address'] ?? $employee->address,
-            'date_of_birth' => $validatedData['date_of_birth'] ?? $employee->date_of_birth,
-            'previous_experience' => $validatedData['previous_experience'] ?? $employee->previous_experience,
-            'relevant_education' => $validatedData['relevant_education'] ?? $employee->relevant_education,
-            'bank_account' => $validatedData['bank_account'] ?? $employee->bank_account,
-            'bank_account_number' => $validatedData['bank_account_number'] ?? $employee->bank_account_number,
-            'emergency_contact' => $validatedData['emergency_contact'] ?? $employee->emergency_contact,
-            'health_info' => $validatedData['health_info'] ?? $employee->health_info,
-            'religion' => $validatedData['religion'] ?? $employee->religion,
+        $validatedData = $request->validate([
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'username' => 'required|string|max:255|unique:employees,username,' . $employee->id,
+            'role' => 'required|in:employee,owner',
+            'id_card_number' => 'required|string|max:13|unique:employees,id_card_number,' . $employee->id,
+            'phone_number' => 'required|string|max:20',
+            'employment_status' => 'required|string',
+            'start_date' => 'nullable|date',
+            'date_of_birth' => 'nullable|date',
+            'address' => 'nullable|string',
+            'previous_experience' => 'nullable|string',
+            'bank_account' => 'nullable|string|max:255',
+            'bank_account_number' => 'nullable|string|max:255',
+            'profile_picture' => 'nullable|image|max:2048',
         ]);
 
-        // จัดการกับการอัปโหลดรูปภาพโปรไฟล์
         if ($request->hasFile('profile_picture')) {
-            // ลบรูปภาพเดิมถ้ามี
+            // Delete old picture if exists
             if ($employee->profile_picture) {
                 Storage::delete($employee->profile_picture);
             }
-
-            // อัปโหลดรูปภาพใหม่และอัพเดทข้อมูลในฐานข้อมูล
-            $profilePicturePath = $request->file('profile_picture')->store('profile_pictures');
-            $employee->profile_picture = $profilePicturePath;
-            $employee->save();
+            $path = $request->file('profile_picture')->store('profile_pictures', 'public');
+            $validatedData['profile_picture'] = $path;
         }
 
-        return redirect()->route('employees')
-            ->with('success', 'ข้อมูลพนักงานถูกอัปเดตเรียบร้อยแล้ว');
-    } else {
-        return redirect()->route('employees')
-            ->with('error', 'ไม่พบข้อมูลพนักงานที่ต้องการอัปเดต');
-    }
-}
+        $employee->update($validatedData);
 
-    
+        return redirect()->route('employees.show', $employee->id)->with('success', 'ข้อมูลพนักงานถูกอัปเดตเรียบร้อยแล้ว');
+    }
+
+
+    public function destroy($id)
+    {
+        $employee = Employee::findOrFail($id);
+
+        // ลบรูปโปรไฟล์ถ้ามี
+        if ($employee->profile_picture) {
+            Storage::delete('public/' . $employee->profile_picture);
+        }
+
+        $employee->delete();
+
+        return redirect()->route('employees.index')->with('success', 'พนักงานถูกลบออกจากระบบเรียบร้อยแล้ว');
+    }
 }
