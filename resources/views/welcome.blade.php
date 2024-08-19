@@ -11,6 +11,7 @@
     <h1 class="text-3xl font-bold underline">
       sssssssssssssss
     </h1>
+    <a href="{{route('login')}}">login</a>
 </body>
 
 </html>

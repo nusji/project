@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('menu_name'); // ชื่อเมนู
             $table->string('menu_detail')->nullable(); // รายละเอียดเมนู
-            $table->foreignId('menu_type_id')->constrained('menu_types')->onDelete('cascade');
+            $table->foreignId('menu_type_id')->constrained('menu_types')->onDelete('cascade'); // ลบ
             $table->double('menu_price', 10, 2);
             $table->boolean('menu_status')->default(true); // สถานะเมนู (true = available, false = not available)
             $table->string('menu_image')->nullable(); // ภาพเมนู

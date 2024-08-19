@@ -22,6 +22,11 @@ class Menu extends Model
 
     public function menuType()
     {
-        return $this->belongsTo(MenuTypes::class, 'menu_type_id');
+        return $this->belongsTo(MenuType::class);
+    }
+
+    public function recipes()
+    {
+        return $this->hasMany(MenuRecipe::class);
     }
 }
