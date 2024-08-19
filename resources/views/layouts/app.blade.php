@@ -86,16 +86,29 @@
                 </svg>
                 จัดการวัตถุดิบ
             </a>
+
+            <a href="{{ route('
+            ') }}"
+                class="py-2.5 px-4 text-lg font-medium text-[#07a189] rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                </svg>
+                จัดการสั่งซื้อวัตถุดิบ
+            </a>
+
             <a href="{{ route('menus.index') }}"
-            class="py-2.5 px-4 text-lg font-medium text-[#07a189] rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center">
-            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M4 3h2a1 1 0 011 1v9a1 1 0 01-1 1H4a1 1 0 01-1-1V4a1 1 0 011-1zM9 4h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V4a1 1 0 011-1zM14 4h2a1 1 0 011 1v9a1 1 0 01-1 1h-2a1 1 0 01-1-1V4a1 1 0 011-1zM18 15a3 3 0 103 3 3 3 0 00-3-3z"></path>
-            </svg>
-            จัดการเมนูข้าวแกง
-        </a>
-        
+                class="py-2.5 px-4 text-lg font-medium text-[#07a189] rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 3h2a1 1 0 011 1v9a1 1 0 01-1 1H4a1 1 0 01-1-1V4a1 1 0 011-1zM9 4h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V4a1 1 0 011-1zM14 4h2a1 1 0 011 1v9a1 1 0 01-1 1h-2a1 1 0 01-1-1V4a1 1 0 011-1zM18 15a3 3 0 103 3 3 3 0 00-3-3z">
+                    </path>
+                </svg>
+                จัดการเมนูข้าวแกง
+            </a>
+
             <a href="#"
                 class="py-2.5 px-4 text-lg font-medium text-[#07a189] rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center">
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"

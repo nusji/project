@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use App\Models\Menu;
 use App\Models\MenuType;
 use App\Models\Ingredient;
@@ -51,7 +50,7 @@ class MenuController extends Controller
             ]);
         }
 
-        return redirect()->route('menus.index')->with('success', 'Menu created successfully.');
+        return redirect()->route('menus.index')->with('success', 'เมนูถูกสร้างเรียบร้อยแล้ว');
     }
 
     public function show(Menu $menu)
@@ -98,12 +97,13 @@ class MenuController extends Controller
             ]);
         }
 
-        return redirect()->route('menus.index')->with('success', 'Menu updated successfully.');
+        return redirect()->route('menus.index')->with('success', 'เมนูถูกอัพเดทเรียบร้อยแล้ว');
     }
 
     public function destroy(Menu $menu)
     {
         $menu->delete();
-        return redirect()->route('menus.index')->with('success', 'Menu deleted successfully.');
+        return redirect()->route('menus.index')->with('success', 'เมนูถูกลบเรียบร้อยแล้ว');
     }
+
 }
