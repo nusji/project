@@ -11,13 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('orders', function (Blueprint $table) {
-            $table->id();
-            $table->date('order_date');
-            $table->string('order_detail');
-            $table->string('order_receipt');
-            $table->foreignId('employee_id')->constrained('employees');
-            $table->timestamps();
+        Schema::table('order_details', function (Blueprint $table) {
+            $table->timestamps(); // This will add both created_at and updated_at
         });
     }
 
@@ -26,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('orders');
+        Schema::table('order_details', function (Blueprint $table) {
+            $table->dropTimestamps(); // This will add both created_at and updated_at
+        });
     }
 };

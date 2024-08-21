@@ -11,12 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('orders', function (Blueprint $table) {
+        Schema::create('production_details', function (Blueprint $table) {
             $table->id();
-            $table->date('order_date');
-            $table->string('order_detail');
-            $table->string('order_receipt');
-            $table->foreignId('employee_id')->constrained('employees');
+            $table->foreignId('production_id')->constrained('productions')->onDelete('cascade');
+            $table->foreignId('menu_id')->constrained('menus');
+            $table->integer('quantity'); // จำนวนที่ผลิต
             $table->timestamps();
         });
     }
@@ -26,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('orders');
+        Schema::dropIfExists('production_details');
     }
 };

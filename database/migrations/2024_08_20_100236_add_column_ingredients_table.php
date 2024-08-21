@@ -11,13 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('orders', function (Blueprint $table) {
-            $table->id();
-            $table->date('order_date');
-            $table->string('order_detail');
-            $table->string('order_receipt');
-            $table->foreignId('employee_id')->constrained('employees');
-            $table->timestamps();
+        Schema::table('ingredients', function (Blueprint $table) {
+            $table->softDeletes();
         });
     }
 
@@ -26,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('orders');
+        Schema::table('ingredients', function (Blueprint $table) {
+            $table->dropSoftDeletes();
+        });
     }
 };

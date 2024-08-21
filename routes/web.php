@@ -9,6 +9,8 @@ use App\Http\Controllers\IngredientController;
 use App\Http\Controllers\IngredientTypeController;
 use App\Http\Controllers\MenuTypeController;
 use App\Http\Controllers\MenuController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ProductionController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -37,17 +39,21 @@ Route::middleware(['auth', 'role:owner'])->group(function () {
     //จัดการพนักงาน แบบ Resourceful Routes ประกอบด้วย index, create, store, show, edit, update, destroy
     Route::resource('employees', EmployeeController::class);
 
+    //จัดการประเภทวัตถุดิบ แบบ Resourceful Routes ประกอบด้วย index, create, store, show, edit, update, destroy
+    Route::resource('ingredient_types', IngredientTypeController::class);
+
     //จัดการวัตถุดิบ แบบ Resourceful Routes ประกอบด้วย index, create, store, show, edit, update, destroy
     Route::resource('ingredients', IngredientController::class);
     Route::post('/ingredients/update-quantity', [IngredientController::class, 'updateQuantity'])->name('ingredients.updateQuantity');
 
-    //จัดการประเภทวัตถุดิบ แบบ Resourceful Routes ประกอบด้วย index, create, store, show, edit, update, destroy
-    Route::resource('ingredient_types', IngredientTypeController::class);
+    //จัดการวัตถุดิบ แบบ Resourceful Routes ประกอบด้วย index, create, store, show, edit, update, destroy
+    Route::resource('orders', OrderController::class);
 
     //จัดการประเภทเมนู แบบ Resourceful Routes ประกอบด้วย index, create, store, show, edit, update, destroy
     Route::resource('menu_types', MenuTypeController::class);
 
     //จัดการเมนู แบบ Resourceful Routes ประกอบด้วย index, create, store, show, edit, update, destroy
     Route::resource('menus', MenuController::class);
-    
+
+    Route::resource('productions', ProductionController::class);
 });
