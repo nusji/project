@@ -1,17 +1,15 @@
-<!-- resources/views/sidebar.blade.php -->
-<aside
-    class="h-full w-64 fixed top-0 left-0 bg-[#FFFFFF] shadow-lg z-10 transition-transform duration-500 pt-16 md:pt-20">
+<aside class="h-full w-64 fixed top-0 left-0 bg-[#FFFFFF] shadow-lg z-10 transition-transform duration-500 pt-16 md:pt-20">
     <div class="flex flex-col p-4 space-y-2">
         <a href="{{ Auth::user()->role === 'owner' ? route('dashboard.owner') : route('dashboard.employee') }}"
-            class="py-2.5 px-4 text-lg font-medium text-[#07a189] rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center">
-            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg">
+            class="py-2.5 px-4 text-lg font-medium text-[#07a189] rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center {{ request()->routeIs('dashboard.owner') || request()->routeIs('dashboard.employee') ? 'bg-[#E2725B] text-white' : '' }}">
+            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
                 </path>
             </svg>
             แดชบอร์ด
         </a>
+
         <a href="#"
             class="py-2.5 px-4 text-lg font-medium text-[#07a189] rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center">
             <svg class="w-5 h-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -21,21 +19,21 @@
             </svg>
             จัดการขาย
         </a>
+        
         <hr>
+
         <a href="{{ route('ingredients.index') }}"
-            class="py-2.5 px-4 text-lg font-medium text-[#07a189] rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center">
-            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg">
+            class="py-2.5 px-4 text-lg font-medium text-[#07a189] rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center {{ request()->routeIs('ingredients.index') ? 'bg-[#E2725B] text-white' : '' }}">
+            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
             </svg>
             วัตถุดิบ
         </a>
 
-        <a href="{{route('orders.index')}}"
-            class="py-2.5 px-4 text-lg font-medium text-[#07a189] rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center">
-            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg">
+        <a href="{{ route('orders.index') }}"
+            class="py-2.5 px-4 text-lg font-medium text-[#07a189] rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center {{ request()->routeIs('orders.index') ? 'bg-[#E2725B] text-white' : '' }}">
+            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
             </svg>
@@ -43,9 +41,8 @@
         </a>
 
         <a href="{{ route('menus.index') }}"
-            class="py-2.5 px-4 text-lg font-medium text-[#07a189] rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center">
-            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg">
+            class="py-2.5 px-4 text-lg font-medium text-[#07a189] rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center {{ request()->routeIs('menus.index') ? 'bg-[#E2725B] text-white' : '' }}">
+            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M4 3h2a1 1 0 011 1v9a1 1 0 01-1 1H4a1 1 0 01-1-1V4a1 1 0 011-1zM9 4h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V4a1 1 0 011-1zM14 4h2a1 1 0 011 1v9a1 1 0 01-1 1h-2a1 1 0 01-1-1V4a1 1 0 011-1zM18 15a3 3 0 103 3 3 3 0 00-3-3z">
                 </path>
@@ -54,9 +51,8 @@
         </a>
 
         <a href="{{ route('productions.index') }}"
-            class="py-2.5 px-4 text-lg font-medium text-[#07a189] rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center">
-            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg">
+            class="py-2.5 px-4 text-lg font-medium text-[#07a189] rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center {{ request()->routeIs('productions.index') ? 'bg-[#E2725B] text-white' : '' }}">
+            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M4 5h16v14H4V5zm4 0v14m8-14v14"></path>
             </svg>
@@ -66,7 +62,7 @@
         <!-- Employee Management -->
         @if (Auth::user()->role === 'owner')
             <a href="{{ route('employees.index') }}"
-                class="py-2.5 px-4 text-lg font-medium text-[#07a189] rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center">
+                class="py-2.5 px-4 text-lg font-medium text-[#07a189] rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center {{ request()->routeIs('employees.index') ? 'bg-[#E2725B] text-white' : '' }}">
                 <svg class="w-5 h-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                     stroke-width="1.5" stroke="currentColor" class="size-6">
                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -77,7 +73,7 @@
             </a>
         @elseif (Auth::user()->role === 'employee')
             <a href="{{ route('employees.index') }}"
-                class="py-2.5 px-4 text-lg font-medium text-[#07a189] rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center">
+                class="py-2.5 px-4 text-lg font-medium text-[#07a189] rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center {{ request()->routeIs('employees.index') ? 'bg-[#E2725B] text-white' : '' }}">
                 <svg class="w-5 h-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                     stroke-width="1.5" stroke="currentColor" class="size-6">
                     <path stroke-linecap="round" stroke-linejoin="round"

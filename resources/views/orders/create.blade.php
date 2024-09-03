@@ -1,77 +1,102 @@
+<!-- resources/views/orders/create.blade.php -->
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto py-8">
-    <h1 class="text-3xl font-bold mb-4">สั่งผลิตใหม่</h1>
-    <div class="bg-white shadow-md rounded-md p-6">
-        <form action="{{ route('orders.store') }}" method="POST">
+    <div class="container mx-auto px-4">
+        <h1 class="text-2xl font-bold mb-4">สร้างรายการสั่งซื้อใหม่</h1>
+        <form action="{{ route('orders.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="mb-4">
-                <label for="order_date" class="block font-medium text-sm text-gray-700">Order Date</label>
-                <input type="date" id="order_date" name="order_date" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full" required>
+                <label for="order_date" class="block mb-2">วันที่และเวลา</label>
+                <input type="datetime-local" name="order_date" id="order_date" class="w-full border rounded px-3 py-2" value="{{ old('order_date') }}" required>
             </div>
+            @error('order_date')
+                <span class="text-red-500 text-sm">{{ $message }}</span>
+            @enderror
+
             <div class="mb-4">
-                <label for="order_detail" class="block font-medium text-sm text-gray-700">Order Detail</label>
-                <textarea id="order_detail" name="order_detail" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full" required></textarea>
+                <label for="order_detail" class="block mb-2">รายละเอียด</label>
+                <textarea name="order_detail" id="order_detail" rows="3" class="w-full border rounded px-3 py-2" required>{{ old('order_detail') }}</textarea>
             </div>
+            @error('order_detail')
+                <span class="text-red-500 text-sm">{{ $message }}</span>
+            @enderror
+
             <div class="mb-4">
-                <label for="order_receipt" class="block font-medium text-sm text-gray-700">Order Receipt</label>
-                <input type="text" id="order_receipt" name="order_receipt" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full" required>
+                <label for="order_receipt" class="block mb-2">ใบเสร็จ (รูปภาพ)</label>
+                <input type="file" name="order_receipt" id="order_receipt" class="w-full border rounded px-3 py-2" accept="image/*">
+                @if (isset($order) && $order->order_receipt)
+                    <img src="{{ asset('storage/' . $order->order_receipt) }}" alt="ใบเสร็จปัจจุบัน" class="mt-2 max-w-xs">
+                    <p class="text-sm text-gray-600">อัปโหลดรูปใหม่เพื่อเปลี่ยนใบเสร็จ</p>
+                @endif
             </div>
-            <div class="mb-4">
-                <label class="block font-medium text-sm text-gray-700">Ingredients</label>
-                <div id="ingredients">
-                    <div class="ingredient-row mb-2 flex items-center">
-                        <select name="ingredients[0][id]" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-700 flex-1 mr-2" required>
-                            <option value="">Select Ingredient</option>
-                            @foreach ($ingredients as $ingredient)
+            @error('order_receipt')
+                <span class="text-red-500 text-sm">{{ $message }}</span>
+            @enderror
+
+            <div id="ingredients">
+                <h2 class="text-xl font-bold mb-2">รายการวัตถุดิบ</h2>
+                <div class="ingredient-item mb-4">
+                    <select name="ingredients[0][id]" class="border rounded px-3 py-2 mr-2" required>
+                        <option value="">เลือกวัตถุดิบ</option>
+                        @foreach ($ingredients as $ingredient)
                             <option value="{{ $ingredient->id }}">{{ $ingredient->ingredient_name }}</option>
-                            @endforeach
-                        </select>
-                        <input type="number" name="ingredients[0][quantity]" placeholder="Quantity" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm flex-1 mr-2" required>
-                        <input type="number" name="ingredients[0][price]" placeholder="Price" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm flex-1 mr-2" required>
-                        <button type="button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded add-ingredient">Add Ingredient</button>
-                    </div>
+                        @endforeach
+                    </select>
+                    <input type="number" name="ingredients[0][quantity]" placeholder="จำนวน" class="border rounded px-3 py-2 mr-2" required>
+                    <input type="number" name="ingredients[0][price]" placeholder="ราคา" class="border rounded px-3 py-2 mr-2" required>
+                    <button type="button" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" onclick="removeIngredient(this)">ลบ</button>
                 </div>
             </div>
-            <div class="flex justify-end">
-                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Create Order</button>
+            @error('ingredients')
+                <span class="text-red-500 text-sm">{{ $message }}</span>
+            @enderror
+
+            <button type="button" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-4" onclick="addIngredient()">เพิ่มวัตถุดิบ</button>
+
+            <div>
+                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">บันทึกรายการสั่งซื้อ</button>
             </div>
         </form>
     </div>
-</div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var addIngredientButton = document.querySelector('.add-ingredient');
-        var ingredientsContainer = document.getElementById('ingredients');
-        var ingredientRowIndex = 1;
-        var ingredients = @json($ingredients);
+    <script>
+        let ingredientCount = 1;
 
-        addIngredientButton.addEventListener('click', function() {
-            var newIngredientRow = document.createElement('div');
-            newIngredientRow.className = 'ingredient-row mb-2 flex items-center';
-            newIngredientRow.innerHTML = `
-                <select name="ingredients[${ingredientRowIndex}][id]" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-700 flex-1 mr-2" required>
-                    <option value="">Select Ingredient</option>
+        function addIngredient() {
+            const ingredientsDiv = document.getElementById('ingredients');
+            const newItem = document.createElement('div');
+            newItem.className = 'ingredient-item mb-4';
+            newItem.innerHTML = `
+                <select name="ingredients[${ingredientCount}][id]" class="border rounded px-3 py-2 mr-2" required>
+                    <option value="">เลือกวัตถุดิบ</option>
                     @foreach ($ingredients as $ingredient)
-                    <option value="{{ $ingredient->id }}">{{ $ingredient->name }}</option>
+                        <option value="{{ $ingredient->id }}">{{ $ingredient->ingredient_name }}</option>
                     @endforeach
                 </select>
-                <input type="number" name="ingredients[${ingredientRowIndex}][quantity]" placeholder="Quantity" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm flex-1 mr-2" required>
-                <input type="number" name="ingredients[${ingredientRowIndex}][price]" placeholder="Price" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm flex-1 mr-2" required>
-                <button type="button" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded remove-ingredient">Remove</button>
+                <input type="number" name="ingredients[${ingredientCount}][quantity]" placeholder="จำนวน" class="border rounded px-3 py-2 mr-2" required>
+                <input type="number" name="ingredients[${ingredientCount}][price]" placeholder="ราคา" class="border rounded px-3 py-2 mr-2" required>
+                <button type="button" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" onclick="removeIngredient(this)">ลบ</button>
             `;
-            ingredientsContainer.appendChild(newIngredientRow);
-            ingredientRowIndex++;
+            ingredientsDiv.appendChild(newItem);
+            ingredientCount++;
+        }
 
-            var removeIngredientButtons = document.querySelectorAll('.remove-ingredient');
-            removeIngredientButtons.forEach(function(button) {
-                button.addEventListener('click', function() {
-                    this.parentNode.remove();
-                });
-            });
+        function removeIngredient(button) {
+            button.parentElement.remove();
+        }
+
+        // กำหนดค่า default ของฟิลด์วันที่และเวลาเป็นปัจจุบัน
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const datetimeLocal = `${year}-${month}-${day}T${hours}:${minutes}`;
+
+            document.getElementById('order_date').value = datetimeLocal;
         });
-    });
-</script>
+    </script>
 @endsection

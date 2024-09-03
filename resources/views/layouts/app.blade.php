@@ -13,10 +13,10 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 
-<body class="bg-[#f5f5f5]">
+<body class="bg-[#ffffff]">
 
     <!-- Navbar -->
-    <nav class="bg-[#FFFFFF] shadow-sm fixed w-full z-20 top-0 left-0">
+    <nav class="bg-[#f7fff0] shadow-sm fixed w-full z-20 top-0 left-0">
         <div class="container mx-auto flex justify-between items-center p-2">
             <!-- Logo -->
             <div class="flex items-center">

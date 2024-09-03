@@ -1,39 +1,57 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto px-4 py-8">
-    <div class="max-w-2xl mx-auto">
-        <h2 class="text-3xl font-bold mb-6 text-gray-800 border-b pb-2">เพิ่มประเภทวัตถุดิบใหม่</h2>
 
-        <form action="{{ route('ingredient_types.store') }}" method="POST" class="bg-white shadow-lg rounded-lg px-8 pt-6 pb-8 mb-4">
-            @csrf
-            <div class="mb-6">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="ingredient_type_name">
-                    ชื่อประเภท
-                </label>
-                <input class="shadow appearance-none border rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300" id="ingredient_type_name" type="text" name="ingredient_type_name" required>
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white shadow-xl rounded-lg overflow-hidden">
+            <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+                <h2 class="text-2xl font-bold leading-6 text-gray-900">เพิ่มประเภทวัตถุดิบใหม่</h2>
+                <p class="mt-1 text-sm text-gray-500">กรอกข้อมูลด้านล่างเพื่อเพิ่มประเภทวัตถุดิบใหม่</p>
             </div>
-            <div class="mb-6">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="ingredient_type_detail">
-                    รายละเอียด
-                </label>
-                <textarea class="shadow appearance-none border rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300" id="ingredient_type_detail" name="ingredient_type_detail" rows="4"></textarea>
-            </div>
-            <div class="flex items-center justify-between">
-                <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-md focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:scale-105" type="submit">
-                    <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    บันทึก
-                </button>
-                <a href="{{ route('ingredient_types.index') }}" class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800 transition duration-300">
-                    <svg class="w-5 h-5 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                    ยกเลิก
-                </a>
-            </div>
-        </form>
+            <form action="{{ route('ingredient_types.store') }}" method="POST" class="px-4 py-5 sm:p-6">
+                @csrf
+                <div class="space-y-6">
+                    <div>
+                        <label for="ingredient_type_name" class="block text-sm font-medium text-gray-700 mb-1">
+                            ชื่อประเภท
+                        </label>
+                        <div class="mt-1">
+                            <input type="text" name="ingredient_type_name" id="ingredient_type_name" required
+                                class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-2 border-gray-300 rounded-md transition duration-150 ease-in-out bg-gray-50 px-4 py-2"
+                                placeholder="ใส่ชื่อประเภทวัตถุดิบ">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="ingredient_type_detail" class="block text-sm font-medium text-gray-700 mb-1">
+                            รายละเอียด
+                        </label>
+                        <div class="mt-1">
+                            <textarea id="ingredient_type_detail" name="ingredient_type_detail" rows="4"
+                                class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-2 border-gray-300 rounded-md transition duration-150 ease-in-out bg-gray-50 px-4 py-2"
+                                placeholder="ใส่รายละเอียดเพิ่มเติม (ถ้ามี)"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex items-center justify-end space-x-4">
+                    <a href="{{ route('ingredient_types.index') }}"
+                        class="inline-flex items-center px-4 py-2 border-2 border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out">
+                        <svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M7.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l2.293 2.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                        </svg>
+                        ยกเลิก
+                    </a>
+                    <button type="submit"
+                        class="inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out">
+                        <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                        </svg>
+                        บันทึก
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
+
 @endsection

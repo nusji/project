@@ -50,7 +50,7 @@ class IngredientTypeController extends Controller
 
         $ingredientType->update($request->all());
 
-        return redirect()->route('ingredients.ingredient_types.index')
+        return redirect()->route('ingredient_types.index')
             ->with('success', 'ประเภทวัตถุดิบถูกอัปเดตเรียบร้อยแล้ว');
     }
 

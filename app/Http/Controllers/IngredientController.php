@@ -8,11 +8,24 @@ use Illuminate\Http\Request;
 
 class IngredientController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $ingredients = Ingredient::with('ingredientType')->get();
+        $query = Ingredient::with('ingredientType');
+
+        // Check if there are any search parameters
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where('ingredient_name', 'like', "%{$search}%")
+                ->orWhereHas('ingredientType', function ($q) use ($search) { //เป็
+                    $q->where('ingredient_name', 'like', "%{$search}%");
+                });
+        }
+
+        $ingredients = $query->paginate(10);
+
         return view('ingredients.index', compact('ingredients'));
     }
+
 
     public function create()
     {
@@ -22,17 +35,19 @@ class IngredientController extends Controller
 
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'ingredient_name' => 'required|max:255|unique:ingredients',
-            'ingredient_type_id' => 'required|exists:ingredients_type,id',
-            'ingredient_unit' => 'required|max:50',
-            'ingredient_quantity' => 'required|numeric|min:0',
-        ],[
-            'ingredient_name.unique'=> 'พบวัตถุดิบนี้ในระบบแล้ว',
-            'ingredient_type_id.require'=> 'กรุณาเลือกประเภทวัตถุดิบ',
-            'ingredient_unit.require'=> 'กรุณากรอกหน่วยวัตถุดิบ',
-            'ingredient_quantity.require'=> 'กรุณากรอกจำนวนวัตถุดิบ',
-        ]
+        $validatedData = $request->validate(
+            [
+                'ingredient_name' => 'required|max:255|unique:ingredients',
+                'ingredient_type_id' => 'required|exists:ingredients_type,id',
+                'ingredient_unit' => 'required|max:50',
+                'ingredient_quantity' => 'required|numeric|min:0',
+            ],
+            [
+                'ingredient_name.unique' => 'พบวัตถุดิบนี้ในระบบแล้ว',
+                'ingredient_type_id.require' => 'กรุณาเลือกประเภทวัตถุดิบ',
+                'ingredient_unit.require' => 'กรุณากรอกหน่วยวัตถุดิบ',
+                'ingredient_quantity.require' => 'กรุณากรอกจำนวนวัตถุดิบ',
+            ]
         );
 
         Ingredient::create($validatedData);
@@ -48,18 +63,20 @@ class IngredientController extends Controller
 
     public function update(Request $request, Ingredient $ingredient)
     {
-        $validatedData = $request->validate([
-            'ingredient_name' => 'required|max:255|unique:ingredients,ingredient_name,' . $ingredient->id,
-            'ingredient_type_id' => 'required|exists:ingredients_type,id',
-            'ingredient_unit' => 'required|max:50',
-            'ingredient_quantity' => 'required|numeric|min:0',
-        ],
-        [
-            'ingredient_name.unique'=> 'พบวัตถุดิบนี้ในระบบแล้ว',
-            'ingredient_type_id.require'=> 'กรุณาเลือกประเภทวัตถุดิบ',
-            'ingredient_unit.require'=> 'กรุณากรอกหน่วยวัตถุดิบ',
-            'ingredient_quantity.require'=> 'กรุณากรอกจำนวนวัตถุดิบ',
-        ]);
+        $validatedData = $request->validate(
+            [
+                'ingredient_name' => 'required|max:255|unique:ingredients,ingredient_name,' . $ingredient->id,
+                'ingredient_type_id' => 'required|exists:ingredients_type,id',
+                'ingredient_unit' => 'required|max:50',
+                'ingredient_quantity' => 'required|numeric|min:0',
+            ],
+            [
+                'ingredient_name.unique' => 'พบวัตถุดิบนี้ในระบบแล้ว',
+                'ingredient_type_id.require' => 'กรุณาเลือกประเภทวัตถุดิบ',
+                'ingredient_unit.require' => 'กรุณากรอกหน่วยวัตถุดิบ',
+                'ingredient_quantity.require' => 'กรุณากรอกจำนวนวัตถุดิบ',
+            ]
+        );
 
         $ingredient->update($validatedData);
 
