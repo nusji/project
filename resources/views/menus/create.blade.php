@@ -20,7 +20,7 @@
                             <label for="menu_type_id" class="block text-sm font-medium text-gray-700">Menu Type</label>
                             <select name="menu_type_id" id="menu_type_id" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required>
                                 @foreach($menuTypes as $menuType)
-                                    <option value="{{ $menuType->id }}">{{ $menuType->name }}</option>
+                                    <option value="{{ $menuType->id }}">{{ $menuType->menu_type_name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -45,7 +45,7 @@
                                 <div class="ingredient-row flex space-x-2 mb-2">
                                     <select name="ingredients[0][id]" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required>
                                         @foreach($ingredients as $ingredient)
-                                            <option value="{{ $ingredient->id }}">{{ $ingredient->name }}</option>
+                                            <option value="{{ $ingredient->id }}">{{ $ingredient->ingredient_name }}</option>
                                         @endforeach
                                     </select>
                                     <input type="number" name="ingredients[0][amount]" step="0.01" placeholder="Amount" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" required>
@@ -72,7 +72,7 @@
             newRow.innerHTML = `
                 <select name="ingredients[${ingredientIndex}][id]" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required>
                     @foreach($ingredients as $ingredient)
-                        <option value="{{ $ingredient->id }}">{{ $ingredient->name }}</option>
+                        <option value="{{ $ingredient->id }}">{{ $ingredient->ingredient_name }}</option>
                     @endforeach
                 </select>
                 <input type="number" name="ingredients[${ingredientIndex}][amount]" step="0.01" placeholder="Amount" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" required>

@@ -29,12 +29,17 @@ Route::post('/profile/complete', [ProfileController::class, 'completeProfile'])-
 Route::middleware(['auth', 'role:employee', 'check.profile'])->group(function () {
     Route::get('/employee', [DashboardController::class, 'employee'])->name('dashboard.employee');
     Route::get('/profile', [DashboardController::class, 'profile'])->name('employees.profile_show');
+    
+});
+
+// เจ้าของร้านเข้าถึงได้ในกรอบนี้
+Route::middleware(['auth', 'role:owner', 'check.profile'])->group(function () {
+    Route::get('/owner', [DashboardController::class, 'owner'])->name('dashboard.owner');
 });
 
 
-// เจ้าของร้านเข้าถึงได้ในกรอบนี้
-Route::middleware(['auth', 'role:owner'])->group(function () {
-    Route::get('/owner', [DashboardController::class, 'owner'])->name('dashboard.owner');
+//ทุกคนเข้าถึงได้ในกรอบนี้
+Route::middleware(['auth'])->group(function () {
 
     //จัดการพนักงาน แบบ Resourceful Routes ประกอบด้วย index, create, store, show, edit, update, destroy
     Route::resource('employees', EmployeeController::class);
@@ -55,5 +60,6 @@ Route::middleware(['auth', 'role:owner'])->group(function () {
     //จัดการเมนู แบบ Resourceful Routes ประกอบด้วย index, create, store, show, edit, update, destroy
     Route::resource('menus', MenuController::class);
 
+    //จัดการการผลิต แบบ Resourceful Routes ประกอบด้วย index, create, store, show, edit, update, destroy
     Route::resource('productions', ProductionController::class);
 });

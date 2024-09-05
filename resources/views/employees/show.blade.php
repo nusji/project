@@ -64,12 +64,15 @@
                     </div>
                 </div>
 
-                @if($employee->profile_picture)
-                    <div class="mt-8">
-                        <h2 class="text-lg font-semibold text-gray-700 mb-2">รูปโปรไฟล์</h2>
-                        <img src="{{ asset('storage/' . $employee->profile_picture) }}" alt="รูปโปรไฟล์" class="w-32 h-32 object-cover rounded-full">
-                    </div>
+                @if($order->order_receipt)
+                <div class="mt-8">
+                    <h2 class="text-lg font-semibold text-gray-700 mb-2">รูปใบเสร็จ</h2>
+                    <a href="{{ asset('storage/' . $order->order_receipt) }}" data-lightbox="receipt" data-title="ใบเสร็จ">
+                        <img src="{{ asset('storage/' . $order->order_receipt) }}" alt="รูปใบเสร็จ" class="w-32 h-32 object-cover rounded-full cursor-pointer">
+                    </a>
+                </div>
                 @endif
+                
 
                 <div class="mt-8 flex justify-end space-x-4">
                     <a href="{{ route('employees.edit', $employee->id) }}"
