@@ -18,4 +18,10 @@ class Order extends Model
     {
         return $this->belongsTo(Employee::class);
     }
+    
+    public function ingredients()
+{
+    return $this->belongsToMany(Ingredient::class, 'order_details')
+                ->withPivot('quantity', 'price');
+}
 }

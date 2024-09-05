@@ -21,7 +21,7 @@ class IngredientTypeController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'ingredient_type_name' => 'required|max:255',
+            'ingredient_type_name' => 'required|max:255|unique:ingredient_types',
             'ingredient_type_detail' => 'nullable',
         ]);
 
@@ -56,6 +56,11 @@ class IngredientTypeController extends Controller
 
     public function destroy(IngredientType $ingredientType)
     {
+
+        // ลบข้อมูลใน ingredients ที่เกี่ยวข้อง
+        $ingredientType->ingredients()->delete();
+
+        // ลบข้อมูลใน ingredient_types
         $ingredientType->delete();
 
         return redirect()->route('ingredient_types.index')

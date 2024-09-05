@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Ingredient extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'ingredients'; // Your table name here
     protected $primaryKey = 'id'; // ตรวจสอบว่าใช้ 'id' เป็น primary key
@@ -25,8 +26,15 @@ class Ingredient extends Model
         return $this->belongsTo(IngredientType::class);
     }
 
-    public static function isDuplicateIngredient($ingredient_name)
+    // เพิ่มความสัมพันธ์กับ OrderDetail
+    public function orderDetails()
     {
-        return self::where('ingredient_name', $ingredient_name)->exists();
+        return $this->hasMany(OrderDetail::class);
+    }
+
+    // เพิ่มความสัมพันธ์กับ OrderDetail แบบ many-to-many
+    public function menuRecipes()
+    {
+        return $this->hasMany(Ingredient::class);
     }
 }

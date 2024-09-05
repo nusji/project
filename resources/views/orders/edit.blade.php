@@ -1,64 +1,108 @@
+<!-- resources/views/orders/edit.blade.php -->
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <h1>แก้ไขคำสั่งซื้อ</h1>
-    
-    <form action="{{ route('orders.update', $order->id) }}" method="POST" enctype="multipart/form-data">
-        @csrf
-        @method('PUT')
-        
-        <div class="form-group">
-            <label for="order_date">วันที่คำสั่งซื้อ</label>
-            <input type="date" name="order_date" id="order_date" class="form-control" value="{{ old('order_date', $order->order_date) }}" required>
+    <div class="container mx-auto px-4">
+        <h1 class="text-2xl font-bold mb-4">แก้ไขรายการสั่งซื้อ</h1>
+        <form action="{{ route('orders.update', $order->id) }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            @method('PUT')
+            <div class="mb-4">
+                <label for="order_date" class="block mb-2">วันที่และเวลา</label>
+                @php
+                    $orderDate = \Carbon\Carbon::parse($order->order_date)->format('Y-m-d\TH:i');
+                @endphp
+                <input type="datetime-local" name="order_date" id="order_date" class="w-full border rounded px-3 py-2" value="{{ old('order_date', $orderDate) }}" required>
+            </div>
             @error('order_date')
-                <div class="text-danger">{{ $message }}</div>
+                <span class="text-red-500 text-sm">{{ $message }}</span>
             @enderror
-        </div>
 
-        <div class="form-group">
-            <label for="order_detail">รายละเอียดคำสั่งซื้อ</label>
-            <textarea name="order_detail" id="order_detail" class="form-control" rows="3" required>{{ old('order_detail', $order->order_detail) }}</textarea>
+            <div class="mb-4">
+                <label for="order_detail" class="block mb-2">รายละเอียด</label>
+                <textarea name="order_detail" id="order_detail" rows="3" class="w-full border rounded px-3 py-2" required>{{ old('order_detail', $order->order_detail) }}</textarea>
+            </div>
             @error('order_detail')
-                <div class="text-danger">{{ $message }}</div>
+                <span class="text-red-500 text-sm">{{ $message }}</span>
             @enderror
-        </div>
 
-        <div class="form-group">
-            <label for="order_receipt">ใบเสร็จ</label>
-            <input type="file" name="order_receipt" id="order_receipt" class="form-control-file">
-            @if($order->order_receipt)
-                <img src="{{ asset('storage/' . $order->order_receipt) }}" alt="Current Receipt" class="mt-2" style="max-width: 200px;">
-            @endif
+            <div class="mb-4">
+                <label for="order_receipt" class="block mb-2">ใบเสร็จ (รูปภาพ)</label>
+                <input type="file" name="order_receipt" id="order_receipt" class="w-full border rounded px-3 py-2" accept="image/*">
+                @if ($order->order_receipt)
+                    <img src="{{ asset('storage/' . $order->order_receipt) }}" alt="ใบเสร็จปัจจุบัน" class="mt-2 max-w-xs">
+                    <p class="text-sm text-gray-600">อัปโหลดรูปใหม่เพื่อเปลี่ยนใบเสร็จ</p>
+                @endif
+            </div>
             @error('order_receipt')
-                <div class="text-danger">{{ $message }}</div>
+                <span class="text-red-500 text-sm">{{ $message }}</span>
             @enderror
-        </div>
 
-        <h3>รายการส่วนผสม</h3>
-        <div id="ingredients-container">
-            @foreach($order->orderDetails as $orderDetail)
-                <div class="form-group ingredient-group">
-                    <input type="hidden" name="ingredients[{{ $loop->index }}][id]" value="{{ $orderDetail->ingredient_id }}">
-                    <label for="ingredient_{{ $loop->index }}">ส่วนผสม</label>
-                    <select name="ingredients[{{ $loop->index }}][id]" id="ingredient_{{ $loop->index }}" class="form-control">
-                        @foreach($ingredients as $ingredient)
-                            <option value="{{ $ingredient->id }}" {{ $orderDetail->ingredient_id == $ingredient->id ? 'selected' : '' }}>
-                                {{ $ingredient->ingredient_name }}
-                            </option>
-                        @endforeach
-                    </select>
+            <div id="ingredients">
+                <h2 class="text-xl font-bold mb-2">รายการวัตถุดิบ</h2>
+                @foreach ($order->ingredients as $index => $ingredient)
+                    <div class="ingredient-item mb-4">
+                        <select name="ingredients[{{ $index }}][id]" class="border rounded px-3 py-2 mr-2" required>
+                            <option value="">เลือกวัตถุดิบ</option>
+                            @foreach ($ingredients as $item)
+                                <option value="{{ $item->id }}" {{ $item->id == $ingredient->id ? 'selected' : '' }}>{{ $item->ingredient_name }}</option>
+                            @endforeach
+                        </select>
+                        <input type="number" name="ingredients[{{ $index }}][quantity]" value="{{ $ingredient->pivot->quantity }}" placeholder="จำนวน" class="border rounded px-3 py-2 mr-2" required>
+                        <input type="number" name="ingredients[{{ $index }}][price]" value="{{ $ingredient->pivot->price }}" placeholder="ราคา" class="border rounded px-3 py-2 mr-2" required>
+                        <button type="button" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" onclick="removeIngredient(this)">ลบ</button>
+                    </div>
+                @endforeach
+            </div>
+            @error('ingredients')
+                <span class="text-red-500 text-sm">{{ $message }}</span>
+            @enderror
 
-                    <label for="quantity_{{ $loop->index }}">จำนวน</label>
-                    <input type="number" name="ingredients[{{ $loop->index }}][quantity]" id="quantity_{{ $loop->index }}" class="form-control" value="{{ old('ingredients.' . $loop->index . '.quantity', $orderDetail->quantity) }}" min="0" required>
+            <button type="button" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-4" onclick="addIngredient()">เพิ่มวัตถุดิบ</button>
 
-                    <label for="price_{{ $loop->index }}">ราคา</label>
-                    <input type="number" name="ingredients[{{ $loop->index }}][price]" id="price_{{ $loop->index }}" class="form-control" value="{{ old('ingredients.' . $loop->index . '.price', $orderDetail->price) }}" min="0" required>
-                </div>
-            @endforeach
-        </div>
+            <div>
+                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">บันทึกการเปลี่ยนแปลง</button>
+            </div>
+        </form>
+    </div>
 
-        <button type="submit" class="btn btn-primary">บันทึก</button>
-    </form>
-</div>
+    <script>
+        let ingredientCount = {{ count($order->ingredients) }};
+
+        function addIngredient() {
+            const ingredientsDiv = document.getElementById('ingredients');
+            const newItem = document.createElement('div');
+            newItem.className = 'ingredient-item mb-4';
+            newItem.innerHTML = `
+                <select name="ingredients[${ingredientCount}][id]" class="border rounded px-3 py-2 mr-2" required>
+                    <option value="">เลือกวัตถุดิบ</option>
+                    @foreach ($ingredients as $ingredient)
+                        <option value="{{ $ingredient->id }}">{{ $ingredient->ingredient_name }}</option>
+                    @endforeach
+                </select>
+                <input type="number" name="ingredients[${ingredientCount}][quantity]" placeholder="จำนวน" class="border rounded px-3 py-2 mr-2" required>
+                <input type="number" name="ingredients[${ingredientCount}][price]" placeholder="ราคา" class="border rounded px-3 py-2 mr-2" required>
+                <button type="button" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" onclick="removeIngredient(this)">ลบ</button>
+            `;
+            ingredientsDiv.appendChild(newItem);
+            ingredientCount++;
+        }
+
+        function removeIngredient(button) {
+            button.parentElement.remove();
+        }
+
+        // กำหนดค่า default ของฟิลด์วันที่และเวลาเป็นปัจจุบัน
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const datetimeLocal = `${year}-${month}-${day}T${hours}:${minutes}`;
+
+            document.getElementById('order_date').value = datetimeLocal;
+        });
+    </script>
 @endsection
