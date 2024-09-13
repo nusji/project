@@ -6,7 +6,7 @@
     <div class="container mx-auto px-4 py-0">
             <!-- เรียกใช้ breadcrumb component -->
     <x-breadcrumb :paths="[
-        ['label' => 'ระบบจัดการวัตถุดิบ', 'url' => route('ingredients.index')],
+        ['label' => 'ระบบวัตถุดิบ', 'url' => route('ingredients.index')],
         ['label' => '']
     ]" />
         <h2 class="text-2xl font-bold text-gray-800 mb-4">ระบบจัดการวัตถุดิบ</h2>

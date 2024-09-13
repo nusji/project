@@ -22,6 +22,7 @@ class Employee extends Authenticatable
         'phone_number',
         'employment_status',
         'start_date',
+        'salary',
 
         'address',
         'date_of_birth',
@@ -39,4 +40,10 @@ class Employee extends Authenticatable
     protected $hidden = [
         'password',
     ];
+
+    // Relationship with Payroll
+    public function payrolls()
+    {
+        return $this->hasMany(Payroll::class);
+    }
 }

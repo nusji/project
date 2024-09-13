@@ -33,9 +33,15 @@
                             <p class="text-gray-600">{{ $employee->phone_number }}</p>
                         </div>
                         <div>
-                            <h2 class="text-lg font-semibold text-gray-700">สถานะการจ้างงาน</h2>
+                            <h2 class="text-lg font-semibold text-gray-700">ประเภทการจ้างงาน</h2>
                             <p class="text-gray-600">{{ $employee->employment_status }}</p>
                         </div>
+                        
+                        <div>
+                            <h2 class="text-lg font-semibold text-gray-700">ฐานเงินเดือน</h2>
+                            <p class="text-gray-600">{{ $employee->salary }}</p>
+                        </div>
+                        
                         <div>
                             <h2 class="text-lg font-semibold text-gray-700">วันเริ่มงาน</h2>
                             <p class="text-gray-600">{{ $employee->start_date ? \Carbon\Carbon::parse($employee->start_date)->format('d/m/Y') : 'ไม่ระบุ' }}</p>
@@ -64,11 +70,11 @@
                     </div>
                 </div>
 
-                @if($order->order_receipt)
+                @if($employee->profile_picture)
                 <div class="mt-8">
-                    <h2 class="text-lg font-semibold text-gray-700 mb-2">รูปใบเสร็จ</h2>
-                    <a href="{{ asset('storage/' . $order->order_receipt) }}" data-lightbox="receipt" data-title="ใบเสร็จ">
-                        <img src="{{ asset('storage/' . $order->order_receipt) }}" alt="รูปใบเสร็จ" class="w-32 h-32 object-cover rounded-full cursor-pointer">
+                    <h2 class="text-lg font-semibold text-gray-700 mb-2">รูปพนักงาน</h2>
+                    <a href="{{ asset('storage/' . $employee->profile_picture) }}" data-lightbox="profile_picture" data-title="ใบเสร็จ">
+                        <img src="{{ asset('storage/' . $employee->profile_picture) }}" alt="รูปใบเสร็จ" class="w-32 h-32 object-cover rounded-full cursor-pointer">
                     </a>
                 </div>
                 @endif

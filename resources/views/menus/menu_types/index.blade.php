@@ -6,7 +6,7 @@
     <div class="container mx-auto px-4 py-0">
         <!-- เรียกใช้ breadcrumb component -->
         <x-breadcrumb :paths="[
-            ['label' => 'ระบบจัดการเมนูข้าวแกง', 'url' => route('menus.index')],
+            ['label' => 'ระบบเมนูข้าวแกง', 'url' => route('menus.index')],
             ['label' => 'ประเภทเมนูข้าวแกง'],
         ]" />
         <h2 class="text-2xl font-bold text-gray-800 mb-4">ประเภทเมนูข้าวแกง</h2>

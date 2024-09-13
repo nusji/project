@@ -33,6 +33,7 @@ class EmployeeController extends Controller
                 'password' => 'required|string|min:8',
                 'employment_status' => 'required|string',
                 'start_date' => 'required|date',
+                'salary' => 'required|numeric',
             ],
             [
                 'first_name.required' => 'จำเป็นต้องกรอกชื่อ',
@@ -40,6 +41,7 @@ class EmployeeController extends Controller
                 'id_card_number.unique' => 'พบหมายเลขบัตรประชาชนนี้ในระบบแล้ว',
                 'username.unique' => 'รหัสผู้ใช้นี้มีอยู่ในระบบแล้ว',
                 'password.min' => 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร',
+                'salary.required' => 'จำเป็นต้องกรอกเงินเดือน',
             ]
         );
 
@@ -52,6 +54,7 @@ class EmployeeController extends Controller
             'password' => Hash::make($validatedData['password']),
             'employment_status' => $validatedData['employment_status'],
             'start_date' => $validatedData['start_date'],
+            'salary' => $validatedData['salary'],
         ]);
 
         return redirect()->route('employees.index')->with('success', 'เพิ่มข้อมูลเบื้องต้นพนักงานใหม่เรียบร้อยแล้ว กรุณาแจ้งพนักงานให้เพิ่มข้อมูลส่วนอื่นๆ');

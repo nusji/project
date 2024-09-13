@@ -2,7 +2,7 @@
 @section('content')
     <div class="container mx-auto px-4 py-0">
         <!-- เรียกใช้ breadcrumb component -->
-        <x-breadcrumb :paths="[['label' => 'ระบบจัดการเมนูข้าวแกง', 'url' => route('menus.index')], ['label' => '']]" />
+        <x-breadcrumb :paths="[['label' => 'ระบบเมนูข้าวแกง', 'url' => route('menus.index')], ['label' => '']]" />
 
         <h2 class="text-2xl font-bold text-gray-800 mb-4">ระบบจัดการเมนูข้าวแกง</h2>
         <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0 md:space-x-4">

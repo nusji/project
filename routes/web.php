@@ -11,6 +11,8 @@ use App\Http\Controllers\MenuTypeController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductionController;
+use App\Http\Controllers\PayrollController;
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -29,7 +31,6 @@ Route::post('/profile/complete', [ProfileController::class, 'completeProfile'])-
 Route::middleware(['auth', 'role:employee', 'check.profile'])->group(function () {
     Route::get('/employee', [DashboardController::class, 'employee'])->name('dashboard.employee');
     Route::get('/profile', [DashboardController::class, 'profile'])->name('employees.profile_show');
-    
 });
 
 // เจ้าของร้านเข้าถึงได้ในกรอบนี้
@@ -62,4 +63,7 @@ Route::middleware(['auth'])->group(function () {
 
     //จัดการการผลิต แบบ Resourceful Routes ประกอบด้วย index, create, store, show, edit, update, destroy
     Route::resource('productions', ProductionController::class);
+
+    Route::resource('payrolls', PayrollController::class);
+    Route::get('payrolls/{payroll}/print-slip', [PayrollController::class, 'printSlip'])->name('payrolls.print-slip');
 });

@@ -1,7 +1,12 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container mx-auto px-4 py-8">
+    <div class="container mx-auto px-4 py-0">
+            <!-- เรียกใช้ breadcrumb component -->
+    <x-breadcrumb :paths="[
+        ['label' => 'ระบบพนักงาน', 'url' => route('employees.index')],
+        ['label' => '']
+    ]" />
         <h2 class="text-2xl font-bold text-gray-800 mb-4">ระบบจัดการพนักงาน</h2>
         <div class="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
             <a href="{{ route('employees.create') }}"
