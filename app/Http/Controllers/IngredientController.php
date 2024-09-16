@@ -6,6 +6,8 @@ use App\Models\Ingredient;
 use App\Models\IngredientType;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use App\Models\Employee;
+use App\Notifications\LowStockNotification;
 
 class IngredientController extends Controller
 {
@@ -13,17 +15,18 @@ class IngredientController extends Controller
     {
         $query = Ingredient::with('ingredientType');
 
-        // Check if there are any search parameters
+        // ตรวจสอบว่ามีการค้นหาหรือไม่
         if ($request->has('search')) {
             $search = $request->input('search');
             $query->where('ingredient_name', 'like', "%{$search}%")
-                ->orWhereHas('ingredientType', function ($q) use ($search) { //เป็
-                    $q->where('ingredient_name', 'like', "%{$search}%");
+                ->orWhereHas('ingredientType', function ($q) use ($search) {
+                    $q->where('type_name', 'like', "%{$search}%"); // สมมติว่าชื่อประเภทวัตถุดิบเป็น 'type_name'
                 });
         }
 
+        // ดึงข้อมูลวัตถุดิบพร้อมแบ่งหน้า
         $ingredients = $query->paginate(10);
-
+        // ส่งข้อมูลไปยัง view
         return view('ingredients.index', compact('ingredients'));
     }
 
@@ -50,29 +53,29 @@ class IngredientController extends Controller
             'ingredient_quantity.numeric' => 'จำนวนวัตถุดิบต้องเป็นตัวเลข',
             'ingredient_quantity.min' => 'จำนวนวัตถุดิบต้องไม่น้อยกว่า 0',
         ]);
-    
+
         // ตรวจสอบเฉพาะข้อมูลที่ยังไม่ถูกลบ
         $exists = Ingredient::where('ingredient_name', $request->ingredient_name)->exists();
-    
+
         if ($exists) {
             return redirect()->back()->withErrors(['ingredient_name' => 'พบวัตถุดิบนี้ในระบบแล้ว']);
         }
-    
+
         // ตรวจสอบว่ามีข้อมูลที่ถูกลบแล้วหรือไม่
         $deletedIngredient = Ingredient::onlyTrashed()
             ->where('ingredient_name', $request->ingredient_name)
             ->first();
-    
+
         if ($deletedIngredient) {
             // ถ้าพบข้อมูลที่ถูกลบแล้ว ให้เปิดใช้งานใหม่
             $deletedIngredient->restore();
             $deletedIngredient->update($validatedData);
             return redirect()->route('ingredients.index')->with('success', 'เปิดใช้งานและอัปเดตวัตถุดิบเรียบร้อยแล้ว');
         }
-    
+
         // ถ้าไม่พบข้อมูลที่ซ้ำ ให้สร้างใหม่
         Ingredient::create($validatedData);
-    
+
         return redirect()->route('ingredients.index')->with('success', 'เพิ่มวัตถุดิบใหม่เรียบร้อยแล้ว');
     }
 
@@ -85,51 +88,57 @@ class IngredientController extends Controller
     }
 
     public function update(Request $request, $id)
-{
-    $validatedData = $request->validate([
-        'ingredient_name' => 'required|max:255',
-        'ingredient_type_id' => 'required|exists:ingredient_types,id',
-        'ingredient_unit' => 'required|max:50',
-        'ingredient_quantity' => 'required|numeric|min:0',
-    ], [
-        'ingredient_name.required' => 'กรุณากรอกชื่อวัตถุดิบ',
-        'ingredient_name.max' => 'ชื่อวัตถุดิบไม่ควรเกิน 255 ตัวอักษร',
-        'ingredient_type_id.required' => 'กรุณาเลือกประเภทวัตถุดิบ',
-        'ingredient_unit.required' => 'กรุณากรอกหน่วยวัตถุดิบ',
-        'ingredient_quantity.required' => 'กรุณากรอกจำนวนวัตถุดิบ',
-        'ingredient_quantity.numeric' => 'จำนวนวัตถุดิบต้องเป็นตัวเลข',
-        'ingredient_quantity.min' => 'จำนวนวัตถุดิบต้องไม่น้อยกว่า 0',
-    ]);
+    {
+        $validatedData = $request->validate([
+            'ingredient_name' => 'required|max:255',
+            'ingredient_type_id' => 'required|exists:ingredient_types,id',
+            'ingredient_unit' => 'required|max:50',
+            'ingredient_stock' => 'required|numeric|min:0',
+            'minimum_quantity' => 'required|numeric|min:0'
+        ], [
+            'ingredient_name.required' => 'กรุณากรอกชื่อวัตถุดิบ',
+            'ingredient_name.max' => 'ชื่อวัตถุดิบไม่ควรเกิน 255 ตัวอักษร',
+            'ingredient_type_id.required' => 'กรุณาเลือกประเภทวัตถุดิบ',
+            'ingredient_unit.required' => 'กรุณากรอกหน่วยวัตถุดิบ',
+            'ingredient_stock.required' => 'กรุณากรอกจำนวนวัตถุดิบ',
+            'ingredient_stock.numeric' => 'จำนวนวัตถุดิบต้องเป็นตัวเลข',
+            'ingredient_stock.min' => 'จำนวนวัตถุดิบต้องไม่น้อยกว่า 0',
+            'minimum_quantity.required' => 'กรุณากรอกจำนวนวัตถุดิบขั้นต่ำ',
+            'minimum_quantity.numeric' => 'จำนวนวัตถุดิบขั้นต่ำต้องเป็นตัวเลข',
+            'minimum_quantity.min' => 'จำนวนวัตถุดิบขั้นต่ำต้องไม่น้อยกว่า 0'
+            
+            //มาทำต่อนะ minimum
+        ]);
 
-    $ingredient = Ingredient::findOrFail($id);
+        $ingredient = Ingredient::findOrFail($id);
 
-    // ตรวจสอบว่ามีการเปลี่ยนชื่อวัตถุดิบหรือไม่
-    if ($ingredient->ingredient_name !== $request->ingredient_name) {
-        // ตรวจสอบว่ามีวัตถุดิบที่ใช้งานอยู่ที่มีชื่อเดียวกันหรือไม่
-        $exists = Ingredient::where('ingredient_name', $request->ingredient_name)
-            ->where('id', '!=', $id)
-            ->exists();
+        // ตรวจสอบว่ามีการเปลี่ยนชื่อวัตถุดิบหรือไม่
+        if ($ingredient->ingredient_name !== $request->ingredient_name) {
+            // ตรวจสอบว่ามีวัตถุดิบที่ใช้งานอยู่ที่มีชื่อเดียวกันหรือไม่
+            $exists = Ingredient::where('ingredient_name', $request->ingredient_name)
+                ->where('id', '!=', $id)
+                ->exists();
 
-        if ($exists) {
-            return redirect()->back()->withErrors(['ingredient_name' => 'พบวัตถุดิบนี้ในระบบแล้ว']);
+            if ($exists) {
+                return redirect()->back()->withErrors(['ingredient_name' => 'พบวัตถุดิบนี้ในระบบแล้ว']);
+            }
+
+            // ตรวจสอบว่ามีวัตถุดิบที่ถูกลบแล้วที่มีชื่อเดียวกันหรือไม่
+            $deletedIngredient = Ingredient::onlyTrashed()
+                ->where('ingredient_name', $request->ingredient_name)
+                ->where('id', '!=', $id)
+                ->first();
+
+            if ($deletedIngredient) {
+                // ถ้าพบข้อมูลที่ถูกลบแล้ว ให้แจ้งเตือนผู้ใช้
+                return redirect()->back()->withErrors(['ingredient_name' => 'มีวัตถุดิบนี้ในระบบที่ถูกลบไปแล้ว กรุณาใช้ชื่ออื่น']);
+            }
         }
 
-        // ตรวจสอบว่ามีวัตถุดิบที่ถูกลบแล้วที่มีชื่อเดียวกันหรือไม่
-        $deletedIngredient = Ingredient::onlyTrashed()
-            ->where('ingredient_name', $request->ingredient_name)
-            ->where('id', '!=', $id)
-            ->first();
+        $ingredient->update($validatedData);
 
-        if ($deletedIngredient) {
-            // ถ้าพบข้อมูลที่ถูกลบแล้ว ให้แจ้งเตือนผู้ใช้
-            return redirect()->back()->withErrors(['ingredient_name' => 'มีวัตถุดิบนี้ในระบบที่ถูกลบไปแล้ว กรุณาใช้ชื่ออื่น']);
-        }
+        return redirect()->route('ingredients.index')->with('success', 'อัปเดตวัตถุดิบเรียบร้อยแล้ว');
     }
-
-    $ingredient->update($validatedData);
-
-    return redirect()->route('ingredients.index')->with('success', 'อัปเดตวัตถุดิบเรียบร้อยแล้ว');
-}
 
     public function destroy(Ingredient $ingredient)
     {
@@ -146,7 +155,7 @@ class IngredientController extends Controller
         ]);
 
         $ingredient = Ingredient::findOrFail($request->ingredient_id);
-        $ingredient->ingredient_quantity += $request->quantity;
+        $ingredient->ingredient_stock += $request->quantity;
         $ingredient->save();
 
         return response()->json(['success' => true, 'message' => 'อัปเดตจำนวนวัตถุดิบเรียบร้อยแล้ว', 'new_quantity' => $ingredient->ingredient_quantity]);

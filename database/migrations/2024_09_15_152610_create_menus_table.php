@@ -11,6 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::create('menu_types', function (Blueprint $table) {
+            $table->id(); // รหัสประเภทเมนู
+            $table->string('menu_type_name'); // ชื่อประเภทเมนู
+            $table->string('menu_type_detail')->nullable(); // รายละเอียดประเภทเมนู
+            $table->timestamps();
+        });
+
         Schema::create('menus', function (Blueprint $table) {
             $table->id();
             $table->string('menu_name'); // ชื่อเมนู
@@ -33,6 +40,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('menu_types');
         Schema::dropIfExists('menus');
     }
 };

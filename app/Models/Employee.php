@@ -12,28 +12,22 @@ class Employee extends Authenticatable
     protected $primaryKey = 'id';
     protected $table = "employees";
     protected $fillable = [
-        'first_name',
-        'last_name',
+        'name',
+        'id_card_number',
+        'phone_number',
+        'employment_type',
         'username',
         'password',
-        'role',
-        'id_card_number',
-        'id_card_image',
-        'phone_number',
-        'employment_status',
-        'start_date',
         'salary',
+        'start_date',
+        'role',
 
         'address',
         'date_of_birth',
         'profile_picture',
-        'previous_experience',
-        'relevant_education',
         'bank_account',
         'bank_account_number',
-        'emergency_contact',
-        'health_info',
-        'religion',
+
         
     ];
 

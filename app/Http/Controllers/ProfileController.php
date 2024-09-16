@@ -19,14 +19,12 @@ class ProfileController extends Controller
             'address' => 'required|string|max:255',
             'date_of_birth' => 'required|date',
             'profile_picture' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-            'previous_experience' => 'required|string',
             'bank_account' => 'required|string',
             'bank_account_number' => 'required|string',
         ], [
             'address.required' => 'จำเป็นต้องกรอกที่อยู่',
             'date_of_birth.required' => 'จำเป็นต้องกรอกวันเกิด',
             'profile_picture.required' => 'จำเป็นต้องอัปโหลดรูปภาพ',
-            'previous_experience.required' => 'จำเป็นต้องกรอกประสบการณ์ทำงานก่อนหน้า',
             'bank_account.required' => 'จำเป็นต้องกรอกชื่อธนาคาร',
             'bank_account_number.required' => 'จำเป็นต้องกรอกเลขที่บัญชีธนาคาร',
         ]);
@@ -40,12 +38,11 @@ class ProfileController extends Controller
             $path = $request->file('profile_picture')->store('profile_pictures', 'public');
             $employee->profile_picture = $path; // บันทึก path ในฐานข้อมูล
         }
-        $employee->previous_experience = $request->previous_experience;
         $employee->bank_account = $request->bank_account;
         $employee->bank_account_number = $request->bank_account_number;
         $employee->is_profile_complete = true;
         $employee->save();
-        return redirect()->route('dashboard.employee')->with('success', 'ข้อมูลพนักงานถูกอัปเดตเรียบร้อยแล้ว');
+        return redirect()->route('dashboard.employee')->with('success', 'ยินดีต้อนรับเข้าสู่ระบบ');
     }
 
 }

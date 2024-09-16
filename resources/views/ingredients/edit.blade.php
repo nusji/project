@@ -57,17 +57,34 @@
                         <p class="text-red-500 text-sm italic mt-2">{{ $message }}</p>
                     @enderror
                 </div>
-                <div class="mb-6">
-                    <label for="ingredient_quantity"
-                        class="block mb-2 text-sm font-medium text-gray-700">จำนวนคงเหลือ</label>
-                    <input type="number" id="ingredient_quantity" name="ingredient_quantity"
-                        value="{{ $ingredient->ingredient_quantity }}"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        required>
-                    @error('ingredient_quantity')
-                        <span class="text-red-500 text-sm">{{ $message }}</span>
-                    @enderror
+                <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="ingredient_quantity_left" class="block mb-2 text-sm font-medium text-gray-700">
+                            จำนวนคงเหลือ
+                        </label>
+                        <input type="number" id="ingredient_quantity_left" name="ingredient_quantity_left"
+                            value="{{ $ingredient->ingredient_stock }}"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            required>
+                        @error('ingredient_quantity_left')
+                            <span class="text-red-500 text-sm">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="ingredient_quantity_right" class="block mb-2 text-sm font-medium text-gray-700">
+                            แจ้งเตือนเมื่อเหลือ
+                        </label>
+                        <input type="number" id="ingredient_quantity_right" name="ingredient_quantity_right"
+                            value="{{ $ingredient->minimum_quantity }}"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            required>
+                        @error('ingredient_quantity_right')
+                            <span class="text-red-500 text-sm">{{ $message }}</span>
+                        @enderror
+                    </div>
                 </div>
+
 
                 <div class="mt-8 flex items-center justify-end space-x-4">
                     <a href="{{ route('ingredients.index') }}"

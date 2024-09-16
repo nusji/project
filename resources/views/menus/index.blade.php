@@ -98,7 +98,7 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @if ($menu->menu_image)
-                                        <img src="{{ asset('storage/menu_pictures/' . $menu->menu_image) }}"
+                                        <img src="{{ asset('storage/' . $menu->menu_image) }}"
                                             alt="{{ $menu->menu_name }}" class="w-16 h-16 object-cover rounded-md">
                                     @else
                                         <span class="text-gray-400">ไม่มีรูปภาพ</span>

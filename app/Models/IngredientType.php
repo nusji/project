@@ -17,6 +17,11 @@ class IngredientType extends Model
         'ingredient_type_detail',
     ];
 
+    protected $dates = [
+        'deleted_at',
+        
+    ];
+
     // เพิ่มความสัมพันธ์กับ Ingredient
     public function ingredients()
     {

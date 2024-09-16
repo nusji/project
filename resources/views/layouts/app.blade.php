@@ -21,13 +21,13 @@
 
 </head>
 
-<body class="bg-[#ffffff]">
+<body class="bg-gray-100">
     <!-- Navbar -->
-    <x-navbar :firstName="Auth::user()->first_name" :lastName="Auth::user()->last_name" />
+    <x-navbar :name="Auth::user()->name" />
     <!-- Sidebar -->
     <x-sidebar :userRole="auth()->user()->role" />
     <!-- Main Content -->
-    <main class="ml-64 mt-16 p-6">
+    <main class="ml-64 mt-16 p-6 ">
         @yield('content')
     </main>
     <!-- เรียกใช้ alert component -->

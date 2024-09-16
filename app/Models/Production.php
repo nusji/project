@@ -2,20 +2,17 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Production extends Model
 {
-    use HasFactory;
+    use SoftDeletes;
 
-    protected $fillable = [
-        'production_date',
-        'comment',
-    ];
+    protected $fillable = ['order_code'];
 
-    public function productionDetails()
+    public function productionMenus()
     {
-        return $this->hasMany(ProductionDetail::class);
+        return $this->hasMany(ProductionMenu::class);
     }
 }

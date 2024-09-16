@@ -37,4 +37,10 @@ class Ingredient extends Model
     {
         return $this->hasMany(Ingredient::class);
     }
+
+    public function isLowStock()
+    {
+        // ตรวจสอบว่าจำนวนสต็อกปัจจุบันน้อยกว่าหรือเท่ากับปริมาณขั้นต่ำ
+        return $this->ingredient_quantity <= $this->minimum_quantity;
+    }
 }

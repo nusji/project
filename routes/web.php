@@ -12,6 +12,7 @@ use App\Http\Controllers\MenuController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductionController;
 use App\Http\Controllers\PayrollController;
+use App\Http\Controllers\SalaryController;
 
 
 Route::get('/', function () {
@@ -40,7 +41,7 @@ Route::middleware(['auth', 'role:owner', 'check.profile'])->group(function () {
 
 
 //ทุกคนเข้าถึงได้ในกรอบนี้
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth','check.profile'])->group(function () {
 
     //จัดการพนักงาน แบบ Resourceful Routes ประกอบด้วย index, create, store, show, edit, update, destroy
     Route::resource('employees', EmployeeController::class);
@@ -66,4 +67,10 @@ Route::middleware(['auth'])->group(function () {
 
     Route::resource('payrolls', PayrollController::class);
     Route::get('payrolls/{payroll}/print-slip', [PayrollController::class, 'printSlip'])->name('payrolls.print-slip');
+
+    Route::get('salaries', [SalaryController::class, 'index'])->name('salaries.index');
+    Route::get('salaries/{employee}/edit', [SalaryController::class, 'edit'])->name('salaries.edit');
+    Route::put('salaries/{employee}', [SalaryController::class, 'update'])->name('salaries.update');
+    Route::get('salaries/{employee}', [SalaryController::class, 'show'])->name('salaries.show');
+    // ไม่มี Route สำหรับ 'create' และ 'store'
 });

@@ -1,8 +1,16 @@
 @extends('layouts.app')
 
+@section('title', 'จัดการวัตถุดิบ')
+
 @section('content')
-    <div class="container mx-auto px-4 py-8">
-        <h2 class="text-2xl font-bold text-gray-800 mb-4">ระบบจัดการวัตถุดิบ</h2>
+    <div class="container mx-auto px-4 py-0">
+            <!-- เรียกใช้ breadcrumb component -->
+    <x-breadcrumb :paths="[
+        ['label' => 'ระบบจัดการผลิต', 'url' => route('productions.index')],
+        ['label' => '']
+    ]" />
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">ระบบจัดการผลิต</h2>
+        @if (auth()->user()->role === 'owner')
         <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0 md:space-x-4">
             <div class="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
                 <a href="{{ route('productions.create') }}"
@@ -16,6 +24,7 @@
                     สั่งผลิตใหม่
                 </a>
             </div>
+            @endif
             <form action="#" method="GET" class="flex-grow md:max-w-md">
                 <div class="relative">
                     <input type="text" name="search" placeholder="ค้นหาวัตถุดิบ..." value="{{ request('search') }}"
@@ -99,14 +108,14 @@
                                         แก้ไข
                                     </a>
 
-                                    <form id="delete-form-{{ $ingredient->id }}"
-                                        action="{{ route('ingredients.destroy', ['ingredient' => $ingredient->id]) }}"
+                                    <form id="delete-form-{{ $production->id }}"
+                                        action="{{ route('ingredients.destroy', ['ingredient' => $production->id]) }}"
                                         method="POST" class="inline-block">
                                         @csrf
                                         @method('DELETE')
                                         <button type="button"
                                             class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                                            onclick="confirmDelete({{ $ingredient->id }})">
+                                            onclick="confirmDelete({{ $production->id }})">
                                             <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none"
                                                 viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -123,6 +132,5 @@
             </table>
         </div>
     </div>
-
 
 @endsection

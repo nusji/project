@@ -10,7 +10,7 @@
         <!-- Desktop Menu -->
         <div class="hidden md:flex items-center space-x-6">
             <!-- Display user name -->
-            <span class="text-white">สวัสดีคุณ {{ $firstName }} {{ $lastName }}</span>
+            <span class="text-white">สวัสดีคุณ {{ $name }}</span>
 
             <!-- Logout button -->
             <form method="POST" action="{{ route('logout') }}">
