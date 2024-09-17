@@ -84,7 +84,7 @@
                                 {{ number_format($summary['totalPrice'], 2) }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                {{ $summary['order']->employee->first_name }} <!-- ตรวจสอบว่าต้องใช้ field อะไร -->
+                                {{ $summary['order']->employee->name }} <!-- ตรวจสอบว่าต้องใช้ field อะไร -->
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2 text-center">
 

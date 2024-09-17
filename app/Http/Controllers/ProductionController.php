@@ -3,9 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Production;
-use App\Models\ProductionMenu;
-use App\Models\ProductionIngredient;
-use App\Models\MenuIngredient;
+use App\Models\ProductionDetail;
 use App\Models\Ingredient;
 use App\Models\Menu;
 use App\Models\MenuRecipe;
@@ -14,166 +12,72 @@ use Illuminate\Support\Facades\DB;
 
 class ProductionController extends Controller
 {
+    // แสดงรายการการผลิตทั้งหมด
     public function index()
     {
-        $productions = Production::with('productionMenus.menu')->paginate(10);
+        // ดึงข้อมูลการผลิตทั้งหมด พร้อมกับรายการเมนูที่ผลิต
+        $productions = Production::with('productionDetails.menu')->get();
+
         return view('productions.index', compact('productions'));
     }
-
+    // แสดงฟอร์มเพิ่มผลิต
     public function create()
     {
-        $menus = Menu::all();
+        // ดึงข้อมูลเมนูทั้งหมดมาเพื่อแสดงในฟอร์ม
+        $menus = Menu::where('menu_status', true)->get();
+
         return view('productions.create', compact('menus'));
     }
 
+    // บันทึกข้อมูลการผลิต
     public function store(Request $request)
     {
         $request->validate([
-            'order_code' => 'required|unique:productions',
-            'menus' => 'required|array',
-            'menus.*.menu_id' => 'required|exists:menus,id',
-            'menus.*.produced_quantity' => 'required|numeric|min:0',
+            'production_date' => 'required|date',
+            'menu_list' => 'required|array',
+            'menu_list.*.menu_id' => 'required|exists:menus,id',
+            'menu_list.*.quantity' => 'required|numeric|min:1',
         ]);
 
-        DB::beginTransaction();
-        try {
+        DB::transaction(function () use ($request) {
+            // บันทึกข้อมูลการผลิต
             $production = Production::create([
-                'order_code' => $request->order_code,
-                'production_date' => now(),
+                'production_date' => $request->production_date,
+                'production_detail' => $request->production_detail,
             ]);
-            
-            //สร้าง production_menu และ production_ingredient ตาม request ที่ส่งมา
-            foreach ($request->menus as $menu) {
-                $producedQuantity = $menu['produced_quantity'];
-                $sellingQuantity = $producedQuantity * 10;
 
-                //สร้าง production_menu ใหม่ โดยมี production_id, menu_id, produced_quantity, selling_quantity ที่ส่งมาจาก request
-                $productionMenu = ProductionMenu::create([
+            // บันทึกเมนูที่ผลิต
+            foreach ($request->menu_list as $menuData) {
+                $productionDetail = ProductionDetail::create([
                     'production_id' => $production->id,
-                    'menu_id' => $menu['menu_id'],
-                    'produced_quantity' => $producedQuantity,
-                    'selling_quantity' => $sellingQuantity,
+                    'menu_id' => $menuData['menu_id'],
+                    'quantity' => $menuData['quantity'],
+                    'quantity_sales' => 0, // ค่าเริ่มต้น
                 ]);
 
-                $menuIngredients = MenuRecipe::where('menu_id', $menu['menu_id'])->get();
-                foreach ($menuIngredients as $menuIngredient) {
-                    $usedQuantity = $menuIngredient->quantity_per_unit * $producedQuantity;
-
-                    ProductionIngredient::create([
-                        'production_menu_id' => $productionMenu->id,
-                        'ingredient_id' => $menuIngredient->ingredient_id,
-                        'used_quantity' => $usedQuantity,
-                    ]);
-
-                    $ingredient = Ingredient::find($menuIngredient->ingredient_id);
-                    $ingredient->ingredient_quantity -= $usedQuantity;
-                    $ingredient->save();
-                }
+                // ตรวจสอบวัตถุดิบและหักลบ
+                $this->processIngredients($menuData['menu_id'], $menuData['quantity']);
             }
+        });
 
-            DB::commit();
-            return redirect()->route('productions.index')->with('success', 'Production created successfully!');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->with('error', 'Error creating production: ' . $e->getMessage());
-        }
+        return redirect()->route('productions.create')->with('success', 'บันทึกการผลิตสำเร็จ');
     }
 
-    public function show($id)
+    private function processIngredients($menuId, $quantity)
     {
-        $production = Production::with('productionMenus.menu', 'productionMenus.productionIngredients.ingredient')->findOrFail($id);
-        return view('productions.show', compact('production'));
-    }
+        $recipes = MenuRecipe::where('menu_id', $menuId)->get();
 
-    public function edit($id)
-    {
-        $production = Production::with('productionMenus.menu')->findOrFail($id);
-        $menus = Menu::all();
-        return view('productions.edit', compact('production', 'menus'));
-    }
+        foreach ($recipes as $recipe) {
+            $requiredAmount = $recipe->Amount * $quantity;
+            $ingredient = Ingredient::find($recipe->ingredient_id);
 
-    public function update(Request $request, $id)
-    {
-        $request->validate([
-            'order_code' => 'required|unique:productions,order_code,' . $id,
-            'menus' => 'required|array',
-            'menus.*.menu_id' => 'required|exists:menus,id',
-            'menus.*.produced_quantity' => 'required|numeric|min:0',
-        ]);
-
-        DB::beginTransaction();
-        try {
-            $production = Production::findOrFail($id);
-            $production->update(['order_code' => $request->order_code]);
-
-            // Reverse previous ingredient usage
-            foreach ($production->productionMenus as $oldProductionMenu) {
-                foreach ($oldProductionMenu->productionIngredients as $oldProductionIngredient) {
-                    $ingredient = Ingredient::find($oldProductionIngredient->ingredient_id);
-                    $ingredient->stock_quantity += $oldProductionIngredient->used_quantity;
-                    $ingredient->save();
-                }
+            if ($ingredient->stock < $requiredAmount) {
+                throw new \Exception("วัตถุดิบไม่พอสำหรับเมนู ID: $menuId");
             }
 
-            // Delete old production menus and ingredients
-            $production->productionMenus()->delete();
-
-            // Create new production menus and ingredients
-            foreach ($request->menus as $menu) {
-                $producedQuantity = $menu['produced_quantity'];
-                $sellingQuantity = $producedQuantity * 10;
-
-                $productionMenu = ProductionMenu::create([
-                    'production_id' => $production->id,
-                    'menu_id' => $menu['menu_id'],
-                    'produced_quantity' => $producedQuantity,
-                    'selling_quantity' => $sellingQuantity,
-                ]);
-
-                $menuIngredients = MenuRecipe::where('menu_id', $menu['menu_id'])->get();
-                foreach ($menuIngredients as $menuIngredient) {
-                    $usedQuantity = $menuIngredient->quantity_per_unit * $producedQuantity;
-
-                    ProductionIngredient::create([
-                        'production_menu_id' => $productionMenu->id,
-                        'ingredient_id' => $menuIngredient->ingredient_id,
-                        'used_quantity' => $usedQuantity,
-                    ]);
-
-                    $ingredient = Ingredient::find($menuIngredient->ingredient_id);
-                    $ingredient->stock_quantity -= $usedQuantity;
-                    $ingredient->save();
-                }
-            }
-
-            DB::commit();
-            return redirect()->route('productions.index')->with('success', 'Production updated successfully!');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->with('error', 'Error updating production: ' . $e->getMessage());
-        }
-    }
-
-    public function destroy($id)
-    {
-        DB::beginTransaction();
-        try {
-            $production = Production::findOrFail($id);
-
-            foreach ($production->productionMenus as $productionMenu) {
-                foreach ($productionMenu->productionIngredients as $productionIngredient) {
-                    $ingredient = Ingredient::find($productionIngredient->ingredient_id);
-                    $ingredient->stock_quantity += $productionIngredient->used_quantity;
-                    $ingredient->save();
-                }
-            }
-
-            $production->delete();
-            DB::commit();
-            return redirect()->route('productions.index')->with('success', 'Production canceled and ingredients restored!');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->with('error', 'Error canceling production: ' . $e->getMessage());
+            $ingredient->update([
+                'stock' => $ingredient->stock - $requiredAmount
+            ]);
         }
     }
 }

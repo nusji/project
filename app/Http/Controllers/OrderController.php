@@ -15,34 +15,29 @@ class OrderController extends Controller
 
     public function index()
     {
-        // ดึงข้อมูลรายการสั่งซื้อพร้อมรายละเอียดและวัตถุดิบ
-        // ใช้ withTrashed เพื่อรวมวัตถุดิบที่ถูกลบแบบ soft delete ด้วย
+        // ดึงข้อมูลรายการสั่งซื้อพร้อมรายละเอียดและวัตถุดิบที่เกี่ยวข้อง โดยใช้ Eloquent ORM ใช้ withTrashed เพื่อรวมวัตถุดิบที่ถูกลบแบบ soft delete ด้วย
         $orders = Order::with(['orderDetails.ingredient' => function ($query) {
             $query->withTrashed(); // รวมข้อมูลที่ถูกลบแล้ว
-        }])->get();
+        }]) ->get();
+
         // สร้างตัวแปรเพื่อเก็บข้อมูลของแต่ละรายการสั่งซื้อ
         $orderSummaries = $orders->map(function ($order) {
-            // คำนวณราคารวมของรายการสั่งซื้อ
             $totalPrice = $order->orderDetails->sum('price');
-            // นับจำนวนวัตถุดิบในรายการสั่งซื้อ
             $ingredientCount = $order->orderDetails->count();
             return [
                 'order' => $order,
                 'totalPrice' => $totalPrice,
-                'ingredientCount' => $ingredientCount
+                'ingredientCount' => $ingredientCount,
             ];
         });
-
         return view('orders.index', ['orderSummaries' => $orderSummaries]);
     }
-
 
     public function create()
     {
         $ingredients = Ingredient::all();
         return view('orders.create', compact('ingredients'));
     }
-
 
     public function store(Request $request)
     {
@@ -74,23 +69,19 @@ class OrderController extends Controller
                 ]);
 
                 $ingredient = Ingredient::find($item['id']);
-                $ingredient->ingredient_quantity += $item['quantity'];
+                $ingredient->ingredient_stock += $item['quantity'];
                 $ingredient->save();
             }
         });
-
         return redirect()->route('orders.index')->with('success', 'การสั่งซื้อถูกบันทึกเรียบร้อยแล้ว');
     }
 
-
     public function show(Order $order)
     {
-        // โหลดข้อมูลที่เกี่ยวข้องพร้อมกับข้อมูลที่ถูก soft deleted
+        // โหลดข้อมูลที่เกี่ยวข้องพร้อมกับข้อมูลที่ถูก soft deleted เพื่อให้แสดงข้อมูลที่ถูกลบด้วย
         $order->load(['orderDetails.ingredient' => function ($query) {
             $query->withTrashed();
         }]);
-
-        // คำนวณราคาทั้งหมดของแต่ละรายการ OrderDetail และราคาสุทธิ
         $order->orderDetails->each(function ($detail) {
             $detail->total = $detail->quantity * $detail->price;
         });
@@ -148,7 +139,7 @@ class OrderController extends Controller
                 // คืนค่า quantity เก่ากลับไปก่อนจะคำนวณค่าใหม่
                 $oldOrderDetail = $order->orderDetails()->where('ingredient_id', $item['id'])->first();
                 if ($oldOrderDetail) {
-                    $ingredient->ingredient_quantity -= $oldOrderDetail->quantity;
+                    $ingredient->ingredient_stock -= $oldOrderDetail->quantity;
                 }
 
                 // สร้าง OrderDetail ใหม่
@@ -159,7 +150,7 @@ class OrderController extends Controller
                 ]);
 
                 // อัปเดต quantity ใหม่ของ ingredient
-                $ingredient->ingredient_quantity += $item['quantity'];
+                $ingredient->ingredient_stock += $item['quantity'];
                 $ingredient->save();
             }
         });
@@ -175,7 +166,7 @@ class OrderController extends Controller
                 $ingredient = $detail->ingredient;
                 // ตรวจสอบว่า $ingredient มีคอลัมน์ quantity หรือไม่
                 if ($ingredient) {
-                    $ingredient->ingredient_quantity -= $detail->quantity;
+                    $ingredient->ingredient_stock -= $detail->quantity;
                     $ingredient->save();
                 }
             }

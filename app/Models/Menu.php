@@ -10,7 +10,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Menu extends Model
 {
     use HasFactory, SoftDeletes;
-
+    protected $table = 'menus';
+    protected $primaryKey = 'id';
     protected $fillable = [
         'menu_name',
         'menu_detail',
@@ -24,9 +25,14 @@ class Menu extends Model
     {
         return $this->belongsTo(MenuType::class);
     }
-
     public function recipes()
     {
         return $this->hasMany(MenuRecipe::class);
     }
+    public function productionDetails()
+    {
+        return $this->hasMany(ProductionDetail::class);
+    }
+
+
 }

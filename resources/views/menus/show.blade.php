@@ -48,7 +48,7 @@
                                 <ul class="list-disc list-inside space-y-2">
                                     @foreach($menu->recipes as $recipe)
                                         <li class="text-gray-700">
-                                            {{ $recipe->ingredient->ingredient_name }}  {{ $recipe->Amount }} {{ $recipe->ingredient->ingredient_unit }}
+                                            {{ $recipe->ingredient->ingredient_name }}  {{ $recipe->amount }} {{ $recipe->ingredient->ingredient_unit }}
                                         </li>
                                     @endforeach
                                 </ul>

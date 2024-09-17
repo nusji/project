@@ -8,27 +8,25 @@ use Illuminate\Notifications\Notifiable;
 
 class Employee extends Authenticatable
 {
+    //latest
     use HasFactory, Notifiable;
-    protected $primaryKey = 'id';
     protected $table = "employees";
+    protected $primaryKey = 'id';
     protected $fillable = [
         'name',
-        'id_card_number',
-        'phone_number',
-        'employment_type',
         'username',
         'password',
-        'salary',
-        'start_date',
         'role',
-
+        'id_card_number',
+        'employee_type',
+        'start_date',
+        'salary',
+        'phone_number',
         'address',
         'date_of_birth',
         'profile_picture',
         'bank_account',
         'bank_account_number',
-
-        
     ];
 
     protected $hidden = [

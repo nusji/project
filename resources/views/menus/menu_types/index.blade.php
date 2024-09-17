@@ -113,7 +113,7 @@
 <!-- ส่วนของการส่งคำขอลบ-->
     @foreach ($menuTypes as $menuType)
         <form id="delete-form-{{ $menuType->id }}"
-            action="{{ route('ingredient_types.destroy', $menuType->id) }}" method="POST" style="display: none;">
+            action="{{ route('menu_types.destroy', $menuType->id) }}" method="POST" style="display: none;">
             @csrf
             @method('DELETE')
         </form>

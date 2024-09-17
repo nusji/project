@@ -59,27 +59,27 @@
                 </div>
                 <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label for="ingredient_quantity_left" class="block mb-2 text-sm font-medium text-gray-700">
+                        <label for="ingredient_stock" class="block mb-2 text-sm font-medium text-gray-700">
                             จำนวนคงเหลือ
                         </label>
-                        <input type="number" id="ingredient_quantity_left" name="ingredient_quantity_left"
+                        <input type="number" id="ingredient_stock" name="ingredient_stock"
                             value="{{ $ingredient->ingredient_stock }}"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                             required>
-                        @error('ingredient_quantity_left')
+                        @error('ingredient_stock')
                             <span class="text-red-500 text-sm">{{ $message }}</span>
                         @enderror
                     </div>
 
                     <div>
-                        <label for="ingredient_quantity_right" class="block mb-2 text-sm font-medium text-gray-700">
+                        <label for="minimum_quantity" class="block mb-2 text-sm font-medium text-gray-700">
                             แจ้งเตือนเมื่อเหลือ
                         </label>
-                        <input type="number" id="ingredient_quantity_right" name="ingredient_quantity_right"
+                        <input type="number" id="minimum_quantity" name="minimum_quantity"
                             value="{{ $ingredient->minimum_quantity }}"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                             required>
-                        @error('ingredient_quantity_right')
+                        @error('minimum_quantity')
                             <span class="text-red-500 text-sm">{{ $message }}</span>
                         @enderror
                     </div>

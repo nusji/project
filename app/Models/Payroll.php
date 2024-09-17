@@ -8,13 +8,15 @@ use Illuminate\Database\Eloquent\Model;
 class Payroll extends Model
 {
     use HasFactory;
-
+    protected $table = 'payrolls';
+    protected $primaryKey = 'id';
     protected $fillable = [
         'employee_id',
         'bonus',
         'deductions',
         'net_salary',
         'payment_date',
+        'payment_method',
     ];
 
     // Relationship with Employee

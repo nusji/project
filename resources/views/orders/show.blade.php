@@ -33,12 +33,12 @@
 
                     <div class="mb-6">
                         <p class="text-sm text-gray-600">ผู้สั่งซื้อ</p>
-                        <p class="font-semibold">{{ $order->employee->first_name }}</p>
+                        <p class="font-semibold">{{ $order->employee->name }}</p>
                     </div>
 
                     <div class="mb-6">
                         <h2 class="text-lg font-bold mb-2">รายละเอียด</h2>
-                        <p class="text-gray-700">{{ $order->order_detail }}</p>
+                        <p class="text-gray-700">{{ $order->order_detail}}</p>
                     </div>
 
                     <div class="mb-6">

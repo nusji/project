@@ -57,7 +57,7 @@ Route::middleware(['auth','check.profile'])->group(function () {
     Route::resource('orders', OrderController::class);
 
     //จัดการประเภทเมนู แบบ Resourceful Routes ประกอบด้วย index, create, store, show, edit, update, destroy
-    Route::resource('menu_types', MenuTypeController::class);
+    Route::resource('menu_types', MenuTypeController::class)->except(['show']);;
 
     //จัดการเมนู แบบ Resourceful Routes ประกอบด้วย index, create, store, show, edit, update, destroy
     Route::resource('menus', MenuController::class);

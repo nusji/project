@@ -4,42 +4,39 @@
 
 @section('content')
     <div class="container mx-auto px-4 py-0">
-            <!-- เรียกใช้ breadcrumb component -->
-    <x-breadcrumb :paths="[
-        ['label' => 'ระบบจัดการผลิต', 'url' => route('productions.index')],
-        ['label' => '']
-    ]" />
+        <!-- เรียกใช้ breadcrumb component -->
+        <x-breadcrumb :paths="[['label' => 'ระบบจัดการผลิต', 'url' => route('productions.index')], ['label' => '']]" />
         <h2 class="text-2xl font-bold text-gray-800 mb-4">ระบบจัดการผลิต</h2>
         @if (auth()->user()->role === 'owner')
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0 md:space-x-4">
-            <div class="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
-                <a href="{{ route('productions.create') }}"
-                    class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-300 ease-in-out shadow-md">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 6v6m0 0v6m0-6h6m-6 0H6">
-                        </path>
-                    </svg>
-                    สั่งผลิตใหม่
-                </a>
-            </div>
-            @endif
-            <form action="#" method="GET" class="flex-grow md:max-w-md">
-                <div class="relative">
-                    <input type="text" name="search" placeholder="ค้นหาวัตถุดิบ..." value="{{ request('search') }}"
-                        class="w-full px-4 py-2 rounded-md border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <button type="submit"
-                        class="absolute inset-y-0 right-0 flex items-center px-4 text-gray-700 bg-gray-100 border-l border-gray-300 rounded-r-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-300 ease-in-out">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0 md:space-x-4">
+                <div class="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                    <a href="{{ route('productions.create') }}"
+                        class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-300 ease-in-out shadow-md">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                             xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                d="M12 6v6m0 0v6m0-6h6m-6 0H6">
+                            </path>
                         </svg>
-                    </button>
+                        สั่งผลิตใหม่
+                    </a>
                 </div>
-            </form>
-        </div>
+        @endif
+        <form action="#" method="GET" class="flex-grow md:max-w-md">
+            <div class="relative">
+                <input type="text" name="search" placeholder="ค้นหาวัตถุดิบ..." value="{{ request('search') }}"
+                    class="w-full px-4 py-2 rounded-md border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <button type="submit"
+                    class="absolute inset-y-0 right-0 flex items-center px-4 text-gray-700 bg-gray-100 border-l border-gray-300 rounded-r-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-300 ease-in-out">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </button>
+            </div>
+        </form>
+    </div>
     </div>
 
     <!-- ส่วนของตาราง-->
@@ -57,6 +54,12 @@
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             รายละเอียด
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            เมนูที่ผลิต
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            จำนวนทัพพี
                         </th>
                         <th
                             class="text-center px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -81,7 +84,17 @@
                                     {{ $production->production_date }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    {{ $production->comment }}
+                                    {{ $production->production_detail }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <ul>
+                                        @foreach ($production->productionDetails as $detail)
+                                            <li>{{ $detail->menu->menu_name }} ({{ $detail->quantity }})</li>
+                                        @endforeach
+                                    </ul>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {{ $production->productionDetails->sum('quantity') }}
                                 </td>
                                 <!-- ส่วนของการจัดการ -->
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2 text-center">

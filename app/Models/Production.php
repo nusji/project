@@ -8,11 +8,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Production extends Model
 {
     use SoftDeletes;
+    protected $table = 'productions';
+    protected $primaryKey = 'id';
+    protected $fillable = [
+        'production_date',
+        'production_detail',
+    ];
 
-    protected $fillable = ['order_code'];
-
-    public function productionMenus()
+    public function productionDetails()
     {
-        return $this->hasMany(ProductionMenu::class);
+        return $this->hasMany(ProductionDetail::class, 'production_id', 'id');
     }
 }

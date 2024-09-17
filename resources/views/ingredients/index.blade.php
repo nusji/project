@@ -7,65 +7,89 @@
         <!-- เรียกใช้ breadcrumb component -->
         <x-breadcrumb :paths="[['label' => 'ระบบวัตถุดิบ', 'url' => route('ingredients.index')], ['label' => '']]" />
         <h2 class="text-2xl font-bold text-gray-800 mb-4">ระบบจัดการวัตถุดิบ</h2>
-
-        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="bg-white shadow-lg rounded-lg p-6">
-                <h3 class="text-xl font-semibold text-gray-800 mb-3">วัตถุดิบทั้งหมด</h3>
-                <p class="text-2xl font-bold text-green-600">{{ \App\Models\Ingredient::count() }}</p>
+        <div class="mt-2 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="px-4 py-4">
+                <div class="bg-white shadow-lg rounded-lg p-6">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-0">วัตถุดิบตามประเภท</h3>
+                    <div class="w-full h-64">
+                        <canvas id="ingredientTypeChart"></canvas>
+                    </div>
+                </div>
             </div>
-                        <div class="bg-white shadow-lg rounded-lg p-6">
-                            <h3 class="text-xl font-semibold text-gray-800 mb-3">วัตถุดิบเหลือน้อย</h3>
-                            @foreach ($ingredients as $ingredient)
+            <div class="px-4 py-4">
+                <div class="bg-white shadow-lg rounded-lg p-6">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-0">วัตถุดิบเหลือน้อย</h3>
+                    <div class="space-y-3">
+                        @forelse ($ingredients as $ingredient)
                             @if ($ingredient->ingredient_stock <= $ingredient->minimum_quantity)
-                            <p class="text-sm font-medium text-gray-600 mb-2">{{ $ingredient->ingredient_name }} <small class="text-sm text-red-500 mt-2">เหลือ : {{ $ingredient->ingredient_stock }} {{ $ingredient->ingredient_unit }}</small> </p>
-                            
+                                <div
+                                    class="flex items-center justify-between bg-red-50 border border-red-200 rounded-lg p-3">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-700">{{ $ingredient->ingredient_name }}</p>
+                                        <p class="text-xs text-gray-500">ปริมาณต่ำสุด: {{ $ingredient->minimum_quantity }}
+                                            {{ $ingredient->ingredient_unit }}</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-sm font-bold text-red-600">เหลือ: {{ $ingredient->ingredient_stock }}
+                                            {{ $ingredient->ingredient_unit }}</p>
+                                        <p class="text-xs text-red-500">
+                                            ต่ำกว่าขั้นต่ำ
+                                            {{ $ingredient->minimum_quantity - $ingredient->ingredient_stock }}
+                                            {{ $ingredient->ingredient_unit }}
+                                        </p>
+                                    </div>
+                                </div>
                             @endif
-                            @endforeach
-                        </div>
-
+                        @empty
+                            <p class="text-sm text-gray-500 italic">ไม่มีวัตถุดิบที่เหลือน้อยในขณะนี้</p>
+                        @endforelse
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="mt-8 flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0 md:space-x-4">
-            @if (auth()->user()->role === 'owner')
-                <div class="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
-                    <a href="{{ route('ingredients.create') }}"
-                        class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-300 ease-in-out shadow-md">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 6v6m0 0v6m0-6h6m-6 0H6">
-                            </path>
-                        </svg>
-                        เพิ่มวัตถุดิบ
-                    </a>
-                    <a href="{{ route('ingredient_types.index') }}"
-                        class="inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-300 ease-in-out shadow-md">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 6h16M4 10h16M4 14h16M4 18h16">
-                            </path>
-                        </svg>
-                        จัดการประเภท
-                    </a>
-                </div>
-            @endif
-            <form action="#" method="GET" class="flex-grow md:max-w-md">
-                <div class="relative">
-                    <input type="text" name="search" placeholder="ค้นหาวัตถุดิบ..." value="{{ request('search') }}"
-                        class="w-full px-4 py-2 rounded-md border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <button type="submit"
-                        class="absolute inset-y-0 right-0 flex items-center px-4 text-gray-700 bg-gray-100 border-l border-gray-300 rounded-r-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-300 ease-in-out">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
-                    </button>
-                </div>
-            </form>
-        </div>
+    </div>
+
+    <div class="mt-8 flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0 md:space-x-4 ml-4">
+        @if (auth()->user()->role === 'owner')
+            <div class="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                <a href="{{ route('ingredients.create') }}"
+                    class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-300 ease-in-out shadow-md">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 6v6m0 0v6m0-6h6m-6 0H6">
+                        </path>
+                    </svg>
+                    เพิ่มวัตถุดิบ
+                </a>
+                <a href="{{ route('ingredient_types.index') }}"
+                    class="inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-300 ease-in-out shadow-md">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 10h16M4 14h16M4 18h16">
+                        </path>
+                    </svg>
+                    จัดการประเภท
+                </a>
+            </div>
+        @endif
+        <form action="#" method="GET" class="flex-grow md:max-w-md">
+            <div class="relative">
+                <input type="text" name="search" placeholder="ค้นหาวัตถุดิบ..." value="{{ request('search') }}"
+                    class="w-full px-4 py-2 rounded-md border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <button type="submit"
+                    class="absolute inset-y-0 right-0 flex items-center px-4 text-gray-700 bg-gray-100 border-l border-gray-300 rounded-r-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-300 ease-in-out">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </button>
+            </div>
+        </form>
+    </div>
     </div>
     <!-- ส่วนของตาราง-->
     <div class="p-6">
@@ -121,7 +145,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-right">
                                     <span id="quantity-{{ $ingredient->id }}">{{ $ingredient->minimum_quantity }}</span>
                                 </td>
-                                
+
 
                                 <!-- ส่วนของการจัดการ -->
 
@@ -229,5 +253,37 @@
                 }
             })
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var ctx = document.getElementById('ingredientTypeChart').getContext('2d');
+            var data = @json($ingredientTypes);
+
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.map(item => item.type),
+                    datasets: [{
+                        data: data.map(item => item.count),
+                        backgroundColor: [
+                            '#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8',
+                            '#82ca9d', '#a4de6c', '#d0ed57', '#ffc658', '#8884d8'
+                        ],
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        },
+                        title: {
+                            display: true,
+                            text: 'วัตถุดิบตามประเภท'
+                        }
+                    }
+                }
+            });
+        });
     </script>
 @endsection
