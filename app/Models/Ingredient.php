@@ -14,7 +14,6 @@ class Ingredient extends Model
     protected $primaryKey = 'id'; // ตรวจสอบว่าใช้ 'id' เป็น primary key
     protected $fillable = [
         'ingredient_name',
-        'ingredient_detail',
         'ingredient_unit',
         'ingredient_stock',
         'minimum_quantity',
@@ -25,20 +24,21 @@ class Ingredient extends Model
 
     ];
 
+    // ในโมเดล Ingredient
     public function ingredientType()
     {
-        return $this->belongsTo(IngredientType::class);
+        return $this->belongsTo(IngredientType::class, 'ingredient_type_id');
     }
     public function orderDetails()
     {
-        return $this->hasMany(OrderDetail::class);
+        return $this->hasMany(OrderDetail::class, 'ingredient_id');
     }
     public function menuRecipes()
     {
-        return $this->hasMany(Ingredient::class);
+        return $this->hasMany(Ingredient::class, 'ingredient_id');
     }
 
-    
+
     public function isLowStock()
     {
         // ตรวจสอบว่าจำนวนสต็อกปัจจุบันน้อยกว่าหรือเท่ากับปริมาณขั้นต่ำ

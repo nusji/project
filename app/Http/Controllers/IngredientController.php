@@ -12,34 +12,49 @@ use App\Notifications\LowStockNotification;
 class IngredientController extends Controller
 {
     public function index(Request $request)
-    {
-        $query = Ingredient::with('ingredientType');
-        // ตรวจสอบว่ามีการค้นหาหรือไม่
-        if ($request->has('search')) {
-            $search = $request->input('search');
-            $query->where('ingredient_name', 'like', "%{$search}%")
-                ->orWhereHas('ingredientType', function ($q) use ($search) {
-                    $q->where('ingredient_type_name', 'like', "%{$search}%"); // สมมติว่าชื่อประเภทวัตถุดิบเป็น 'type_name'
-                });
-        }
-        // ดึงข้อมูลวัตถุดิบพร้อมแบ่งหน้า
-        $ingredients = $query->paginate(10);
+{
+    // เริ่มต้น query โดยรวมความสัมพันธ์ ingredientType
+    $query = Ingredient::with('ingredientType');
 
-        $ingredientTypes = Ingredient::select('ingredient_type_id')
-            ->selectRaw('count(*) as count')
-            ->groupBy('ingredient_type_id')
-            ->with('ingredientType') // เพิ่ม eager loading สำหรับ ingredient type
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'type' => $item->ingredientType->ingredient_type_name, // สมมติว่า ingredient type มี column 'name'
-                    'count' => $item->count
-                ];
+    // ตรวจสอบว่ามีการค้นหาหรือไม่
+    if ($request->has('search')) {
+        $search = $request->input('search');
+        $query->where('ingredient_name', 'like', "%{$search}%")
+            ->orWhereHas('ingredientType', function ($q) use ($search) {
+                $q->where('ingredient_type_name', 'like', "%{$search}%"); // สมมติว่า ingredient type มีชื่อว่า 'ingredient_type_name'
             });
-
-        // ส่งข้อมูลไปยัง view
-        return view('ingredients.index', compact('ingredients', 'ingredientTypes'));
     }
+
+    // ตรวจสอบว่ามีการจัดเรียงหรือไม่
+    if ($request->has('orderBy') && $request->has('direction')) {
+        $orderBy = $request->input('orderBy');
+        $direction = $request->input('direction');
+        $query->orderBy($orderBy, $direction); // จัดเรียงตามตัวเลือกที่ผู้ใช้กำหนด
+    } else {
+        // กำหนดค่าเริ่มต้นการจัดเรียง
+        $query->orderBy('ingredient_name', 'asc'); // เรียงตามชื่อวัตถุดิบเป็นค่าเริ่มต้น
+    }
+
+    // ดึงข้อมูลวัตถุดิบพร้อมแบ่งหน้า
+    $ingredients = $query->paginate(10);
+
+    // ดึงข้อมูลประเภทของวัตถุดิบสำหรับ chart
+    $ingredientTypes = Ingredient::select('ingredient_type_id')
+        ->selectRaw('count(*) as count')
+        ->groupBy('ingredient_type_id')
+        ->with('ingredientType') // เพิ่ม eager loading สำหรับ ingredient type
+        ->get()
+        ->map(function ($item) {
+            return [
+                'type' => $item->ingredientType->ingredient_type_name, // สมมติว่า ingredient type มี column 'ingredient_type_name'
+                'count' => $item->count
+            ];
+        });
+
+    // ส่งข้อมูลไปยัง view
+    return view('ingredients.index', compact('ingredients', 'ingredientTypes'));
+}
+
 
 
     public function create()
@@ -54,15 +69,17 @@ class IngredientController extends Controller
             'ingredient_name' => 'required|max:255',
             'ingredient_type_id' => 'required|exists:ingredient_types,id',
             'ingredient_unit' => 'required|max:50',
-            'ingredient_quantity' => 'required|numeric|min:0',
+            'ingredient_stock' => 'required|min:0.00',
+            'minimum_quantity' => 'required|min:0.00'
         ], [
             'ingredient_name.required' => 'กรุณากรอกชื่อวัตถุดิบ',
             'ingredient_name.max' => 'ชื่อวัตถุดิบไม่ควรเกิน 255 ตัวอักษร',
             'ingredient_type_id.required' => 'กรุณาเลือกประเภทวัตถุดิบ',
             'ingredient_unit.required' => 'กรุณากรอกหน่วยวัตถุดิบ',
-            'ingredient_quantity.required' => 'กรุณากรอกจำนวนวัตถุดิบ',
-            'ingredient_quantity.numeric' => 'จำนวนวัตถุดิบต้องเป็นตัวเลข',
-            'ingredient_quantity.min' => 'จำนวนวัตถุดิบต้องไม่น้อยกว่า 0',
+            'ingredient_stock.required' => 'กรุณากรอกจำนวนวัตถุดิบ',
+            'ingredient_stock.min' => 'จำนวนวัตถุดิบต้องไม่น้อยกว่า 0',
+            'minimum_quantity.required' => 'กรุณากรอกจำนวนวัตถุดิบขั้นต่ำ',
+            'minimum_quantity.min' => 'จำนวนวัตถุดิบขั้นต่ำต้องไม่น้อยกว่า 0'
         ]);
 
         // ตรวจสอบเฉพาะข้อมูลที่ยังไม่ถูกลบ

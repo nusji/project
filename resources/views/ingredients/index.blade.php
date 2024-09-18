@@ -89,6 +89,26 @@
                 </button>
             </div>
         </form>
+        <div class="mb-4 flex justify-end">
+            <form action="{{ route('ingredients.index') }}" method="GET" class="flex items-center">
+                <label for="orderBy" class="mr-2 text-sm text-gray-700">เรียงตาม:</label>
+                <select name="orderBy" id="orderBy" class="border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 mr-2">
+                    <option value="ingredient_name" {{ request('orderBy') === 'ingredient_name' ? 'selected' : '' }}>ชื่อวัตถุดิบ</option>
+                    <option value="ingredient_stock" {{ request('orderBy') === 'ingredient_stock' ? 'selected' : '' }}>จำนวนคงเหลือ</option>
+                    <option value="ingredientType" {{ request('orderBy') === 'ingredientType' ? 'selected' : '' }}>ประเภทวัตถุดิบ</option>
+                </select>
+        
+                <select name="direction" id="direction" class="border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    <option value="asc" {{ request('direction') === 'asc' ? 'selected' : '' }}>น้อยไปมาก</option>
+                    <option value="desc" {{ request('direction') === 'desc' ? 'selected' : '' }}>มากไปน้อย</option>
+                </select>
+        
+                <button type="submit" class="ml-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition">
+                    เรียงลำดับ
+                </button>
+            </form>
+        </div>
+        
     </div>
     </div>
     <!-- ส่วนของตาราง-->

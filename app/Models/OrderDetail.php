@@ -21,7 +21,7 @@ class OrderDetail extends Model
 
     public function ingredient()
     {
-        return $this->belongsTo(Ingredient::class);
+        return $this->belongsTo(Ingredient::class)->withTrashed();
     }
     
 }

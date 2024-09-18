@@ -5,11 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Employee extends Authenticatable
 {
     //latest
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, SoftDeletes;
     protected $table = "employees";
     protected $primaryKey = 'id';
     protected $fillable = [

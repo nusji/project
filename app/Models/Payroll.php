@@ -22,7 +22,7 @@ class Payroll extends Model
     // Relationship with Employee
     public function employee()
     {
-        return $this->belongsTo(Employee::class);
+        return $this->belongsTo(Employee::class)->withTrashed();
     }
 
     public function calculateOvertimePay()

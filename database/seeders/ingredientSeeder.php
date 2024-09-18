@@ -15,39 +15,33 @@ class ingredientSeeder extends Seeder
     {
         DB::table('ingredients')->insert([
             // เนื้อสัตว์
-            ['ingredient_name' => 'เนื้อไก่', 'ingredient_type_id' => 1, 'ingredient_unit' => 'กิโลกรัม', 'ingredient_stock' => 5],
-            ['ingredient_name' => 'เนื้อหมู', 'ingredient_type_id' => 1, 'ingredient_unit' => 'กิโลกรัม', 'ingredient_stock' => 5],
-            ['ingredient_name' => 'เนื้อวัว', 'ingredient_type_id' => 1, 'ingredient_unit' => 'กิโลกรัม', 'ingredient_stock' => 5],
-            ['ingredient_name' => 'เนื้อปลา', 'ingredient_type_id' => 1, 'ingredient_unit' => 'กิโลกรัม', 'ingredient_stock' => 5],
-            ['ingredient_name' => 'กุ้ง', 'ingredient_type_id' => 1, 'ingredient_unit' => 'กิโลกรัม', 'ingredient_stock' => 5],
+            ['ingredient_name' => 'เนื้อไก่', 'ingredient_type_id' => 1, 'ingredient_unit' => 'กิโลกรัม', 'ingredient_stock' => 5, 'minimum_quantity' => 5],
+            ['ingredient_name' => 'เนื้อหมู', 'ingredient_type_id' => 1, 'ingredient_unit' => 'กิโลกรัม', 'ingredient_stock' => 5, 'minimum_quantity' => 5],
+            ['ingredient_name' => 'เนื้อวัว', 'ingredient_type_id' => 1, 'ingredient_unit' => 'กิโลกรัม', 'ingredient_stock' => 5, 'minimum_quantity' => 5],
+            ['ingredient_name' => 'เนื้อปลา', 'ingredient_type_id' => 1, 'ingredient_unit' => 'กิโลกรัม', 'ingredient_stock' => 5, 'minimum_quantity' => 5],
+            ['ingredient_name' => 'กุ้ง', 'ingredient_type_id' => 1, 'ingredient_unit' => 'กิโลกรัม', 'ingredient_stock' => 5, 'minimum_quantity' => 5],
 
             // เครื่องเทศ
-            ['ingredient_name' => 'กระเทียม', 'ingredient_type_id' => 2, 'ingredient_unit' => 'กลีบ', 'ingredient_stock' => 10],
-            ['ingredient_name' => 'หอมแดง', 'ingredient_type_id' => 2, 'ingredient_unit' => 'หัว', 'ingredient_stock' => 5],
-            ['ingredient_name' => 'ตะไคร้', 'ingredient_type_id' => 2, 'ingredient_unit' => 'ต้น', 'ingredient_stock' => 3],
-            ['ingredient_name' => 'ใบมะกรูด', 'ingredient_type_id' => 2, 'ingredient_unit' => 'ใบ', 'ingredient_stock' => 10],
-            ['ingredient_name' => 'ข่า', 'ingredient_type_id' => 2, 'ingredient_unit' => 'ชิ้น', 'ingredient_stock' => 3],
+            ['ingredient_name' => 'กระเทียม', 'ingredient_type_id' => 2, 'ingredient_unit' => 'กิโลกรัม', 'ingredient_stock' => 10, 'minimum_quantity' => 5],
+            ['ingredient_name' => 'หอมแดง', 'ingredient_type_id' => 2, 'ingredient_unit' => 'กิโลกรัม', 'ingredient_stock' => 5, 'minimum_quantity' => 5],
+            ['ingredient_name' => 'ตะไคร้', 'ingredient_type_id' => 2, 'ingredient_unit' => 'กิโลกรัม', 'ingredient_stock' => 3, 'minimum_quantity' => 5],
+            ['ingredient_name' => 'ใบมะกรูด', 'ingredient_type_id' => 2, 'ingredient_unit' => 'กิโลกรัม', 'ingredient_stock' => 10, 'minimum_quantity' => 5],
+            ['ingredient_name' => 'ข่า', 'ingredient_type_id' => 2, 'ingredient_unit' => 'กิโลกรัม', 'ingredient_stock' => 3, 'minimum_quantity' => 5],
 
             // พริกแกง
-            ['ingredient_name' => 'พริกแกงเขียวหวาน', 'ingredient_type_id' => 3, 'ingredient_unit' => 'ถ้วย', 'ingredient_stock' => 1],
-            ['ingredient_name' => 'พริกแกงแดง', 'ingredient_type_id' => 3, 'ingredient_unit' => 'ถ้วย', 'ingredient_stock' => 1],
-            ['ingredient_name' => 'พริกแกงส้ม', 'ingredient_type_id' => 3, 'ingredient_unit' => 'ถ้วย', 'ingredient_stock' => 1],
-            ['ingredient_name' => 'พริกแกงมัสมั่น', 'ingredient_type_id' => 3, 'ingredient_unit' => 'ถ้วย', 'ingredient_stock' => 1],
-            ['ingredient_name' => 'พริกแกงเผ็ด', 'ingredient_type_id' => 3, 'ingredient_unit' => 'ถ้วย', 'ingredient_stock' => 1],
+            ['ingredient_name' => 'พริกแกงเขียวหวาน', 'ingredient_type_id' => 3, 'ingredient_unit' => 'กิโลกรัม', 'ingredient_stock' => 1, 'minimum_quantity' => 5],
+            ['ingredient_name' => 'พริกแกงแดง', 'ingredient_type_id' => 3, 'ingredient_unit' => 'กิโลกรัม', 'ingredient_stock' => 1, 'minimum_quantity' => 5],
+            ['ingredient_name' => 'พริกแกงส้ม', 'ingredient_type_id' => 3, 'ingredient_unit' => 'กิโลกรัม', 'ingredient_stock' => 1, 'minimum_quantity' => 5],
+            ['ingredient_name' => 'พริกแกงมัสมั่น', 'ingredient_type_id' => 3, 'ingredient_unit' => 'กิโลกรัม', 'ingredient_stock' => 1, 'minimum_quantity' => 5],
+            ['ingredient_name' => 'พริกแกงเผ็ด', 'ingredient_type_id' => 3, 'ingredient_unit' => 'กิโลกรัม', 'ingredient_stock' => 1, 'minimum_quantity' => 5],
 
             // เครื่องปรุงรส
-            ['ingredient_name' => 'น้ำปลา', 'ingredient_type_id' => 4, 'ingredient_unit' => 'ขวด', 'ingredient_stock' => 1],
-            ['ingredient_name' => 'กะปิ', 'ingredient_type_id' => 4, 'ingredient_unit' => 'ช้อนโต๊ะ', 'ingredient_stock' => 2],
-            ['ingredient_name' => 'น้ำตาลปี๊บ', 'ingredient_type_id' => 4, 'ingredient_unit' => 'ก้อน', 'ingredient_stock' => 1],
-            ['ingredient_name' => 'น้ำมะขามเปียก', 'ingredient_type_id' => 4, 'ingredient_unit' => 'ขวด', 'ingredient_stock' => 1],
-            ['ingredient_name' => 'มะนาว', 'ingredient_type_id' => 4, 'ingredient_unit' => 'ลูก', 'ingredient_stock' => 5],
+            ['ingredient_name' => 'น้ำปลา', 'ingredient_type_id' => 4, 'ingredient_unit' => 'ลิตร', 'ingredient_stock' => 1, 'minimum_quantity' => 5],
+            ['ingredient_name' => 'กะปิ', 'ingredient_type_id' => 4, 'ingredient_unit' => 'กิโลกรัม', 'ingredient_stock' => 2, 'minimum_quantity' => 5],
+            ['ingredient_name' => 'น้ำตาลปี๊บ', 'ingredient_type_id' => 4, 'ingredient_unit' => 'กิโลกรัม', 'ingredient_stock' => 1, 'minimum_quantity' => 5],
+            ['ingredient_name' => 'น้ำมะขามเปียก', 'ingredient_type_id' => 4, 'ingredient_unit' => 'ลิตร', 'ingredient_stock' => 1, 'minimum_quantity' => 5],
+            ['ingredient_name' => 'มะนาว', 'ingredient_type_id' => 4, 'ingredient_unit' => 'ลิตร', 'ingredient_stock' => 5, 'minimum_quantity' => 5],
 
-            // กะทิ
-            ['ingredient_name' => 'กะทิสด', 'ingredient_type_id' => 5, 'ingredient_unit' => 'ขวด', 'ingredient_stock' => 1],
-            ['ingredient_name' => 'กะทิกระป๋อง', 'ingredient_type_id' => 5, 'ingredient_unit' => 'กระป๋อง', 'ingredient_stock' => 1],
-            ['ingredient_name' => 'กะทิสำเร็จรูป', 'ingredient_type_id' => 5, 'ingredient_unit' => 'กล่อง', 'ingredient_stock' => 1],
-            ['ingredient_name' => 'กะทิแบบผง', 'ingredient_type_id' => 5, 'ingredient_unit' => 'ซอง', 'ingredient_stock' => 1],
-            ['ingredient_name' => 'กะทิกล่อง', 'ingredient_type_id' => 5, 'ingredient_unit' => 'กล่อง', 'ingredient_stock' => 1],
         ]);
     }
 }

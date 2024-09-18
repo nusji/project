@@ -5,7 +5,7 @@
 @section('content')
     <div class="container mx-auto px-4 py-0">
         <x-breadcrumb :paths="[
-            ['label' => 'ระบบจัดการวัตถุดิบ', 'url' => route('ingredients.index')],
+            ['label' => 'ระบบวัตถุดิบ', 'url' => route('ingredients.index')],
             ['label' => 'วัตถุดิบ', 'url' => route('ingredients.index')],
             ['label' => 'เพิ่ม'],
         ]" />
@@ -62,16 +62,33 @@
                 @enderror
             </div>
 
-            <div class="mb-6">
-                <label for="ingredient_quantity" class="block mb-2 text-sm font-medium text-gray-700">จำนวนเริ่มต้น</label>
-                <input type="number" id="ingredient_quantity" name="ingredient_quantity"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required>
-                @error('ingredient_quantity')
-                    <span class="text-red-500 text-sm">{{ $message }}</span>
-                @enderror
-            </div>
+            <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="ingredient_stock" class="block mb-2 text-sm font-medium text-gray-700">
+                        จำนวนเริ่มต้น
+                    </label>
+                    <input type="number" id="ingredient_stock" name="ingredient_stock"
+                        value="{{ old('ingredient_stock') }}"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required>
+                    @error('ingredient_stock')
+                        <span class="text-red-500 text-sm">{{ $message }}</span>
+                    @enderror
+                </div>
 
+                <div>
+                    <label for="minimum_quantity" class="block mb-2 text-sm font-medium text-gray-700">
+                        แจ้งเตือนเมื่อเหลือ
+                    </label>
+                    <input type="number" id="minimum_quantity" name="minimum_quantity"
+                        value="{{ old('minimum_quantity') }}"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required>
+                    @error('minimum_quantity')
+                        <span class="text-red-500 text-sm">{{ $message }}</span>
+                    @enderror
+                </div>
+            </div>
             <div class="mt-8 flex items-center justify-end space-x-4">
                 <a href="{{ route('ingredients.index') }}"
                     class="inline-flex items-center px-4 py-2 border-2 border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out">

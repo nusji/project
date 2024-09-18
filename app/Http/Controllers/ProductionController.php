@@ -16,20 +16,19 @@ class ProductionController extends Controller
     public function index()
     {
         // ดึงข้อมูลการผลิตทั้งหมด พร้อมกับรายการเมนูที่ผลิต
-        $productions = Production::with('productionDetails.menu')->get();
+        $productions = Production::withTrashed('productionDetails.menu')->get();
+
 
         return view('productions.index', compact('productions'));
     }
-    // แสดงฟอร์มเพิ่มผลิต
+
     public function create()
     {
-        // ดึงข้อมูลเมนูทั้งหมดมาเพื่อแสดงในฟอร์ม
+        // ดึงข้อมูลเมนูที่พร้อมขาย ทั้งหมดมาเพื่อแสดงในฟอร์ม
         $menus = Menu::where('menu_status', true)->get();
-
         return view('productions.create', compact('menus'));
     }
 
-    // บันทึกข้อมูลการผลิต
     public function store(Request $request)
     {
         $request->validate([
@@ -66,17 +65,19 @@ class ProductionController extends Controller
     private function processIngredients($menuId, $quantity)
     {
         $recipes = MenuRecipe::where('menu_id', $menuId)->get();
+        $menu = Menu::find($menuId); // Assuming you have a Menu model
 
         foreach ($recipes as $recipe) {
-            $requiredAmount = $recipe->Amount * $quantity;
+            
+            $requiredAmount = $recipe->amount * $quantity;
             $ingredient = Ingredient::find($recipe->ingredient_id);
 
-            if ($ingredient->stock < $requiredAmount) {
-                throw new \Exception("วัตถุดิบไม่พอสำหรับเมนู ID: $menuId");
+            if ($ingredient->ingredient_stock < $requiredAmount) {
+                return back()->with('error', 'วัตถุดิบ ' . $ingredient->ingredient_name . ' ไม่เพียงพอ');
             }
 
             $ingredient->update([
-                'stock' => $ingredient->stock - $requiredAmount
+                'stock' => $ingredient->ingredient_stock - $requiredAmount
             ]);
         }
     }
