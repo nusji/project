@@ -5,9 +5,9 @@
 @section('content')
     <div class="container mx-auto px-4 py-0">
         <!-- เรียกใช้ breadcrumb component -->
-        <x-breadcrumb :paths="[['label' => 'ระบบเงินเดือน', 'url' => route('payrolls.index')], ['label' => 'ฐานเงินเดือน']]" />
+        <x-breadcrumb :paths="[['label' => 'ระบบเงินเดือน', 'url' => route('payrolls.index')],
+         ['label' => 'ฐานเงินเดือน']]" />
         <h2 class="text-2xl font-bold text-gray-800 mb-4">ฐานเงินเดือนพนักงาน</h2>
-    </div>
     <div class="p-6">
         <div class="bg-white shadow rounded-lg overflow-hidden">
             <table class="min-w-full divide-y divide-gray-200">
@@ -21,6 +21,7 @@
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             ตำแหน่งงาน
+                        </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             ฐานเงินเดือน
                         </th>
@@ -35,12 +36,12 @@
                             <td class="px-6 py-4 whitespace-nowrap">
                                 {{ $index + 1 }}</td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                {{ $employee->first_name }} {{ $employee->last_name }}
+                                {{ $employee->name }}</p>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                {{ $employee->employment_status }}</td>
+                                {{ $employee->employment_type }}</td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                {{ $employee->salary }}</td>
+                                {{ number_format($employee->salary) }}</td>
                                 
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <a href="{{ route('salaries.edit', $employee->id) }}"

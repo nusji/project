@@ -1,5 +1,13 @@
-<aside
+<div>
+<aside 
+id="sidebar"
     class="h-full w-64 fixed top-0 left-0 bg-slate-700 shadow-lg z-10 transition-transform duration-500 pt-16 md:pt-20">
+    <button id="sidebarToggle" class="absolute top-14 right-2 p-2 text-white hover:bg-slate-600 rounded-full"
+        aria-label="Toggle Sidebar">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+    </button>
     <div class="flex flex-col p-4 space-y-2">
         <a href="{{ $userRole === 'owner' ? route('dashboard.owner') : route('dashboard.employee') }}"
             class="py-2.5 px-4 text-lg font-medium text-[#F1F5F9] rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center {{ request()->routeIs('dashboard.owner') || request()->routeIs('dashboard.employee') ? 'bg-[#E2725B] text-white' : '' }}">
@@ -100,3 +108,36 @@
 
     </div>
 </aside>
+<button
+        id="sidebarRecall"
+        class="fixed top-16 left-4 p-2 bg-slate-700 text-white rounded-full shadow-lg hidden focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-700 focus:ring-white"
+        aria-label="Show Sidebar">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+    </button>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebarRecall = document.getElementById('sidebarRecall');
+        const mainContent = document.querySelector('main');
+    
+        function toggleSidebar() {
+            sidebar.classList.toggle('-translate-x-full');
+            mainContent.classList.toggle('ml-0');
+            mainContent.classList.toggle('ml-64');
+            sidebarRecall.classList.toggle('hidden');
+        }
+    
+        if (sidebarToggle) {
+            sidebarToggle.addEventListener('click', toggleSidebar);
+        }
+    
+        if (sidebarRecall) {
+            sidebarRecall.addEventListener('click', toggleSidebar);
+        }
+    });
+    </script>

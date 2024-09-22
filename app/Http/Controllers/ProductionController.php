@@ -9,6 +9,7 @@ use App\Models\Menu;
 use App\Models\MenuRecipe;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Livewire\ProductionComponent;
 
 class ProductionController extends Controller
 {
@@ -24,42 +25,28 @@ class ProductionController extends Controller
 
     public function create()
     {
-        // ดึงข้อมูลเมนูที่พร้อมขาย ทั้งหมดมาเพื่อแสดงในฟอร์ม
-        $menus = Menu::where('menu_status', true)->get();
-        return view('productions.create', compact('menus'));
+        return view('productions.create');
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'production_date' => 'required|date',
-            'menu_list' => 'required|array',
-            'menu_list.*.menu_id' => 'required|exists:menus,id',
-            'menu_list.*.quantity' => 'required|numeric|min:1',
-        ]);
+        $productionComponent = new ProductionComponent();
+        $productionComponent->productionDate = $request->input('production_date');
+        $productionComponent->productionDetail = $request->input('production_detail');
+        $productionComponent->menuList = $request->input('menu_list');
 
-        DB::transaction(function () use ($request) {
-            // บันทึกข้อมูลการผลิต
-            $production = Production::create([
-                'production_date' => $request->production_date,
-                'production_detail' => $request->production_detail,
-            ]);
+        // คำนวณ quantity_sales สำหรับแต่ละเมนู
+        foreach ($productionComponent->menuList as &$menu) {
+            $menu['quantity_sales'] = $menu['quantity'] * 10;
+        }
 
-            // บันทึกเมนูที่ผลิต
-            foreach ($request->menu_list as $menuData) {
-                $productionDetail = ProductionDetail::create([
-                    'production_id' => $production->id,
-                    'menu_id' => $menuData['menu_id'],
-                    'quantity' => $menuData['quantity'],
-                    'quantity_sales' => 0, // ค่าเริ่มต้น
-                ]);
+        $result = $productionComponent->saveProduction();
 
-                // ตรวจสอบวัตถุดิบและหักลบ
-                $this->processIngredients($menuData['menu_id'], $menuData['quantity']);
-            }
-        });
-
-        return redirect()->route('productions.create')->with('success', 'บันทึกการผลิตสำเร็จ');
+        if ($result['success']) {
+            return redirect()->route('productions.index')->with('success', 'บันทึกการผลิตเรียบร้อยแล้ว');
+        } else {
+            return redirect()->back()->withErrors($result['errors'])->withInput();
+        }
     }
 
     private function processIngredients($menuId, $quantity)
@@ -68,7 +55,7 @@ class ProductionController extends Controller
         $menu = Menu::find($menuId); // Assuming you have a Menu model
 
         foreach ($recipes as $recipe) {
-            
+
             $requiredAmount = $recipe->amount * $quantity;
             $ingredient = Ingredient::find($recipe->ingredient_id);
 

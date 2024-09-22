@@ -9,7 +9,7 @@ class SalaryController extends Controller
 {
     public function index()
     {
-        $employees = Employee::select('id', 'first_name', 'last_name', 'salary', 'employment_status')->paginate(10);
+        $employees = Employee::select('id', 'name', 'salary','start_date', 'employment_type')->paginate(10);
         return view('payrolls.salaries.index', compact('employees'));
     }
 
@@ -35,6 +35,6 @@ class SalaryController extends Controller
         $employee->update(['salary' => $validatedData['salary']]);
 
         // redirect กลับไปที่หน้ารายการพนักงานพร้อมข้อความสำเร็จ
-        return redirect()->route('salaries.index')->with('success', 'Employee salary updated successfully.');
+        return redirect()->route('salaries.index')->with('success', 'ปรับเงินเดือนเรียบร้อยแล้ว');
     }
 }

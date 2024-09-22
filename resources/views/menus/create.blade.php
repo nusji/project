@@ -13,7 +13,7 @@
                             <label for="menu_name" class="block text-sm font-medium text-gray-700 mb-1">ชื่อเมนู</label>
                             <input type="text" name="menu_name" id="menu_name"
                                 class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                value="{{ old('menu_name') }}" required >
+                                value="{{ old('menu_name') }}">
                             @error('menu_name')
                                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                             @enderror
@@ -30,7 +30,7 @@
                             <label for="menu_type_id" class="block text-sm font-medium text-gray-700">ประเภทเมนู</label>
                             <select name="menu_type_id" id="menu_type_id"
                                 class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                required>
+                                >
                                 @if ($menuTypes->isEmpty())
                                     <option disabled>ไม่พบประเภท กรุณาเพิ่มประเภทก่อน</option>
                                 @else
@@ -49,7 +49,7 @@
                                 <label for="menu_price" class="block text-sm font-medium text-gray-700">ราคาต่อทัพพี</label>
                                 <input type="number" name="menu_price" id="menu_price" step="0.01"
                                     class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                    value="{{ old('menu_price') }}" required>
+                                    value="{{ old('menu_price') }}" >
                                 @error('menu_price')
                                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                                 @enderror
@@ -59,7 +59,7 @@
                                 <label for="menu_status" class="block text-sm font-medium text-gray-700">สถานะขาย</label>
                                 <select name="menu_status" id="menu_status"
                                     class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                    required>
+                                    >
                                     <option value="1" {{ old('menu_status') == '1' ? 'selected' : '' }}>ขาย</option>
                                     <option value="0" {{ old('menu_status') == '0' ? 'selected' : '' }}>ไม่ขาย</option>
                                 </select>
