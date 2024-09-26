@@ -19,7 +19,8 @@ return new class extends Migration
             $table->softDeletes();  // สำหรับการลบแบบ soft delete
         });
 
-        Schema::create('production_menus', function (Blueprint $table) {
+        /*
+         Schema::create('production_menus', function (Blueprint $table) {
             $table->id();
             $table->foreignId('production_id')->constrained('productions')->onDelete('cascade');
             $table->foreignId('menu_id')->constrained()->onDelete('cascade');
@@ -35,6 +36,7 @@ return new class extends Migration
             $table->decimal('used_quantity', 10, 2);  // ปริมาณวัตถุดิบที่ใช้ในการผลิต
             $table->timestamps();
         });
+        */
     }
 
     /**

@@ -41,7 +41,7 @@ Route::middleware(['auth', 'role:owner', 'check.profile'])->group(function () {
 
 
 //ทุกคนเข้าถึงได้ในกรอบนี้
-Route::middleware(['auth','check.profile'])->group(function () {
+Route::middleware(['auth', 'check.profile'])->group(function () {
 
     //จัดการพนักงาน แบบ Resourceful Routes ประกอบด้วย index, create, store, show, edit, update, destroy
     Route::resource('employees', EmployeeController::class);
@@ -64,6 +64,8 @@ Route::middleware(['auth','check.profile'])->group(function () {
 
     //จัดการการผลิต แบบ Resourceful Routes ประกอบด้วย index, create, store, show, edit, update, destroy
     Route::resource('productions', ProductionController::class);
+    // สำหรับการดึงรายละเอียดเมนู
+    Route::post('menus/details', [MenuController::class, 'getMenuDetails'])->name('menus.details');
 
     Route::resource('payrolls', PayrollController::class);
     Route::get('payrolls/{payroll}/print-slip', [PayrollController::class, 'printSlip'])->name('payrolls.print-slip');

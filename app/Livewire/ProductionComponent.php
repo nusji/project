@@ -20,7 +20,7 @@ class ProductionComponent extends Component
     public function render()
     {
         // ค้นหาเมนูตามการพิมพ์
-        $this->menus = Menu::where('name', 'like', '%' . $this->search . '%')->get();
+        $this->menus = Menu::where('menu_name', 'like', '%' . $this->search . '%')->get();
         return view('livewire.production-component');
     }
 

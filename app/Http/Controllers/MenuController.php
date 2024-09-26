@@ -133,4 +133,15 @@ class MenuController extends Controller
 
         return redirect()->route('menus.index')->with('success', 'เมนูถูกลบเรียบร้อยแล้ว');
     }
+
+
+    public function getMenuDetails(Request $request)
+    {
+        $menuIds = $request->menu_ids;
+        $menus = Menu::whereIn('id', $menuIds)->get();
+
+        $html = view('productions.partials.menu-details', compact('menus'))->render();
+
+        return response()->json(['html' => $html]);
+    }
 }

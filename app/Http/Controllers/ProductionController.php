@@ -1,71 +1,85 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\Production;
-use App\Models\ProductionDetail;
-use App\Models\Ingredient;
 use App\Models\Menu;
-use App\Models\MenuRecipe;
+use App\Models\Ingredient;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use App\Livewire\ProductionComponent;
 
 class ProductionController extends Controller
 {
-    // แสดงรายการการผลิตทั้งหมด
     public function index()
     {
-        // ดึงข้อมูลการผลิตทั้งหมด พร้อมกับรายการเมนูที่ผลิต
-        $productions = Production::withTrashed('productionDetails.menu')->get();
-
-
+        $productions = Production::latest()->paginate(10);
         return view('productions.index', compact('productions'));
     }
-
     public function create()
     {
-        return view('productions.create');
+        // ดึงเมนูทั้งหมดที่ยังสามารถผลิตได้
+        $menus = Menu::where('menu_status', true)->get();
+        return view('productions.create', compact('menus'));
     }
 
     public function store(Request $request)
     {
-        $productionComponent = new ProductionComponent();
-        $productionComponent->productionDate = $request->input('production_date');
-        $productionComponent->productionDetail = $request->input('production_detail');
-        $productionComponent->menuList = $request->input('menu_list');
+        $data = $request->validate([
+            'production_date' => 'required|date',
+            'production_detail' => 'nullable|string',
+            'menus' => 'required|array',
+            'menus.*.menu_id' => 'required|exists:menus,id',
+            'menus.*.quantity' => 'required|integer|min:1',
+        ]);
 
-        // คำนวณ quantity_sales สำหรับแต่ละเมนู
-        foreach ($productionComponent->menuList as &$menu) {
-            $menu['quantity_sales'] = $menu['quantity'] * 10;
+        // ตรวจสอบวัตถุดิบก่อนการผลิต
+        foreach ($data['menus'] as $menuData) {
+            $menu = Menu::find($menuData['menu_id']);
+            foreach ($menu->recipes as $recipe) {
+                $requiredAmount = $menuData['quantity'] * $recipe->amount;
+                if ($recipe->ingredient->stock < $requiredAmount) {
+                    return back()->withErrors(['error' => 'วัตถุดิบไม่เพียงพอสำหรับเมนู ' . $menu->menu_name]);
+                }
+            }
         }
 
-        $result = $productionComponent->saveProduction();
+        // เริ่มการบันทึกข้อมูลการผลิต
+        $production = Production::create([
+            'production_date' => $data['production_date'],
+            'production_detail' => $data['production_detail'],
+        ]);
 
-        if ($result['success']) {
-            return redirect()->route('productions.index')->with('success', 'บันทึกการผลิตเรียบร้อยแล้ว');
-        } else {
-            return redirect()->back()->withErrors($result['errors'])->withInput();
+        foreach ($data['menus'] as $menuData) {
+            $menu = Menu::find($menuData['menu_id']);
+            $quantitySales = $menuData['quantity'] * 10;
+
+            // บันทึกรายละเอียดการผลิต
+            $production->details()->create([
+                'menu_id' => $menuData['menu_id'],
+                'quantity' => $menuData['quantity'],
+                'quantity_sales' => $quantitySales,
+            ]);
+
+            // หักลบวัตถุดิบ
+            foreach ($menu->recipes as $recipe) {
+                $requiredAmount = $menuData['quantity'] * $recipe->amount;
+                $recipe->ingredient->decrement('stock', $requiredAmount);
+            }
         }
+
+        return redirect()->route('productions.index')->with('success', 'บันทึกการผลิตเรียบร้อยแล้ว');
     }
 
-    private function processIngredients($menuId, $quantity)
+    public function destroy(Production $production)
     {
-        $recipes = MenuRecipe::where('menu_id', $menuId)->get();
-        $menu = Menu::find($menuId); // Assuming you have a Menu model
-
-        foreach ($recipes as $recipe) {
-
-            $requiredAmount = $recipe->amount * $quantity;
-            $ingredient = Ingredient::find($recipe->ingredient_id);
-
-            if ($ingredient->ingredient_stock < $requiredAmount) {
-                return back()->with('error', 'วัตถุดิบ ' . $ingredient->ingredient_name . ' ไม่เพียงพอ');
+        // คืนค่าวัตถุดิบที่ถูกหักไป
+        foreach ($production->details as $detail) {
+            $menu = $detail->menu;
+            foreach ($menu->recipes as $recipe) {
+                $restoredAmount = $detail->quantity * $recipe->amount;
+                $recipe->ingredient->increment('stock', $restoredAmount);
             }
-
-            $ingredient->update([
-                'stock' => $ingredient->ingredient_stock - $requiredAmount
-            ]);
         }
+
+        $production->delete();
+        return redirect()->route('productions.index')->with('success', 'ลบการผลิตเรียบร้อยแล้ว และคืนวัตถุดิบสำเร็จ');
     }
 }
