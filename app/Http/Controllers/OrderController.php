@@ -44,7 +44,7 @@ class OrderController extends Controller
         $request->validate([
             'order_date' => 'required|date',
             'order_detail' => 'required|string',
-            'order_receipt' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // กำหนดให้เป็นไฟล์รูปภาพ
+            'order_receipt' => 'required|image|mimes:jpeg,png,jpg,gif,svg', // กำหนดให้เป็นไฟล์รูปภาพ
             'ingredients' => 'required|array',
             'ingredients.*.id' => 'required|exists:ingredients,id',
             'ingredients.*.quantity' => 'required|numeric|min:0',
@@ -106,7 +106,7 @@ class OrderController extends Controller
         $validatedData = $request->validate([
             'order_date' => 'required|date',
             'order_detail' => 'required|string',
-            'order_receipt' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'order_receipt' => 'nullable|image|mimes:jpeg,png,jpg,gif',
             'ingredients' => 'required|array',
             'ingredients.*.id' => 'required|exists:ingredients,id',
             'ingredients.*.quantity' => 'required|numeric|min:0',

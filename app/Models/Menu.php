@@ -33,6 +33,18 @@ class Menu extends Model
     {
         return $this->hasMany(ProductionDetail::class);
     }
+    public function ingredients()
+    {
+        return $this->belongsToMany(Ingredient::class, 'menu_ingredients')
+                    ->withPivot('amount')
+                    ->withTimestamps();
+    }
+    public function productions()
+    {
+        return $this->belongsToMany(Production::class, 'production_menus')
+                    ->withPivot('quantity')
+                    ->withTimestamps();
+    }
 
 
 }

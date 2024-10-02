@@ -1,117 +1,213 @@
-<!-- resources/views/orders/create.blade.php -->
 @extends('layouts.app')
-
 @section('content')
-    <div class="container mx-auto px-4 py-0">
-        <x-breadcrumb :paths="[
-            ['label' => 'ระบบสั่งซื้อวัตถุดิบ', 'url' => route('orders.index')],
-            ['label' => 'สร้างรายการสั่งซื้อใหม่'],
-        ]" />
+    <div class="py-6">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <x-breadcrumb :paths="[
+                ['label' => 'ระบบสั่งซื้อวัตถุดิบ', 'url' => route('orders.index')],
+                ['label' => 'สร้างรายการสั่งซื้อใหม่'],
+            ]" />
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 bg-white border-b border-gray-200">
+                    <h1 class="text-2xl font-semibold mb-6">สร้างรายการสั่งซื้อใหม่</h1>
+                    <form action="{{ route('orders.store') }}" method="POST">
+                        @csrf
+                        <div class="mb-4">
+                            <label for="order_date"
+                                class="block text-sm font-medium text-gray-700 mb-2">วันที่สั่งซื้อ</label>
+                            <input type="datetime-local" name="order_date" id="order_date"
+                                class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                value="{{ old('order_date') }}" required>
+                            @error('order_date')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
 
-        <h2 class="text-2xl font-bold text-gray-800 mb-2">สร้างรายการสั่งซื้อใหม่</h2>
-        <p class=" text-sm text-gray-500">กรอกข้อมูลด้านล่างเพื่อสร้างรายการสั่งซื้อใหม่</p>
-    </div>
-    <div class="p-6">
-        <form action="{{ route('orders.store') }}" method="POST" enctype="multipart/form-data">
-            @csrf
-            <div class="mb-4">
-                <label for="order_date" class="block mb-2">วันที่และเวลา</label>
-                <input type="datetime-local" name="order_date" id="order_date" class="w-full border rounded px-3 py-2"
-                    value="{{ old('order_date') }}" required>
-            </div>
-            @error('order_date')
-                <span class="text-red-500 text-sm">{{ $message }}</span>
-            @enderror
+                        <!-- มาแก้ไขตรงนี้ด้วยนะ เพราะว่าเราต้องการให้ผู้ใช้เลือกพนักงานที่บันทึกรายการสั่งซื้อ -->
+                        <div class="mb-4">
+                            <label for="order_detail"
+                                class="block text-sm font-medium text-gray-700 mb-2">รายละเอียดการสั่งซื้อ</label>
+                            <textarea name="order_detail" id="order_detail" rows="3"
+                                class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                required>{{ old('order_detail') }}</textarea>
+                            @error('order_detail')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div class="mb-4">
+                            <label for="receipt_image"
+                                class="block text-sm font-medium text-gray-700 mb-2">แนบรูปใบเสร็จ</label>
+                            <input type="file" name="receipt_image" id="receipt_image" accept="image/*"
+                                class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none">
+                            @error('receipt_image')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                            <!-- ตัวอย่างรูปภาพ -->
+                            <div class="mt-4" id="image-preview-container" style="display: none;">
+                                <a href="#" id="image-preview-link" data-lightbox="receipt">
+                                    <img id="image-preview" class="w-32 h-32 object-cover rounded" alt="Preview">
+                                </a>
+                            </div>
+                            <script>
+                                document.getElementById('receipt_image').addEventListener('change', function(event) {
+                                    const input = event.target;
+                                    const file = input.files[0];
 
-            <div class="mb-4">
-                <label for="order_detail" class="block mb-2">รายละเอียด</label>
-                <textarea name="order_detail" id="order_detail" rows="3" class="w-full border rounded px-3 py-2" required>{{ old('order_detail') }}</textarea>
-            </div>
-            @error('order_detail')
-                <span class="text-red-500 text-sm">{{ $message }}</span>
-            @enderror
+                                    if (file) {
+                                        const reader = new FileReader();
+                                        reader.onload = function(e) {
+                                            const imagePreview = document.getElementById('image-preview');
+                                            const imagePreviewLink = document.getElementById('image-preview-link');
+                                            const previewContainer = document.getElementById('image-preview-container');
 
-            <div class="mb-4">
-                <label for="order_receipt" class="block mb-2">ใบเสร็จ (รูปภาพ)</label>
-                <input type="file" name="order_receipt" id="order_receipt" class="w-full border rounded px-3 py-2"
-                    accept="image/*">
-                @if (isset($order) && $order->order_receipt)
-                    <img src="{{ asset('storage/' . $order->order_receipt) }}" alt="ใบเสร็จปัจจุบัน" class="mt-2 max-w-xs">
-                    <p class="text-sm text-gray-600">อัปโหลดรูปใหม่เพื่อเปลี่ยนใบเสร็จ</p>
-                @endif
-            </div>
-            @error('order_receipt')
-                <span class="text-red-500 text-sm">{{ $message }}</span>
-            @enderror
+                                            imagePreview.src = e.target.result;
+                                            imagePreviewLink.href = e.target.result;
+                                            previewContainer.style.display = 'block'; // แสดง container ของตัวอย่างรูปภาพ
+                                        };
+                                        reader.readAsDataURL(file);
+                                    }
+                                });
+                            </script>
+                        </div>
 
-            <div id="ingredients">
-                <h2 class="text-xl font-bold mb-2">รายการวัตถุดิบ</h2>
-                <div class="ingredient-item mb-4">
-                    <select name="ingredients[0][id]" class="border rounded px-3 py-2 mr-2" required>
-                        <option value="">เลือกวัตถุดิบ</option>
-                        @foreach ($ingredients as $ingredient)
-                            <option value="{{ $ingredient->id }}">{{ $ingredient->ingredient_name }}</option>
-                        @endforeach
-                    </select>
-                    <input type="number" name="ingredients[0][quantity]" placeholder="จำนวน"
-                        class="border rounded px-3 py-2 mr-2" required>
-                    <input type="number" name="ingredients[0][price]" placeholder="ราคา"
-                        class="border rounded px-3 py-2 mr-2" required>
-                    <button type="button" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-                        onclick="removeIngredient(this)">ลบ</button>
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">รายการวัตถุดิบ</label>
+                            <div class="flex space-x-2 mb-4">
+                                <input type="text" id="ingredient-search" placeholder="ค้นหาวัตถุดิบ"
+                                    class="flex-grow mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                <button type="button" id="search-ingredient"
+                                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">
+                                    ค้นหา
+                                </button>
+                            </div>
+                            <div id="search-results" class="mb-4 flex flex-wrap gap-2"></div>
+                            <div id="ingredients-container" class="space-y-2">
+                                @if (old('ingredients'))
+                                    @foreach (old('ingredients') as $index => $ingredient)
+                                        <div class="ingredient-row flex items-center space-x-2 p-2 bg-gray-100 rounded">
+                                            <input type="hidden" name="ingredients[{{ $index }}][id]"
+                                                value="{{ $ingredient['id'] }}">
+                                            <span
+                                                class="flex-grow">{{ $ingredients->firstWhere('id', $ingredient['id'])->ingredient_name }}</span>
+                                            <div class="flex items-center space-x-2">
+                                                <input type="number" name="ingredients[{{ $index }}][quantity]"
+                                                    placeholder="จำนวน" value="{{ $ingredient['quantity'] }}"
+                                                    class="w-32 py-1 px-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                                    required>
+                                                <input type="number" name="ingredients[{{ $index }}][price]"
+                                                    placeholder="ราคา" value="{{ $ingredient['price'] }}"
+                                                    class="w-32 py-1 px-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                                    required>
+                                            </div>
+                                            <button type="button"
+                                                class="remove-ingredient text-red-500 hover:text-red-700">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M6 18L18 6M6 6l12 12"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    @endforeach
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-end mt-6">
+                            <button type="submit"
+                                class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full">
+                                บันทึกรายการสั่งซื้อ
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
-            @error('ingredients')
-                <span class="text-red-500 text-sm">{{ $message }}</span>
-            @enderror
-
-            <button type="button" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-4"
-                onclick="addIngredient()">เพิ่มวัตถุดิบ</button>
-
-            <div>
-                <button type="submit"
-                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">บันทึกรายการสั่งซื้อ</button>
-            </div>
-        </form>
+        </div>
     </div>
 
     <script>
-        let ingredientCount = 1;
-
-        function addIngredient() {
-            const ingredientsDiv = document.getElementById('ingredients');
-            const newItem = document.createElement('div');
-            newItem.className = 'ingredient-item mb-4';
-            newItem.innerHTML = `
-                <select name="ingredients[${ingredientCount}][id]" class="border rounded px-3 py-2 mr-2" required>
-                    <option value="">เลือกวัตถุดิบ</option>
-                    @foreach ($ingredients as $ingredient)
-                        <option value="{{ $ingredient->id }}">{{ $ingredient->ingredient_name }}</option>
-                    @endforeach
-                </select>
-                <input type="number" name="ingredients[${ingredientCount}][quantity]" placeholder="จำนวน" class="border rounded px-3 py-2 mr-2" required>
-                <input type="number" name="ingredients[${ingredientCount}][price]" placeholder="ราคา" class="border rounded px-3 py-2 mr-2" required>
-                <button type="button" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" onclick="removeIngredient(this)">ลบ</button>
-            `;
-            ingredientsDiv.appendChild(newItem);
-            ingredientCount++;
-        }
-
-        function removeIngredient(button) {
-            button.parentElement.remove();
-        }
-
-        // กำหนดค่า default ของฟิลด์วันที่และเวลาเป็นปัจจุบัน
         document.addEventListener('DOMContentLoaded', function() {
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const datetimeLocal = `${year}-${month}-${day}T${hours}:${minutes}`;
+            let ingredientIndex = {{ count(old('ingredients', [])) }};
+            const ingredients = @json($ingredients);
+            const selectedIngredients = new Set(
+                @json(old('ingredients', []))
+                .map(ingredient => parseInt(ingredient.id))
+            );
 
-            document.getElementById('order_date').value = datetimeLocal;
+            const searchInput = document.getElementById('ingredient-search');
+            const searchButton = document.getElementById('search-ingredient');
+            const searchResults = document.getElementById('search-results');
+            const ingredientsContainer = document.getElementById('ingredients-container');
+
+            function updateSearchResults() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const results = ingredients.filter(ingredient =>
+                    ingredient.ingredient_name.toLowerCase().includes(searchTerm) &&
+                    !selectedIngredients.has(ingredient.id)
+                );
+                displaySearchResults(results);
+            }
+
+            searchButton.addEventListener('click', updateSearchResults);
+            searchInput.addEventListener('keyup', function(event) {
+                if (event.key === 'Enter') {
+                    updateSearchResults();
+                }
+            });
+
+            function displaySearchResults(results) {
+                searchResults.innerHTML = '';
+                results.forEach(ingredient => {
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.className =
+                        'bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-1 px-2 rounded mr-2';
+                    button.textContent = ingredient.ingredient_name;
+                    button.onclick = function() {
+                        addIngredient(ingredient);
+                        updateSearchResults();
+                    };
+                    searchResults.appendChild(button);
+                });
+            }
+
+            function addIngredient(ingredient) {
+                if (selectedIngredients.has(ingredient.id)) {
+                    alert('วัตถุดิบนี้ถูกเพิ่มไปแล้ว');
+                    return;
+                }
+
+                const newRow = document.createElement('div');
+                newRow.className = 'ingredient-row flex items-center space-x-2 p-2 bg-gray-100 rounded';
+                newRow.innerHTML = `
+            <input type="hidden" name="ingredients[${ingredientIndex}][id]" value="${ingredient.id}">
+            <span class="flex-grow">${ingredient.ingredient_name}</span>
+            <div class="flex items-center space-x-2">
+                <input type="number" name="ingredients[${ingredientIndex}][quantity]" placeholder="จำนวน" required 
+                       class="w-32 py-1 px-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                <input type="number" name="ingredients[${ingredientIndex}][price]" placeholder="ราคา" required 
+                       class="w-32 py-1 px-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+            <button type="button" class="remove-ingredient text-red-500 hover:text-red-700">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        `;
+                ingredientsContainer.appendChild(newRow);
+                selectedIngredients.add(ingredient.id);
+                ingredientIndex++;
+            }
+
+            ingredientsContainer.addEventListener('click', function(e) {
+                if (e.target.closest('.remove-ingredient')) {
+                    const row = e.target.closest('.ingredient-row');
+                    const ingredientId = parseInt(row.querySelector('input[type="hidden"]').value);
+                    selectedIngredients.delete(ingredientId);
+                    row.remove();
+                    updateSearchResults();
+                }
+            });
+
+            // Initial update of search results
+            updateSearchResults();
         });
     </script>
 @endsection

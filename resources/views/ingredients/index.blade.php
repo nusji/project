@@ -7,7 +7,7 @@
         <!-- เรียกใช้ breadcrumb component -->
         <x-breadcrumb :paths="[['label' => 'ระบบวัตถุดิบ', 'url' => route('ingredients.index')], ['label' => '']]" />
         <h2 class="text-2xl font-bold text-gray-800 mb-4">ระบบจัดการวัตถุดิบ</h2>
-        <div class="mt-2 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="mt-2 grid md:grid-cols-3 gap-6">
             <div class="px-4 py-4">
                 <div class="bg-white shadow-lg rounded-lg p-6">
                     <h3 class="text-xl font-semibold text-gray-800 mb-0">วัตถุดิบตามประเภท</h3>
@@ -17,7 +17,7 @@
                 </div>
             </div>
             <div class="px-4 py-4">
-                <div class="bg-white shadow-lg rounded-lg p-6">
+                <div class="col-span-2 bg-white shadow-lg rounded-lg p-6">
                     <h3 class="text-xl font-semibold text-gray-800 mb-0">วัตถุดิบเหลือน้อย</h3>
                     <div class="space-y-3">
                         @forelse ($ingredients as $ingredient)

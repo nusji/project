@@ -1,8 +1,5 @@
 <!-- resources/views/orders/index.blade.php -->
 @extends('layouts.app')
-
-@section('title', 'จัดการวัตถุดิบ')
-
 @section('content')
     <div class="container mx-auto px-4 py-0">
                     <!-- เรียกใช้ breadcrumb component -->

@@ -19,7 +19,7 @@ class Employee extends Authenticatable
         'password',
         'role',
         'id_card_number',
-        'employee_type',
+        'employment_type',
         'start_date',
         'salary',
         'phone_number',
