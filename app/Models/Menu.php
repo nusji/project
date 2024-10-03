@@ -35,13 +35,13 @@ class Menu extends Model
     }
     public function ingredients()
     {
-        return $this->belongsToMany(Ingredient::class, 'menu_ingredients')
-                    ->withPivot('amount')
-                    ->withTimestamps();
+        // ใช้ 'menu_recipes' เป็นชื่อ Pivot Table
+        return $this->belongsToMany(Ingredient::class, 'menu_recipes')
+                    ->withPivot('amount');
     }
     public function productions()
     {
-        return $this->belongsToMany(Production::class, 'production_menus')
+        return $this->belongsToMany(Production::class, 'production_details')
                     ->withPivot('quantity')
                     ->withTimestamps();
     }

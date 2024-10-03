@@ -15,6 +15,12 @@ class Production extends Model
         'production_detail',
     ];
 
+    public function menus()
+    {
+        // กำหนดให้เชื่อมโยงผ่าน pivot table ที่ชื่อ 'menu_production' หรือใช้ชื่อ Pivot Table ที่คุณใช้
+        return $this->belongsToMany(Menu::class, 'production_details')
+                    ->withPivot('quantity'); // ปริมาณที่ผลิต
+    }
     public function productionDetails()
     {
         return $this->hasMany(ProductionDetail::class, 'production_id', 'id');

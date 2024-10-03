@@ -23,95 +23,68 @@ class ProductionController extends Controller
         return view('productions.create', compact('menus'));
     }
 
-    
     public function store(Request $request)
     {
-        $request->validate([
+        // ตรวจสอบข้อมูลที่ส่งเข้ามา
+        $validatedData = $request->validate([
             'production_date' => 'required|date',
             'production_detail' => 'required|string',
             'menus' => 'required|array',
             'menus.*.id' => 'required|exists:menus,id',
-            'menus.*.quantity' => 'required|numeric|min:0',
+            'menus.*.quantity' => 'required|numeric|min:1',
         ]);
 
-        try {
-            DB::beginTransaction();
-
-            $insufficientIngredients = $this->checkIngredientsAvailability($request->menus);
-
-            if (!empty($insufficientIngredients)) {
-                DB::rollBack();
-                return response()->json([
-                    'success' => false,
-                    'message' => 'วัตถุดิบไม่เพียงพอสำหรับการผลิต',
-                    'insufficientIngredients' => $insufficientIngredients
-                ], 422);
-            }
-
-            $production = Production::create([
-                'production_date' => $request->production_date,
-                'production_detail' => $request->production_detail,
-            ]);
-
-            foreach ($request->menus as $menuData) {
-                $menu = Menu::findOrFail($menuData['id']);
-                $production->menus()->attach($menu->id, ['quantity' => $menuData['quantity']]);
-                $this->updateIngredientStock($menu, $menuData['quantity']);
-            }
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'รายการผลิตถูกบันทึกเรียบร้อยแล้ว',
-                'redirect' => route('productions.index')
-            ]);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'เกิดข้อผิดพลาดในการบันทึกรายการผลิต: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    private function checkIngredientsAvailability($menus)
-    {
+        // ตรวจสอบวัตถุดิบเพียงพอหรือไม่
         $insufficientIngredients = [];
 
-        foreach ($menus as $menuData) {
-            $menu = Menu::with('ingredients')->findOrFail($menuData['id']);
-            $quantity = $menuData['quantity'];
+        foreach ($validatedData['menus'] as $menuData) {
+            $menu = Menu::findOrFail($menuData['id']); // ดึงข้อมูลเมนู
+            $quantityToProduce = $menuData['quantity']; // จำนวนที่ต้องผลิต
 
+            // ดึงวัตถุดิบที่ต้องใช้สำหรับเมนูนี้
             foreach ($menu->ingredients as $ingredient) {
-                $requiredAmount = $ingredient->pivot->amount * $quantity;
-                $availableAmount = $ingredient->stock_quantity;
+                $totalRequired = $ingredient->pivot->quantity_required * $quantityToProduce; // ปริมาณที่ต้องใช้ทั้งหมด
 
-                if ($availableAmount < $requiredAmount) {
-                    if (!isset($insufficientIngredients[$menu->menu_name])) {
-                        $insufficientIngredients[$menu->menu_name] = [];
-                    }
-                    $insufficientIngredients[$menu->menu_name][] = [
-                        'name' => $ingredient->ingredient_name,
-                        'required' => $requiredAmount,
-                        'available' => $availableAmount
+                // ตรวจสอบวัตถุดิบในสต็อกเพียงพอหรือไม่
+                if ($ingredient->ingredient_stock < $totalRequired) {
+                    // เพิ่มรายการวัตถุดิบที่ไม่เพียงพอลงในอาร์เรย์
+                    $insufficientIngredients[] = [
+                        'menu_name' => $menu->menu_name,
+                        'ingredient_name' => $ingredient->ingredient_name,
+                        'required' => $totalRequired,
+                        'available' => $ingredient->ingredient_stock,
                     ];
                 }
             }
         }
 
-        return $insufficientIngredients;
-    }
-
-    private function updateIngredientStock($menu, $quantity)
-    {
-        foreach ($menu->ingredients as $ingredient) {
-            $usedAmount = $ingredient->pivot->amount * $quantity;
-            $ingredient->decrement('stock_quantity', $usedAmount);
+        // ถ้าวัตถุดิบไม่พอ ส่งกลับไปพร้อมกับแจ้งเตือน SweetAlert
+        if (!empty($insufficientIngredients)) {
+            return redirect()->back()->with([
+                'insufficientIngredients' => $insufficientIngredients, // ส่งข้อมูลเมนูและวัตถุดิบที่ไม่พอ
+            ])->withInput();
         }
-    }
 
+        // ถ้าวัตถุดิบพอ ให้ทำการบันทึกรายการผลิต
+        $production = new Production();
+        $production->production_date = $validatedData['production_date'];
+        $production->production_detail = $validatedData['production_detail'];
+        $production->save();
+
+        // บันทึกรายการเมนูที่ผลิต
+        foreach ($validatedData['menus'] as $menuData) {
+            $production->menus()->attach($menuData['id'], ['quantity' => $menuData['quantity']]);
+
+            // หักวัตถุดิบจากสต็อก
+            $menu = Menu::findOrFail($menuData['id']);
+            foreach ($menu->ingredients as $ingredient) {
+                $ingredient->ingredient_stock -= $ingredient->pivot->quantity_required * $menuData['quantity'];
+                $ingredient->save();
+            }
+        }
+
+        return redirect()->route('productions.index')->with('success', 'บันทึกรายการผลิตสำเร็จ');
+    }
 
     public function edit(Production $production)
     {

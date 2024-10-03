@@ -20,8 +20,8 @@ id="sidebar"
             แดชบอร์ด
         </a>
 
-        <a href="#"
-            class="py-2.5 px-4 text-lg font-medium text-[#F1F5F9] rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center">
+        <a href="{{route('sales.index')}}"
+            class="py-2.5 px-4 text-lg font-medium text-[#F1F5F9] rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center {{ request()->routeIs('sales.*') || request()->routeIs('sales.*') ? 'bg-[#E2725B] text-white' : '' }}">
             <svg class="w-5 h-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                 stroke-width="2" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -61,7 +61,7 @@ id="sidebar"
                     d="M4 3h2a1 1 0 011 1v9a1 1 0 01-1 1H4a1 1 0 01-1-1V4a1 1 0 011-1zM9 4h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V4a1 1 0 011-1zM14 4h2a1 1 0 011 1v9a1 1 0 01-1 1h-2a1 1 0 01-1-1V4a1 1 0 011-1zM18 15a3 3 0 103 3 3 3 0 00-3-3z">
                 </path>
             </svg>
-            เมนูข้าวแกง
+            จัดการเมนูข้าวแกง
         </a>
 
         @if ($userRole === 'owner')
@@ -72,7 +72,7 @@ id="sidebar"
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M4 5h16v14H4V5zm4 0v14m8-14v14"></path>
                 </svg>
-                การผลิต
+                จัดการการผลิต
             </a>
         @endif
         <!-- Employee Management -->

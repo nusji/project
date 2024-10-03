@@ -13,6 +13,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductionController;
 use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\SalaryController;
+use App\Http\Controllers\SaleController;
 
 
 Route::get('/', function () {
@@ -64,9 +65,9 @@ Route::middleware(['auth', 'check.profile'])->group(function () {
 
     //จัดการการผลิต แบบ Resourceful Routes ประกอบด้วย index, create, store, show, edit, update, destroy
     Route::resource('productions', ProductionController::class);
-        // สำหรับการดึงรายละเอียดเมนู
-        Route::post('menus/details', [MenuController::class, 'getMenuDetails'])->name('menus.details');
-        Route::get('/menus/search', [MenuController::class, 'search'])->name('menus.search');
+    // สำหรับการดึงรายละเอียดเมนู
+    Route::post('menus/details', [MenuController::class, 'getMenuDetails'])->name('menus.details');
+    Route::get('/menus/search', [MenuController::class, 'search'])->name('menus.search');
 
     Route::resource('payrolls', PayrollController::class);
     Route::get('payrolls/{payroll}/print-slip', [PayrollController::class, 'printSlip'])->name('payrolls.print-slip');
@@ -76,4 +77,6 @@ Route::middleware(['auth', 'check.profile'])->group(function () {
     Route::put('salaries/{employee}', [SalaryController::class, 'update'])->name('salaries.update');
     Route::get('salaries/{employee}', [SalaryController::class, 'show'])->name('salaries.show');
     // ไม่มี Route สำหรับ 'create' และ 'store'
+
+    route::resource('sales', SaleController::class);
 });

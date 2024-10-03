@@ -38,6 +38,12 @@ class Ingredient extends Model
         return $this->hasMany(Ingredient::class, 'ingredient_id');
     }
 
+    public function menus()
+    {
+        // ใช้ 'menu_recipes' เป็นชื่อ Pivot Table
+        return $this->belongsToMany(Menu::class, 'menu_recipes')
+                    ->withPivot('quantity_required');
+    }
 
     public function isLowStock()
     {

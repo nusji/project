@@ -154,5 +154,34 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initial update of search results
     updateSearchResults();
 });
+
+    // ตรวจสอบว่ามีข้อมูลใน session หรือไม่ ถ้ามีให้แสดง SweetAlert
+    @if(session('insufficientIngredients'))
+        let insufficientIngredients = @json(session('insufficientIngredients'));
+        let message = '';
+
+        insufficientIngredients.forEach(item => {
+            message += `เมนู: ${item.menu_name}\n`;
+            message += `วัตถุดิบ: ${item.ingredient_name}\n`;
+            message += `ต้องการ: ${item.required}\n`;
+            message += `คงเหลือ: ${item.available}\n\n`;
+        });
+
+        Swal.fire({
+            title: 'วัตถุดิบไม่เพียงพอ!',
+            text: message,
+            icon: 'error',
+            confirmButtonText: 'ตกลง'
+        });
+    @endif
+
+    @if(session('success'))
+        Swal.fire({
+            title: 'สำเร็จ!',
+            text: '{{ session('success') }}',
+            icon: 'success',
+            confirmButtonText: 'ตกลง'
+        });
+    @endif
 </script>
 @endsection
