@@ -12,50 +12,48 @@ use App\Notifications\LowStockNotification;
 class IngredientController extends Controller
 {
     public function index(Request $request)
-{
-    // เริ่มต้น query โดยรวมความสัมพันธ์ ingredientType
-    $query = Ingredient::with('ingredientType');
+    {
+        // เริ่มต้น query โดยรวมความสัมพันธ์ ingredientType
+        $query = Ingredient::with('ingredientType');
 
-    // ตรวจสอบว่ามีการค้นหาหรือไม่
-    if ($request->has('search')) {
-        $search = $request->input('search');
-        $query->where('ingredient_name', 'like', "%{$search}%")
-            ->orWhereHas('ingredientType', function ($q) use ($search) {
-                $q->where('ingredient_type_name', 'like', "%{$search}%"); // สมมติว่า ingredient type มีชื่อว่า 'ingredient_type_name'
+        // ตรวจสอบว่ามีการค้นหาหรือไม่
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where('ingredient_name', 'like', "%{$search}%")
+                ->orWhereHas('ingredientType', function ($q) use ($search) {
+                    $q->where('ingredient_type_name', 'like', "%{$search}%"); // สมมติว่า ingredient type มีชื่อว่า 'ingredient_type_name'
+                });
+        }
+
+        // ตรวจสอบว่ามีการจัดเรียงหรือไม่
+        if ($request->has('orderBy') && $request->has('direction')) {
+            $orderBy = $request->input('orderBy');
+            $direction = $request->input('direction');
+            $query->orderBy($orderBy, $direction); // จัดเรียงตามตัวเลือกที่ผู้ใช้กำหนด
+        } else {
+            // กำหนดค่าเริ่มต้นการจัดเรียง
+            $query->orderBy('ingredient_name', 'asc'); // เรียงตามชื่อวัตถุดิบเป็นค่าเริ่มต้น
+        }
+
+        // ดึงข้อมูลวัตถุดิบพร้อมแบ่งหน้า
+        $ingredients = $query->paginate(10);
+
+        // ดึงข้อมูลประเภทของวัตถุดิบสำหรับ chart
+        $ingredientTypes = Ingredient::select('ingredient_type_id')
+            ->selectRaw('count(*) as count')
+            ->groupBy('ingredient_type_id')
+            ->with('ingredientType') // เพิ่ม eager loading สำหรับ ingredient type
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'type' => $item->ingredientType->ingredient_type_name, // สมมติว่า ingredient type มี column 'ingredient_type_name'
+                    'count' => $item->count
+                ];
             });
+
+        // ส่งข้อมูลไปยัง view
+        return view('ingredients.index', compact('ingredients', 'ingredientTypes'));
     }
-
-    // ตรวจสอบว่ามีการจัดเรียงหรือไม่
-    if ($request->has('orderBy') && $request->has('direction')) {
-        $orderBy = $request->input('orderBy');
-        $direction = $request->input('direction');
-        $query->orderBy($orderBy, $direction); // จัดเรียงตามตัวเลือกที่ผู้ใช้กำหนด
-    } else {
-        // กำหนดค่าเริ่มต้นการจัดเรียง
-        $query->orderBy('ingredient_name', 'asc'); // เรียงตามชื่อวัตถุดิบเป็นค่าเริ่มต้น
-    }
-
-    // ดึงข้อมูลวัตถุดิบพร้อมแบ่งหน้า
-    $ingredients = $query->paginate(10);
-
-    // ดึงข้อมูลประเภทของวัตถุดิบสำหรับ chart
-    $ingredientTypes = Ingredient::select('ingredient_type_id')
-        ->selectRaw('count(*) as count')
-        ->groupBy('ingredient_type_id')
-        ->with('ingredientType') // เพิ่ม eager loading สำหรับ ingredient type
-        ->get()
-        ->map(function ($item) {
-            return [
-                'type' => $item->ingredientType->ingredient_type_name, // สมมติว่า ingredient type มี column 'ingredient_type_name'
-                'count' => $item->count
-            ];
-        });
-
-    // ส่งข้อมูลไปยัง view
-    return view('ingredients.index', compact('ingredients', 'ingredientTypes'));
-}
-
-
 
     public function create()
     {
