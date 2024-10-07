@@ -162,8 +162,18 @@ class IngredientController extends Controller
 
     public function destroy(Ingredient $ingredient)
     {
-        $ingredient->delete(); // ทำ Soft Delete
-        return redirect()->route('ingredients.index')->with('success', 'ลบวัตถุดิบเรียบร้อยแล้ว');
+        // ตรวจสอบว่าวัตถุดิบถูกใช้งานอยู่หรือไม่
+        if ($ingredient->menuRecipes()->exists()) {
+            return redirect()->route('ingredients.index')->with('error', 'ไม่สามารถลบวัตถุดิบได้ เนื่องจากยังมีการใช้งานอยู่ในสูตรอาหาร');
+        }
+    
+        try {
+            $ingredient->forceDelete(); // ลบถาวร
+            return redirect()->route('ingredients.index')->with('success', 'ลบวัตถุดิบเรียบร้อยแล้ว');
+        } catch (\Exception $e) {
+            // จัดการกับข้อผิดพลาดที่อาจเกิดขึ้นระหว่างการลบ
+            return redirect()->route('ingredients.index')->with('error', 'เกิดข้อผิดพลาดในการลบวัตถุดิบ: ' . $e->getMessage());
+        }
     }
 
     public function updateQuantity(Request $request)

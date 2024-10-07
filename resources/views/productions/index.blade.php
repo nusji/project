@@ -117,23 +117,49 @@
                                         </svg>
                                         แก้ไข
                                     </a>
-
-                                    <form id="delete-form-{{ $production->id }}"
-                                        action="{{ route('ingredients.destroy', ['ingredient' => $production->id]) }}"
-                                        method="POST" class="inline-block">
+                        
+                                    <form {{ route('productions.destroy', ['production' => $production->id]) }}" method="POST"
+                                        class="inline" id="delete-form-{{ $production->id }}">
                                         @csrf
-                                        @method('DELETE')
-                                        <button type="button"
-                                            class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                                            onclick="confirmDelete({{ $production->id }})">
+                                        <button type="button" onclick="confirmDelete({{ $production->id }})"
+                                            class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
                                             <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none"
                                                 viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                             </svg>
-                                            ลบ
+                                            ยกเลิกการผลิต
                                         </button>
                                     </form>
+
+                                    <script>
+                                        function confirmDelete(productionId) {
+                                            Swal.fire({
+                                                title: 'คุณแน่ใจหรือไม่?',
+                                                text: "กรุณาพิมพ์คำว่า 'ยกเลิกการผลิต' เพื่อยืนยันการลบข้อมูล!",
+                                                icon: 'warning',
+                                                input: 'text',
+                                                inputPlaceholder: 'พิมพ์ที่นี่...',
+                                                showCancelButton: true,
+                                                confirmButtonText: 'ใช่, ลบเลย!',
+                                                cancelButtonText: 'ยกเลิก',
+                                                customClass: {
+                                                    confirmButton: 'bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded',
+                                                    cancelButton: 'bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded'
+                                                },
+                                                preConfirm: (inputValue) => {
+                                                    if (inputValue !== 'ยกเลิกการผลิต') {
+                                                        Swal.showValidationMessage('คำที่พิมพ์ไม่ถูกต้อง! กรุณาพิมพ์ "ยกเลิกการผลิต".');
+                                                    }
+                                                    return inputValue;
+                                                }
+                                            }).then((result) => {
+                                                if (result.isConfirmed) {
+                                                    document.getElementById(`delete-form-${productionId}`).submit();
+                                                }
+                                            });
+                                        }
+                                    </script>
                                 </td>
                             </tr>
                         @endforeach

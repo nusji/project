@@ -10,10 +10,20 @@ use Illuminate\Support\Facades\Storage;
 
 class EmployeeController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $employees = Employee::all();
-        return view('employees.index', compact('employees'));
+        // Get search input from request
+        $search = $request->input('search');
+
+        $employees = Employee::when($search, function ($query, $search) {
+            return $query->where('name', 'like', "%{$search}%")
+                         ->orWhere('id_card_number', 'like', "%{$search}%")
+                         ->orWhere('phone_number', 'like', "%{$search}%")
+                         ->orWhere('employment_type', 'like', "%{$search}%")
+                         ->orWhere('username', 'like', "%{$search}%");
+        })->paginate(10);
+
+        return view('employees.index', compact('employees', 'search'));
     }
 
     public function create()

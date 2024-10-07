@@ -16,6 +16,11 @@ class Order extends Model
         'employee_id'
     ];
 
+    protected $casts = [
+        'order_date' => 'datetime',
+    ];
+    
+
     public function orderDetails()
     {
         return $this->hasMany(OrderDetail::class);

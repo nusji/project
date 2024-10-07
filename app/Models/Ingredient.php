@@ -27,15 +27,19 @@ class Ingredient extends Model
     // ในโมเดล Ingredient
     public function ingredientType()
     {
-        return $this->belongsTo(IngredientType::class, 'ingredient_type_id');
+        return $this->belongsTo(IngredientType::class);
+    }
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'id');
     }
     public function orderDetails()
     {
-        return $this->hasMany(OrderDetail::class, 'ingredient_id');
+        return $this->hasMany(OrderDetail::class, 'id');
     }
     public function menuRecipes()
     {
-        return $this->hasMany(Ingredient::class, 'ingredient_id');
+        return $this->hasMany(Ingredient::class, 'id');
     }
 
     public function menus()

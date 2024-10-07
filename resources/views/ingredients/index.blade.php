@@ -175,10 +175,9 @@
                             ชื่อวัตถุดิบ</option>
                         <option value="ingredient_stock" {{ request('orderBy') === 'ingredient_stock' ? 'selected' : '' }}>
                             จำนวนคงเหลือ</option>
-                        <option value="ingredientType" {{ request('orderBy') === 'ingredientType' ? 'selected' : '' }}>
+                        <option value="ingredient_type_id" {{ request('orderBy') === 'ingredient_type_id' ? 'selected' : '' }}>
                             ประเภทวัตถุดิบ</option>
                     </select>
-
                     <select name="direction" id="direction"
                         class="border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
                         <option value="asc" {{ request('direction') === 'asc' ? 'selected' : '' }}>น้อยไปมาก</option>
@@ -315,7 +314,8 @@
         function confirmDelete(ingredientId) {
             Swal.fire({
                 title: 'คุณแน่ใจหรือไม่?',
-                text: "คุณจะไม่สามารถกู้คืนการลบนี้ได้!",
+                html: 'การลบรายการวัตถุดิบจะไม่สามารถกู้คืนได้!<br><br>' +
+                '<span style="color: red; font-weight: bold;"></span>',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',

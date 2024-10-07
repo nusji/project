@@ -22,26 +22,28 @@ Route::get('/', function () {
 Route::get('/no-access', function () {
     return view('no-access');
 });
+// สร้าง Route สำหรับการล็อกอินและล็อกเอาท์
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+// สร้าง Route สำหรับการลงทะเบียนและยืนยันการลงทะเบียน
 Route::get('/profile/complete', [ProfileController::class, 'showCompleteForm'])->name('employees.complete_profile');
 Route::post('/profile/complete', [ProfileController::class, 'completeProfile'])->name('employees.update_profile');
 
-// พนักงานเข้าถึงได้ในกรอบนี้
+//สิทธิ์เฉพาะสำหรับพนักงานเท่านั้น
 Route::middleware(['auth', 'role:employee', 'check.profile'])->group(function () {
     Route::get('/employee', [DashboardController::class, 'employee'])->name('dashboard.employee');
     Route::get('/profile', [DashboardController::class, 'profile'])->name('employees.profile_show');
 });
 
-// เจ้าของร้านเข้าถึงได้ในกรอบนี้
+//สิทธิ์เฉพาะสำหรับเจ้าของร้านเท่านั้น
 Route::middleware(['auth', 'role:owner', 'check.profile'])->group(function () {
     Route::get('/owner', [DashboardController::class, 'owner'])->name('dashboard.owner');
 });
 
 
-//ทุกคนเข้าถึงได้ในกรอบนี้
+//สิทธิ์เฉพาะสำหรับเจ้าของร้านและพนักงานเท่านั้น
 Route::middleware(['auth', 'check.profile'])->group(function () {
 
     //จัดการพนักงาน แบบ Resourceful Routes ประกอบด้วย index, create, store, show, edit, update, destroy
@@ -65,6 +67,10 @@ Route::middleware(['auth', 'check.profile'])->group(function () {
 
     //จัดการการผลิต แบบ Resourceful Routes ประกอบด้วย index, create, store, show, edit, update, destroy
     Route::resource('productions', ProductionController::class);
+
+    //จัดการการขาย แบบ Resourceful Routes ประกอบด้วย index, create, store, show, edit, update, destroy
+    route::resource('sales', SaleController::class);
+
     // สำหรับการดึงรายละเอียดเมนู
     Route::post('menus/details', [MenuController::class, 'getMenuDetails'])->name('menus.details');
     Route::get('/menus/search', [MenuController::class, 'search'])->name('menus.search');
@@ -76,7 +82,6 @@ Route::middleware(['auth', 'check.profile'])->group(function () {
     Route::get('salaries/{employee}/edit', [SalaryController::class, 'edit'])->name('salaries.edit');
     Route::put('salaries/{employee}', [SalaryController::class, 'update'])->name('salaries.update');
     Route::get('salaries/{employee}', [SalaryController::class, 'show'])->name('salaries.show');
-    // ไม่มี Route สำหรับ 'create' และ 'store'
 
-    route::resource('sales', SaleController::class);
+
 });

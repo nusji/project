@@ -9,10 +9,19 @@ use Illuminate\Http\Request;
 
 class MenuController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $menus = Menu::with('menuType')->paginate(10);
-        return view('menus.index', compact('menus'));
+        // รับค่าการค้นหาจาก request
+        $search = $request->input('search');
+    
+        // ดึงเมนู โดยค้นหาตามชื่อหากมีการส่งค่าการค้นหา
+        $menus = Menu::with('menuType')
+            ->when($search, function ($query, $search) {
+                return $query->where('name', 'like', "%{$search}%"); // ค้นหาจากชื่อเมนู
+            })
+            ->paginate(10);
+    
+        return view('menus.index', compact('menus', 'search')); // ส่ง $search ไปยัง view
     }
     public function create()
     {
@@ -72,7 +81,7 @@ class MenuController extends Controller
     }
     public function show(Menu $menu)
     {
-        $menu->load('menuType', 'recipes.ingredient');
+        $menu->load('menuType', 'recipes.ingredient')->withTrashed();
         return view('menus.show', compact('menu'));
     }
     public function edit($id)

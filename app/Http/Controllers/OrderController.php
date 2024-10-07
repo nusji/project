@@ -9,54 +9,76 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 class OrderController extends Controller
 {
+    protected function getOrderSummaries()
+    {
+        return Order::with(['orderDetails.ingredient', 'employee']) // Load the related models
+            ->get() // Get all orders
+            ->map(function ($order) {
+                return [
+                    'order' => $order,
+                    'ingredientCount' => $order->orderDetails->sum('quantity'), // Total quantity of ingredients in the order
+                    'totalPrice' => $order->orderDetails->sum(function ($detail) {
+                        return $detail->quantity * $detail->price; // Calculate total price
+                    }),
+                ];
+            })
+            ->toArray(); // Convert to array for easier access in the view
+    }
 
     public function index()
     {
-        // ดึงข้อมูลรายการสั่งซื้อพร้อมรายละเอียดและวัตถุดิบที่เกี่ยวข้อง โดยใช้ Eloquent ORM ใช้ withTrashed เพื่อรวมวัตถุดิบที่ถูกลบแบบ soft delete ด้วย
-        $orders = Order::with(['orderDetails.ingredient' => function ($query) {
-            $query->withTrashed(); // รวมข้อมูลที่ถูกลบแล้ว
-        }]) ->get();
-
-        // สร้างตัวแปรเพื่อเก็บข้อมูลของแต่ละรายการสั่งซื้อ
-        $orderSummaries = $orders->map(function ($order) {
-            $totalPrice = $order->orderDetails->sum('price');
-            $ingredientCount = $order->orderDetails->count();
-            return [
-                'order' => $order,
-                'totalPrice' => $totalPrice,
-                'ingredientCount' => $ingredientCount,
-            ];
-        });
-        return view('orders.index', ['orderSummaries' => $orderSummaries]);
+        return view('orders.index', [
+            'orderSummaries' => $this->getOrderSummaries(),
+        ]);
     }
 
     public function create()
     {
-        $ingredients = Ingredient::all();
+        $ingredients = DB::table('ingredients')
+            ->select('ingredients.id', 'ingredients.ingredient_name', DB::raw('SUM(order_details.quantity) as order_count'))
+            ->leftJoin('order_details', 'ingredients.id', '=', 'order_details.ingredient_id')
+            ->groupBy('ingredients.id', 'ingredients.ingredient_name')
+            ->orderByDesc('order_count') // จัดเรียงจากยอดสั่งซื้อมากไปน้อย
+            ->get();
         return view('orders.create', compact('ingredients'));
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'order_date' => 'required|date',
-            'order_detail' => 'required|string',
-            'order_receipt' => 'required|image|mimes:jpeg,png,jpg,gif,svg', // กำหนดให้เป็นไฟล์รูปภาพ
-            'ingredients' => 'required|array',
-            'ingredients.*.id' => 'required|exists:ingredients,id',
-            'ingredients.*.quantity' => 'required|numeric|min:0',
-            'ingredients.*.price' => 'required|numeric|min:0',
-        ]);
+        $request->validate(
+            [
+                'order_date' => 'required|date',
+                'order_detail' => 'required|string',
+                'order_receipt' => 'required|file|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'ingredients' => 'required|array',
+                'ingredients.*.id' => 'required|exists:ingredients,id',
+                'ingredients.*.quantity' => 'required|numeric|min:0',
+                'ingredients.*.price' => 'required|numeric|min:0',
+
+
+            ],
+            [
+                'order_receipt.required' => 'โปรดอัปโหลดไฟล์ใบเสร็จ',
+                'order_receipt.image' => 'ไฟล์ที่อัปโหลดต้องเป็นรูปภาพเท่านั้น',
+                'order_receipt.mimes' => 'ไฟล์ที่อัปโหลดต้องเป็นไฟล์ประเภท jpeg, png, jpg, gif, svg เท่านั้น',
+                'order_receipt.max' => 'ไฟล์ที่อัปโหลดต้องมีขนาดไม่เกิน 2 MB',
+            ]
+        );
+
+        if (!$request->hasFile('order_receipt')) {
+            return redirect()->back()->withErrors(['order_receipt' => 'โปรดอัปโหลดไฟล์ใบเสร็จ']);
+        }
+
         DB::transaction(function () use ($request) {
-            // จัดการการอัปโหลดไฟล์รูปภาพ
-            $receiptPath = $request->file('order_receipt')->store('order_receipt', 'public'); // บันทึกไฟล์รูปภาพไปที่ 'storage/app/public/receipts'
+            $receiptPath = $request->file('order_receipt')->store('order_receipt', 'public');
             $order = Order::create([
                 'order_date' => $request->order_date,
                 'order_detail' => $request->order_detail,
-                'order_receipt' => $receiptPath, // บันทึกเส้นทางของไฟล์รูปภาพ
+                'order_receipt' => $receiptPath,
                 'employee_id' => Auth::id(),
             ]);
 
@@ -73,8 +95,10 @@ class OrderController extends Controller
                 $ingredient->save();
             }
         });
+
         return redirect()->route('orders.index')->with('success', 'การสั่งซื้อถูกบันทึกเรียบร้อยแล้ว');
     }
+
 
     public function show(Order $order)
     {

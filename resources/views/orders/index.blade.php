@@ -8,6 +8,7 @@
         ['label' => '']
     ]" />
         <h2 class="text-2xl font-bold text-gray-800 mb-4">ระบบสั่งซื้อวัตถุดิบ</h2>
+        
         <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0 md:space-x-4">
             <div class="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
                 <a href="{{ route('orders.create') }}"
@@ -23,7 +24,7 @@
             </div>
             <form action="#" method="GET" class="flex-grow md:max-w-md">
                 <div class="relative">
-                    <input type="text" name="search" placeholder="ค้นหาวัตถุดิบ..." value="{{ request('search') }}"
+                    <input type="text" name="search" placeholder="ค้นหา..." value="{{ request('search') }}"
                         class="w-full px-4 py-2 rounded-md border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     <button type="submit"
                         class="absolute inset-y-0 right-0 flex items-center px-4 text-gray-700 bg-gray-100 border-l border-gray-300 rounded-r-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-300 ease-in-out">
@@ -133,21 +134,22 @@
     </div>
     <script>
         function confirmDelete(orderId) {
-            Swal.fire({
-                title: 'คุณแน่ใจหรือไม่?',
-                text: 'การลบรายการจะไม่สามารถกู้คืนได้!',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'ใช่, ลบเลย!',
-                cancelButtonText: 'ยกเลิก'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // หากผู้ใช้ยืนยันการลบ, ส่งแบบฟอร์ม
-                    document.getElementById('delete-form-' + orderId).submit();
-                }
-            });
+    Swal.fire({
+        title: 'คุณแน่ใจหรือไม่?',
+        html: 'การลบรายการสั่งซื้อจะไม่สามารถกู้คืนได้!<br><br>' +
+              '<span style="color: red; font-weight: bold;">จำนวนวัตถุดิบ จะถูกลบออกตามด้วย</span>',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'ใช่, ลบเลย!',
+        cancelButtonText: 'ยกเลิก'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // หากผู้ใช้ยืนยันการลบ, ส่งแบบฟอร์ม
+            document.getElementById('delete-form-' + orderId).submit();
         }
+    });
+}
     </script>
 @endsection
