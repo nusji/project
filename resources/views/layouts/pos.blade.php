@@ -31,13 +31,15 @@
 </head>
 
 <body class="bg-gray-100">
-    <!-- Navbar -->
-    <x-navbar :name="Auth::user()->name" />
 
-    <aside class="h-full w-40 fixed top-0 left-0 bg-slate-700 shadow-lg z-10 transition-transform duration-500 pt-16 md:pt-20">
+    <aside
+        class="h-full w-40 fixed top-0 left-0 bg-slate-700 shadow-lg z-10 transition-transform duration-500 pt-0 md:pt-0">
         <div class="flex flex-col p-4 space-y-2">
-            <a href="{{ route('dashboard.owner') }}"
-                class="border-1 py-2.5 px-4 text-lg font-medium text-[#F1F5F9] rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center {{ request()->routeIs('dashboard.owner') || request()->routeIs('dashboard.employee') ? 'bg-[#E2725B] text-white' : '' }}">
+            <span class="text-white">คุณ {{ Auth::user()->name }}</span>
+            <hr>
+            <h2 class="text-center font-italic text-white">จัดการขาย</h2>
+            <a href="{{ Auth::user()->role === 'owner' ? route('dashboard.owner') : route('dashboard.employee') }}"
+                class="border-1 py-2.5 px-4 text-lg font-medium text-[#F1F5F9] text-center border-2 bg-orange-500 rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center {{ request()->routeIs('dashboard.owner') || request()->routeIs('dashboard.employee') ? 'bg-[#E2725B] text-white' : '' }}">
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                     xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -46,10 +48,22 @@
                 </svg>
                 ออก POS
             </a>
+            @if (Route::is('sales.create'))
+                <a href="{{ route('sales.index') }}"
+                    class="border-1 py-2.5 px-4 text-sm font-regular text-[#F1F5F9] text-center border-2 rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                    ย้อนกลับ
+                </a>
+            @endif
+
         </div>
     </aside>
     <!-- Main Content -->
-    <main class="ml-64 mt-16 p-6 ">
+    <main class="ml-40">
 
         @if (session('errors'))
             <div class="text-red-500 text-sm">

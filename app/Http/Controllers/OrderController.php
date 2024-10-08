@@ -22,7 +22,7 @@ class OrderController extends Controller
                     'order' => $order,
                     'ingredientCount' => $order->orderDetails->sum('quantity'), // Total quantity of ingredients in the order
                     'totalPrice' => $order->orderDetails->sum(function ($detail) {
-                        return $detail->quantity * $detail->price; // Calculate total price
+                        return $detail->price; // Calculate total price
                     }),
                 ];
             })
@@ -106,6 +106,7 @@ class OrderController extends Controller
         $order->load(['orderDetails.ingredient' => function ($query) {
             $query->withTrashed();
         }]);
+
         $order->orderDetails->each(function ($detail) {
             $detail->total = $detail->quantity * $detail->price;
         });

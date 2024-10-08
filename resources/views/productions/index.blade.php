@@ -21,7 +21,7 @@
         @endif
         <form action="#" method="GET" class="flex-grow md:max-w-md">
             <div class="relative">
-                <input type="text" name="search" placeholder="ค้นหาวัตถุดิบ..." value="{{ request('search') }}"
+                <input type="text" name="search" placeholder="ค้นหา..." value="{{ request('search') }}"
                     class="w-full px-4 py-2 rounded-md border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                 <button type="submit"
                     class="absolute inset-y-0 right-0 flex items-center px-4 text-gray-700 bg-gray-100 border-l border-gray-300 rounded-r-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-300 ease-in-out">
@@ -33,7 +33,6 @@
                 </button>
             </div>
         </form>
-    </div>
     </div>
 
     <!-- ส่วนของตาราง-->
@@ -56,7 +55,7 @@
                             เมนูที่ผลิต
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            จำนวนทัพพี
+                            จำนวนกิโลกรัมที่ผลิต
                         </th>
                         <th
                             class="text-center px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -117,10 +116,11 @@
                                         </svg>
                                         แก้ไข
                                     </a>
-                        
-                                    <form {{ route('productions.destroy', ['production' => $production->id]) }}" method="POST"
+
+                                    <form action="{{ route('productions.destroy', $production) }}" method="POST"
                                         class="inline" id="delete-form-{{ $production->id }}">
                                         @csrf
+                                        @method('DELETE') <!-- เพิ่ม METHOD DELETE -->
                                         <button type="button" onclick="confirmDelete({{ $production->id }})"
                                             class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
                                             <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -160,6 +160,7 @@
                                             });
                                         }
                                     </script>
+
                                 </td>
                             </tr>
                         @endforeach

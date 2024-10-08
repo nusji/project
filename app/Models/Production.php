@@ -23,6 +23,7 @@ class Production extends Model
     }
     public function productionDetails()
     {
-        return $this->hasMany(ProductionDetail::class, 'production_id', 'id');
+        return $this->hasMany(ProductionDetail::class);
     }
+    
 }

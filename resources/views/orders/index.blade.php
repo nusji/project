@@ -70,7 +70,7 @@
                     @foreach ($orderSummaries as $summary)
                         <tr>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                {{ $summary['order']->created_at->format('d/m/Y') }}
+                                {{ $summary['order']->order_date->format('d/m/Y H:i') }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 {{ $summary['order']->orderDetails->pluck('ingredient.ingredient_name')->implode(', ') }}

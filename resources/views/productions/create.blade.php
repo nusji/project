@@ -23,7 +23,7 @@
                         <label for="production_detail" class="block text-sm font-medium text-gray-700 mb-2">รายละเอียดการผลิต</label>
                         <textarea name="production_detail" id="production_detail" rows="3"
                                   class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                  required>{{ old('production_detail') }}</textarea>
+                                  >{{ old('production_detail') }}</textarea>
                         @error('production_detail')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
@@ -31,6 +31,9 @@
 
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-2">รายการเมนูที่ผลิต</label>
+                        @error('menus')
+                            <p class="text-red-500 text-xs mb-2">{{ $message }}</p>
+                        @enderror
                         <div class="flex space-x-2 mb-4">
                             <input type="text" id="menu-search" placeholder="ค้นหาเมนู" 
                                    class="flex-grow mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
@@ -161,10 +164,11 @@ document.addEventListener('DOMContentLoaded', function() {
         let message = '';
 
         insufficientIngredients.forEach(item => {
-            message += `เมนู: ${item.menu_name}\n`;
-            message += `วัตถุดิบ: ${item.ingredient_name}\n`;
-            message += `ต้องการ: ${item.required}\n`;
-            message += `คงเหลือ: ${item.available}\n\n`;
+            message += `เมนู : ${item.menu_name}\n`;
+            message += `วัตถุดิบ : ${item.ingredient_name}\n`;
+            message += `ต้องการ : ${item.required}\n`;
+            message += `${item.unit}\n`;
+            message += `คงเหลือ : ${item.available}\n\n`;
         });
 
         Swal.fire({

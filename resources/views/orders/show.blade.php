@@ -15,7 +15,7 @@
                 <div class="flex justify-between items-start">
                     <div>
                         <p class="text-md text-gray-600">วันที่/เวลาบันทึกการสั่งซื้อ</p>
-                        <p class="font-semibold">{{ $order->order_date }}</p>
+                        <p class="font-semibold">{{ $order->order_date->format('d/m/Y H:i') }}</p>
                     </div>
                     <div class="text-right">
                         <p class="text-md text-gray-600">เลขที่รายการสั่งซื้อ</p>

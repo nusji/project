@@ -29,10 +29,7 @@ class Menu extends Model
     {
         return $this->hasMany(MenuRecipe::class);
     }
-    public function productionDetails()
-    {
-        return $this->hasMany(ProductionDetail::class);
-    }
+
     public function ingredients()
     {
         // ใช้ 'menu_recipes' เป็นชื่อ Pivot Table
@@ -44,6 +41,11 @@ class Menu extends Model
         return $this->belongsToMany(Production::class, 'production_details')
                     ->withPivot('quantity')
                     ->withTimestamps();
+    }
+
+    public function productionDetails()
+    {
+        return $this->hasMany(ProductionDetail::class, 'menu_id'); // ความสัมพันธ์แบบ One-to-Many
     }
 
 
