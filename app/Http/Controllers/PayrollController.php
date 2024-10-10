@@ -6,10 +6,6 @@ use App\Models\Payroll;
 use App\Models\Employee;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
-
-
-
-
 class PayrollController extends Controller
 {
     public function index(Request $request)
@@ -54,12 +50,19 @@ class PayrollController extends Controller
             'deductions' => 'nullable|numeric|min:0',
             'net_salary' => 'required|numeric|min:0',
             'payment_date' => 'required|date',
+            'slip' => 'nullable|file|mimes:jpeg,png,pdf|max:2048',
+            'payment_channel' => 'required|string',
         ]);
-
+    
+        if ($request->hasFile('slip')) {
+            $validatedData['slip'] = $request->file('slip')->store('slips', 'public');
+        }
+    
         Payroll::create($validatedData);
-
+    
         return redirect()->route('payrolls.index')->with('success', 'Payroll record created successfully.');
     }
+    
 
     public function show(Payroll $payroll)
     {

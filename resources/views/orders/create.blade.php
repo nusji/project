@@ -60,14 +60,20 @@
                                 <div class="flex flex-wrap -mx-4">
                                     <!-- คอลัมน์สำหรับอัปโหลดรูปภาพ -->
                                     <div class="w-full md:w-1/2 px-4 mb-4">
-                                        <label for="order_receipt"
-                                            class="block text-sm font-medium text-gray-700 mb-2">แนบรูปใบเสร็จ</label>
-                                        <input type="file" name="order_receipt" id="order_receipt"
-                                            class="block w-full h-10 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none">
+                                        <label for="order_receipt" class="block text-sm font-medium text-gray-700 mb-2">แนบรูปใบเสร็จ</label>
+                                        <div class="flex items-center">
+                                            <label for="order_receipt" class="flex items-center cursor-pointer">
+                                                <span
+                                                    class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-l-md">เลือกไฟล์</span>
+                                                <input type="file" name="order_receipt" id="order_receipt" accept="image/*" class="hidden">
+                                            </label>
+                                            <span id="file-name" class="ml-4 text-gray-600">ยังไม่ได้เลือกไฟล์</span>
+                                        </div>
                                         @error('order_receipt')
                                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                         @enderror
                                     </div>
+                                    
 
                                     <!-- คอลัมน์สำหรับแสดงรูปภาพ -->
                                     <div class="w-full md:w-1/2 px-4 mb-4">

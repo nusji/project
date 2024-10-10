@@ -10,8 +10,8 @@
             <div class="bg-white-200 text-black p-6">
                 <h1 class="text-2xl font-bold">ใบรายละเอียดการสั่งซื้อ</h1>
             </div>
-
-            <div class="p-6 space-y-6">
+            <!-- ข้อมูลทั่วไป -->
+            <div class="pl-10 pr-10">
                 <div class="flex justify-between items-start">
                     <div>
                         <p class="text-md text-gray-600">วันที่/เวลาบันทึกการสั่งซื้อ</p>
@@ -22,23 +22,35 @@
                         <p class="font-semibold"># {{ $order->id }}</p>
                     </div>
                 </div>
-
-                <div class="p-6 space-y-6">
-                    <div class="inline-box">
-                        <p class="text-md text-gray-600">พนักงานบันทึกรายการ</p>
-                        <p class="font-semibold">ชื่อ : {{ $order->employee->name }}
-                        <p class="font-medium text-gray-400">เบอร์โทร {{ $order->employee->phone_number }}</p>
-                        </p>
-                    </div>
-                    <div>
-                        <h2 class="text-xl font-semibold mb-2">รายละเอียด</h2>
-                        <p class="text-gray-700 bg-gray-50 p-4 rounded-md">{{ $order->order_detail }}</p>
+                <!-- ข้อมูลพนักงาน -->
+                <div class="border-t pt-2 mt-4">
+                    <h2 class="text-xl font-semibold mb-4">ข้อมูลพนักงาน</h2>
+                    <div class="flex items-center">
+                        <div class="mr-4">
+                            <img src="{{ $order->employee->profile_image_url ?? asset('images/default-avatar.png') }}"
+                                alt="รูปพนักงาน" class="w-16 h-16 object-cover rounded-full border-2 border-gray-300">
+                        </div>
+                        <div>
+                            <p class="font-semibold text-lg">
+                                {{ $order->employee->name }}
+                                @if ($order->employee->deleted_at)
+                                    <span class="text-red-500 text-sm">(ลาออก)</span>
+                                @endif
+                            </p>
+                            <p class="text-gray-500">เบอร์โทร: {{ $order->employee->phone_number }}</p>
+                        </div>
                     </div>
                 </div>
 
+                <!-- รายละเอียดการสั่งซื้อ -->
+                <div class="border-t pt-2 mt-5">
+                    <h2 class="text-xl font-semibold mb-4">รายละเอียดการสั่งซื้อ</h2>
+                    <p class="text-gray-700 bg-gray-100 p-4 rounded-md">{{ $order->order_detail }}</p>
+                </div>
 
+                <!-- ใบเสร็จ -->
                 @if ($order->order_receipt)
-                    <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                    <div class="bg-gray-50 rounded-lg p-6 border border-gray-200 mt-4">
                         <h2 class="text-xl font-semibold text-gray-800 mb-4">รูปใบเสร็จ</h2>
                         <div class="flex flex-col sm:flex-row items-center gap-6">
                             <img src="{{ asset('storage/' . $order->order_receipt) }}" alt="รูปใบเสร็จ"
@@ -57,9 +69,10 @@
                         </div>
                     </div>
                 @endif
-                <div>
-                    <h2 class="text-xl font-semibold mb-4">รายการวัตถุดิบ</h2>
-                    <div class="overflow-x-auto bg-gray-50 rounded-lg border border-gray-200">
+
+                <div class="mt-4 border-t">
+                    <h2 class="text-xl font-semibold mb-4 mt-4">รายการวัตถุดิบที่สั่งซื้อ</h2>
+                    <div class="overflow-x-auto bg-gray-50 rounded-lg border border-gray-200 mb-4">
                         <table class="w-full text-sm">
                             <thead>
                                 <tr class="bg-gray-100">
@@ -97,7 +110,8 @@
                                                 N/A
                                             @endif
                                         </td>
-                                        <td class="px-4 py-2 text-right">{{ number_format($detail->price, 2) }} บาท</td>
+                                        <td class="px-4 py-2 text-right">{{ number_format($detail->price, 2) }} บาท
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -174,10 +188,9 @@
         </div>
     </div>
 
-    <!-- Modal -->
-    <div id="receiptModal"
-        class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center transition-opacity duration-300">
-        <div class="bg-white rounded-lg p-6 max-w-3xl w-full mx-4 transform transition-transform duration-300 scale-95">
+    <!-- Modal สำหรับแสดงรูปใบเสร็จ -->
+    <div id="receiptModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white rounded-lg p-4 max-w-3xl w-full mx-4 overflow-auto max-h-screen">
             <div class="relative">
                 <button onclick="closeModal()"
                     class="absolute top-0 right-0 mt-2 mr-2 text-gray-600 hover:text-gray-800 focus:outline-none">
@@ -187,10 +200,10 @@
                         </path>
                     </svg>
                 </button>
-                <img id="modalImage" src="" alt="ใบเสร็จ" class="w-full rounded-lg">
+                <img id="modalImage" src="" alt="ใบเสร็จ"
+                    class="w-full h-auto max-h-full rounded-lg object-contain">
             </div>
             <div class="mt-4 text-center">
-                <p class="text-gray-600 mb-2">คลิกที่ปุ่มด้านล่างเพื่อดาวน์โหลดใบเสร็จ</p>
                 <a id="downloadButton" href="" download
                     class="inline-block bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded transition-colors">
                     ดาวน์โหลดใบเสร็จ
@@ -198,6 +211,7 @@
             </div>
         </div>
     </div>
+
 
     <script>
         function openModal(imageSrc) {

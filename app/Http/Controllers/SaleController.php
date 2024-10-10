@@ -23,29 +23,75 @@ class SaleController extends Controller
         return view('sales.index', compact('sales'));
     }
 
+
+
+
     public function create()
     {
-        // หาวันปัจจุบัน
         $today = Carbon::today();
-        // ดึงข้อมูล production ของวันนี้ พร้อมกับรายละเอียดเมนู
-        $productions = Production::whereDate('production_date', $today)
-            ->with('productionDetails.menu.menuType') // เพิ่ม category ในการ eager load
-            ->get();
-
-        // รวมเมนูจาก production_details ของวันนี้
-        $menus = $productions->flatMap(function ($production) {
-            return $production->productionDetails->map(function ($detail) {
-                return $detail->menu;
-            });
-        })->unique('id');
-
-        // ดึงประเภทเมนูทั้งหมดที่มีในเมนูวันนี้
+        $productions = $this->getProductionWithMenus($today);
+        $menus = $this->getMenusFromProduction($productions);
         $categories = $menus->pluck('menuType')->unique();
 
-        // ส่งข้อมูลไปยัง view
-        return view('sales.create', compact('menus', 'categories'));
+        return view('sales.create', compact('menus', 'categories', 'today'));
     }
 
+
+    private function getProductionWithMenus($date)
+    {
+        return Production::whereDate('production_date', $date)
+            ->with('productionDetails.menu.menuType')
+            ->get();
+    }
+
+    private function getMenusFromProduction($productions)
+    {
+        return $productions->flatMap(function ($production) {
+            return $production->productionDetails
+                ->where('is_sold_out', false) // Exclude sold-out items
+                ->map(function ($detail) {
+                    return $detail->menu;
+                });
+        })->unique('id');
+    }
+
+    public function getMenusByDate(Request $request)
+    {
+        $date = Carbon::parse($request->date);
+        $productions = $this->getProductionWithMenus($date);
+        $menus = $this->getMenusFromProduction($productions);
+
+        return response()->json([
+            'menus' => $menus,
+            'date' => $date->format('Y-m-d')
+        ]);
+    }
+
+
+    public function showSoldOutManagement(Request $request, Production $production)
+    {
+        $productionDetails = $production->productionDetails()->with('menu')->get();
+        $selectedDate = $production->production_date->format('Y-m-d');
+    
+        return view('sales.manage_sold_out', compact('productionDetails', 'selectedDate', 'production'));
+    }
+    
+
+    public function updateSoldOutStatus(Request $request, Production $production)
+    {
+        $menuIds = $request->input('menu_ids', []);
+
+        // อัปเดตสถานะ "ขายหมด" เฉพาะ ProductionDetail ของ production นี้
+        $productionDetails = $production->productionDetails;
+
+        foreach ($productionDetails as $detail) {
+            $detail->is_sold_out = in_array($detail->menu_id, $menuIds);
+            $detail->save();
+        }
+
+        return redirect()->route('sales.manageSoldOut', ['production' => $production->id])
+            ->with('success', 'อัปเดตสถานะขายหมดเรียบร้อยแล้ว');
+    }
     public function store(Request $request)
     {
         // ตรวจสอบข้อมูลที่ได้รับ
@@ -89,11 +135,11 @@ class SaleController extends Controller
     {
         // ดึงข้อมูลคำสั่งขาย และรายละเอียดคำสั่งขายที่เกี่ยวข้อง
         $sale = Sale::with('saleDetails.menu')->findOrFail($id);
-    
+
         // ส่งข้อมูลไปยัง view
         return view('sales.show', compact('sale'));
     }
-    
+
 
     public function destroy(Sale $sale)
     {

@@ -8,7 +8,18 @@
                     <!-- ซ้าย: รายการเมนู -->
                     <div class="w-2/3 p-4">
                         <div class="mb-4">
-                            <h2 class="text-2xl font-bold mb-2">เมนูวันนี้</h2>
+                            <div class="flex justify-between items-center mb-2">
+                                <h2 class="text-2xl font-bold" id="menu-title">เมนูวันที่ <span
+                                        id="selected-date">{{ $today->format('d/m/Y') }}</span></h2>
+                                <div class="flex items-center">
+                                    <input type="date" id="date-picker" class="border rounded px-2 py-1 mr-2"
+                                        value="{{ $today->format('Y-m-d') }}">
+                                    <button id="load-menu-btn"
+                                        class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                                        โหลดเมนู
+                                    </button>
+                                </div>
+                            </div>
                             <!-- เพิ่มส่วนของประเภทเมนู -->
                             <div class="mb-4">
                                 <h3 class="text-xl font-semibold mb-2">ประเภทเมนู</h3>
@@ -21,16 +32,16 @@
                                     @endforeach
                                 </div>
                             </div>
-                            <div class="grid grid-cols-3 gap-4" id="menu-items-container">
+                            <div class="grid grid-cols-5 gap-4" id="menu-items-container">
                                 @foreach ($menus as $menu)
                                     <div class="bg-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-200 transition menu-item"
                                         data-category="{{ $menu->menu_type_id }}" onclick="addToCart({{ $menu->id }})">
                                         @if ($menu->menu_image)
-                                        <img src="{{ Storage::url($menu->menu_image) }}" alt="{{ $menu->menu_name }}" class="menu-image h-10 w-10">
+                                            <img src="{{ Storage::url($menu->menu_image) }}" alt="{{ $menu->menu_name }}"
+                                                class="menu-image h-10 w-10">
                                         @endif
                                         <h3 class="font-semibold">{{ $menu->menu_name }}</h3>
                                         <p class="text-gray-600">{{ number_format($menu->menu_price, 2) }} บาท</p>
-
                                     </div>
                                 @endforeach
                             </div>
@@ -107,6 +118,46 @@
         </div>
     </template>
     <script>
+        let currentMenus = @json($menus);
+
+        function loadMenuByDate() {
+            const selectedDate = document.getElementById('date-picker').value;
+            fetch(`/sales/menus-by-date?date=${selectedDate}`)
+                .then(response => response.json())
+                .then(data => {
+                    currentMenus = data.menus;
+                    document.getElementById('selected-date').textContent = new Date(data.date).toLocaleDateString(
+                        'th-TH');
+                    renderMenuItems();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('เกิดข้อผิดพลาดในการโหลดเมนู: ' + error.message);
+                });
+        }
+
+
+        function renderMenuItems() {
+            const container = document.getElementById('menu-items-container');
+            container.innerHTML = '';
+
+            currentMenus.forEach(menu => {
+                const menuItem = document.createElement('div');
+                menuItem.className =
+                    'bg-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-200 transition menu-item';
+                menuItem.dataset.category = menu.menu_type_id;
+                menuItem.innerHTML = `
+            ${menu.menu_image ? `<img src="${menu.menu_image}" alt="${menu.menu_name}" class="menu-image h-10 w-10">` : ''}
+            <h3 class="font-semibold">${menu.menu_name}</h3>
+            <p class="text-gray-600">${Number(menu.menu_price).toFixed(2)} บาท</p>
+        `;
+                menuItem.onclick = () => addToCart(menu.id);
+                container.appendChild(menuItem);
+            });
+        }
+
+        document.getElementById('load-menu-btn').addEventListener('click', loadMenuByDate);
+
         // เพิ่มฟังก์ชันสำหรับกรองรายการเมนูตามประเภท
         function filterMenuItems(categoryId) {
             const menuItems = document.querySelectorAll('.menu-item');

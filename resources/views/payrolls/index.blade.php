@@ -135,7 +135,7 @@
                                 {{ $payroll->payment_date }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                {{ $payroll->employee->first_name }} {{ $payroll->employee->last_name }}
+                                {{ $payroll->employee->name }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 {{ $payroll->employee->salary }}

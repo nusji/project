@@ -97,8 +97,7 @@ class EmployeeController extends Controller
             'username' => 'required|string|max:255|unique:employees,username,' . $employee->id,
             'salary' => 'required|numeric',
             'start_date' => 'nullable|date',
-
-            'role' => 'required|in:employee,owner',
+            'role' => 'required|in:employee,owner,none',
 
             'date_of_birth' => 'nullable|date',
             'address' => 'nullable|string',

@@ -1,9 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container mx-auto px-4 py-8">
+    <div class="container mx-auto px-4 py-0">
         <x-breadcrumb :paths="[
-            ['label' => 'ระบบพนักงาน', 'url' => route('employees.index')],
+            ['label' => 'ระบบจัดการพนักงาน', 'url' => route('employees.index')],
             ['label' => 'เพิ่มข้อมูลพนักงานใหม่'],
         ]" />
 
@@ -11,13 +11,14 @@
         <form action="{{ route('employees.update', $employee->id) }}" method="POST" enctype="multipart/form-data"
             class="space-y-6">
             @csrf
+            @method('PUT')
             <div class="bg-white shadow-md rounded-lg overflow-hidden">
                 <div class="p-6 space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-2">
                             <label for="name" class="text-sm font-medium text-gray-700">ชื่อ-สกุลจริง</label>
                             <input type="text" id="name" name="name"
-                                value="{{ old('first_name', $employee->name) }} " 
+                                value="{{ old('first_name', $employee->name) }} "
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 required>
                             @error('name')
@@ -49,13 +50,9 @@
                             <select id="employment_type" name="employment_type"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 required>
-                                <option value="พนักงานประจำ(แผนกครัว)"
-                                    {{ $employee->employment_type == 'พนักงานประจำ (แผนกครัว)' ? 'selected' : '' }}>
-                                    แผนกครัว (พนักงานประจำ)
-                                </option>
-                                <option value="พนักงานประจำ(แผนกขาย)"
-                                    {{ $employee->employment_type == 'พนักงานประจำ (แผนกขาย)' ? 'selected' : '' }}>
-                                    แผนกขาย (พนักงานประจำ)
+                                <option value="พนักงานประจำ"
+                                    {{ $employee->employment_type == 'พนักงานประจำ' ? 'selected' : '' }}>
+                                    พนักงานประจำ
                                 </option>
                                 <option value="พนักงานชั่วคราว"
                                     {{ $employee->employment_type == 'พนักงานชั่วคราว' ? 'selected' : '' }}>
@@ -79,7 +76,7 @@
 
                         <div class="space-y-2">
                             <label for="role" class="text-sm font-medium text-gray-700">บทบาท/สิทธิ์</label>
-                            <select id="employment_type" name="employment_type"
+                            <select id="role" name="role"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-yellow-50"
                                 required>
                                 <option value="employee" {{ $employee->role == 'employee' ? 'selected' : '' }}>
@@ -91,7 +88,7 @@
                                 <option value="none" {{ $employee->role == 'none' ? 'selected' : '' }}>
                                     ไม่มีบทบาท (ลาออก)
                                 </option>
-                                @error('password')
+                                @error('role')
                                     <p class="text-red-500 text-xs italic">{{ $message }}</p>
                                 @enderror
                         </div>

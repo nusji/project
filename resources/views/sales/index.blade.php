@@ -17,7 +17,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                             </svg>
-                            
+
                         </div>
                         <span class="text-sm font-medium text-gray-700">บันทึกการขาย</span>
                     </a>
@@ -99,7 +99,9 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         {{ $sale->employee->name }}
-                                    </td>
+                                        @if ($sale->employee->deleted_at)
+                                            <span class="text-red-500 text-sm">(ลาออก)</span>
+                                        @endif
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         {{ ucfirst($sale->payment_type) }}
                                     </td>
@@ -108,7 +110,7 @@
                                             return $detail->menu ? $detail->menu->menu_price * $detail->quantity : 0;
                                         }) }}
                                     </td>
-                                    
+
                                     <!-- ส่วนของการจัดการ -->
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2 text-center">
 
@@ -129,8 +131,8 @@
                                             @method('DELETE') <!-- เพิ่ม METHOD DELETE -->
                                             <button type="button" onclick="confirmDelete({{ $sale->id }})"
                                                 class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-                                                <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg"
-                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                    viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                 </svg>

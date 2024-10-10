@@ -20,7 +20,7 @@ class OrderController extends Controller
             ->map(function ($order) {
                 return [
                     'order' => $order,
-                    'ingredientCount' => $order->orderDetails->sum('quantity'), // Total quantity of ingredients in the order
+                    'ingredientCount' => $order->orderDetails->count('ingredient_id'), // Total quantity of ingredients in the order
                     'totalPrice' => $order->orderDetails->sum(function ($detail) {
                         return $detail->price; // Calculate total price
                     }),

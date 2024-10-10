@@ -42,6 +42,10 @@ Route::middleware(['auth', 'role:owner', 'check.profile'])->group(function () {
     Route::get('/owner', [DashboardController::class, 'owner'])->name('dashboard.owner');
 });
 
+Route::get('/sales/manage-sold-out/{production}', [SaleController::class, 'showSoldOutManagement'])->name('sales.manageSoldOut');
+Route::post('/sales/update-sold-out/{production}', [SaleController::class, 'updateSoldOutStatus'])->name('sales.updateSoldOut');
+Route::post('/payrolls/store-multiple', [PayrollController::class, 'storeMultiple'])->name('payrolls.storeMultiple');
+
 
 //สิทธิ์เฉพาะสำหรับเจ้าของร้านและพนักงานเท่านั้น
 Route::middleware(['auth', 'check.profile'])->group(function () {
@@ -70,6 +74,9 @@ Route::middleware(['auth', 'check.profile'])->group(function () {
 
     //จัดการการขาย แบบ Resourceful Routes ประกอบด้วย index, create, store, show, edit, update, destroy
     route::resource('sales', SaleController::class);
+    Route::get('sales/menus-by-date', [SaleController::class, 'getMenusByDate'])->name('sales.menus-by-date');
+
+
 
     // สำหรับการดึงรายละเอียดเมนู
     Route::post('menus/details', [MenuController::class, 'getMenuDetails'])->name('menus.details');
@@ -82,6 +89,4 @@ Route::middleware(['auth', 'check.profile'])->group(function () {
     Route::get('salaries/{employee}/edit', [SalaryController::class, 'edit'])->name('salaries.edit');
     Route::put('salaries/{employee}', [SalaryController::class, 'update'])->name('salaries.update');
     Route::get('salaries/{employee}', [SalaryController::class, 'show'])->name('salaries.show');
-
-
 });
