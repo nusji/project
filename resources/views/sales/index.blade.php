@@ -104,8 +104,11 @@
                                         {{ ucfirst($sale->payment_type) }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        {{ $sale->saleDetails->sum(function ($detail) {return $detail->menu->menu_price * $detail->quantity;}) }}
+                                        {{ $sale->saleDetails->sum(function ($detail) {
+                                            return $detail->menu ? $detail->menu->menu_price * $detail->quantity : 0;
+                                        }) }}
                                     </td>
+                                    
                                     <!-- ส่วนของการจัดการ -->
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2 text-center">
 

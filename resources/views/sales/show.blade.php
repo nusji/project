@@ -45,7 +45,11 @@
                     @foreach($sale->saleDetails as $detail)
                     <tr class="hover:bg-gray-50">
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {{ $detail->menu->menu_name }}
+                            @if($detail->menu)
+                                {{ $detail->menu->menu_name }}
+                            @else
+                                <span class="text-red-500">Menu not available</span>
+                            @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             {{ $detail->quantity }}
