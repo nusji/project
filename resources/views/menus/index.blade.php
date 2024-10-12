@@ -6,6 +6,7 @@
 
         <h2 class="text-2xl font-bold text-gray-800 mb-4">ระบบจัดการเมนูข้าวแกง</h2>
         <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0 md:space-x-4">
+            @if (auth()->user()->role === 'owner')
             <div class="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
                 <a href="{{ route('menus.create') }}"
                     class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-300 ease-in-out shadow-md">
@@ -28,6 +29,7 @@
                     จัดการประเภท
                 </a>
             </div>
+            @endif
             <div>
                 <!-- เรียกใช้ search form component -->
                 <x-search-form :search="$search" />

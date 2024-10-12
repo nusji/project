@@ -4,57 +4,84 @@ namespace App\Http\Controllers;
 
 use App\Models\Menu;
 use App\Models\MenuAllocation;
-use App\Models\MenuAllocationDetail;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class MenuAllocationController extends Controller
 {
-    public function allocateMenus(Request $request)
+    // ฟังก์ชันสำหรับแสดงรายการจัดสรรเมนู
+    public function index()
     {
-        // จำนวนเมนูขายดีที่ต้องการ
-        $topCount = $request->input('top_count', 5); // default 5
-        // จำนวนเมนูที่ต้องการสุ่ม
-        $randomCount = $request->input('random_count', 3); // default 3
+        // ดึงข้อมูลการจัดสรรเมนูพร้อมข้อมูลเมนู
+        $allocations = MenuAllocation::with('menu')->get();
+
+        return view('allocations.index', compact('allocations'));
+    }
+
+    // ฟังก์ชันสำหรับแสดงฟอร์มสร้างการจัดสรรเมนูใหม่
+    public function create()
+    {
+        return view('allocations.create');
+    }
+
+    // ฟังก์ชันสำหรับบันทึกการจัดสรรเมนูใหม่
+    public function store(Request $request)
+    {
+        // รับข้อมูลจากฟอร์ม
+        $days = $request->input('days');
+        $menusPerDay = $request->input('menu_count');
 
         // ดึงเมนูขายดี
-        $topMenus = Menu::withCount('sales')
-            ->orderBy('sales_count', 'desc')
-            ->take($topCount)
-            ->get();
+        $topSellers = $this->getTopSellers($request->input('fixed_top_sellers'));
 
-        // ดึงเมนูที่ไม่ซ้ำกับสัปดาห์ก่อน
-        $lastWeekMenus = MenuAllocationDetail::whereHas('menuAllocation', function ($query) {
-            $query->whereBetween('allocation_date', [now()->startOfWeek()->subWeek(), now()->endOfWeek()->subWeek()]);
-        })->pluck('menu_id');
-
-        // สุ่มเมนูที่ไม่ซ้ำกับเมนูของสัปดาห์ก่อน
-        $randomMenus = Menu::whereNotIn('id', $lastWeekMenus)
+        // ดึงเมนูที่เหลือ
+        $availableMenus = Menu::whereNotIn('id', $topSellers->pluck('id'))
             ->inRandomOrder()
-            ->take($randomCount)
             ->get();
 
-        // สร้างข้อมูลการจัดสรรเมนู
-        $allocation = MenuAllocation::create([
-            'allocation_date' => now(),
-        ]);
-
-        // บันทึกเมนูขายดี
-        foreach ($topMenus as $menu) {
-            $allocation->menuAllocationDetails()->create([
-                'menu_id' => $menu->id,
-            ]);
+        // ตรวจสอบจำนวนเมนูที่เหลือว่ามีพอหรือไม่
+        if ($availableMenus->count() < ($menusPerDay * $days - $topSellers->count())) {
+            return redirect()->back()->with('error', 'Not enough menus to allocate.');
         }
 
-        // บันทึกเมนูสุ่ม
-        foreach ($randomMenus as $menu) {
-            $allocation->menuAllocationDetails()->create([
-                'menu_id' => $menu->id,
-            ]);
+        // จัดสรรเมนูในแต่ละวัน
+        for ($day = 0; $day < $days; $day++) {
+            $dailyMenus = $topSellers->merge(
+                $availableMenus->splice(0, $menusPerDay - $topSellers->count())
+            );
+
+            foreach ($dailyMenus as $menu) {
+                MenuAllocation::create([
+                    'allocation_date' => now()->addDays($day),
+                    'menu_id' => $menu->id,
+                ]);
+            }
         }
 
-        return response()->json([
-            'message' => 'Menu allocation completed successfully!',
-            'allocation' => $allocation->load('menuAllocationDetails'),
-        ]);
+        return redirect()->route('allocations.index')->with('success', 'Menus allocated successfully.');
+    }
+
+    // ฟังก์ชันดึงเมนูขายดี
+    protected function getTopSellers($limit = 1)
+{
+    return DB::table('production_details')
+        ->select('menu_id', DB::raw('count(*) as total_sold_out'))
+        ->where('is_sold_out', true)
+        ->groupBy('menu_id')
+        ->orderBy('total_sold_out', 'desc')
+        ->limit($limit)
+        ->pluck('menu_id');
+}
+
+
+    public function show($id)
+    {
+        // ดึงข้อมูลการจัดสรรเมนูพร้อมข้อมูลเมนู
+        $allocation = MenuAllocation::with('menu')->findOrFail($id);
+
+        // ดึงข้อมูล allocation details ที่เกี่ยวข้อง (ถ้ามีตาราง menu_allocation_details)
+        $allocationDetails = $allocation->allocationDetails;  // ตรวจสอบความสัมพันธ์นี้ว่ามีใน model หรือไม่
+
+        return view('allocations.show', compact('allocation', 'allocationDetails'));
     }
 }

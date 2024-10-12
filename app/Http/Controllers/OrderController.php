@@ -39,7 +39,7 @@ class OrderController extends Controller
     public function create()
     {
         $ingredients = DB::table('ingredients')
-            ->select('ingredients.id', 'ingredients.ingredient_name', DB::raw('SUM(order_details.quantity) as order_count'))
+            ->select('ingredients.id', 'ingredients.ingredient_name', 'ingredients.ingredient_unit', DB::raw('SUM(order_details.quantity) as order_count'))
             ->leftJoin('order_details', 'ingredients.id', '=', 'order_details.ingredient_id')
             ->groupBy('ingredients.id', 'ingredients.ingredient_name')
             ->orderByDesc('order_count') // จัดเรียงจากยอดสั่งซื้อมากไปน้อย

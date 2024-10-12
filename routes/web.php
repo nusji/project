@@ -14,6 +14,7 @@ use App\Http\Controllers\ProductionController;
 use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\SalaryController;
 use App\Http\Controllers\SaleController;
+use App\Http\Controllers\MenuAllocationController;
 
 
 Route::get('/', function () {
@@ -34,7 +35,9 @@ Route::post('/profile/complete', [ProfileController::class, 'completeProfile'])-
 //สิทธิ์เฉพาะสำหรับพนักงานเท่านั้น
 Route::middleware(['auth', 'role:employee', 'check.profile'])->group(function () {
     Route::get('/employee', [DashboardController::class, 'employee'])->name('dashboard.employee');
-    Route::get('/profile', [DashboardController::class, 'profile'])->name('employees.profile_show');
+    Route::get('/profile', [ProfileController::class, 'showProfile'])->name('profile.profile');
+    Route::get('/profile/edit', [ProfileController::class, 'editProfile'])->name('profile.profile_edit');
+    Route::put('/profile/update/{id}', [ProfileController::class, 'updateProfile'])->name('profile.profile_update');
 });
 
 //สิทธิ์เฉพาะสำหรับเจ้าของร้านเท่านั้น
@@ -42,9 +45,25 @@ Route::middleware(['auth', 'role:owner', 'check.profile'])->group(function () {
     Route::get('/owner', [DashboardController::class, 'owner'])->name('dashboard.owner');
 });
 
+//ยกเว้น ใช้ได้ทุกคน
 Route::get('/sales/manage-sold-out/{production}', [SaleController::class, 'showSoldOutManagement'])->name('sales.manageSoldOut');
 Route::post('/sales/update-sold-out/{production}', [SaleController::class, 'updateSoldOutStatus'])->name('sales.updateSoldOut');
 Route::post('/payrolls/store-multiple', [PayrollController::class, 'storeMultiple'])->name('payrolls.storeMultiple');
+Route::get('/employees/profile', [ProfileController::class, 'showProfile'])->name('employees.showProfile');
+Route::get('/profile/{id}/change-password', [ProfileController::class, 'changePasswordForm'])->name('profile.change_password')->middleware('auth');
+Route::post('/profile/{id}/change-password', [ProfileController::class, 'updatePassword'])->name('profile.update_password')->middleware('auth');
+Route::get('/password/reset-custom', [ProfileController::class, 'showCustomPasswordResetForm'])->name('profile.reset_custom');
+Route::post('/password/reset-custom', [ProfileController::class, 'resetPasswordWithVerification'])->name('profile.reset_custom.post');
+
+use App\Http\Controllers\FeedbackController;
+Route::resource('feedbacks',FeedbackController::class);
+
+use App\Http\Controllers\ReportController;
+use App\Models\Production;
+
+Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
+
+Route::get('/', [ProductionController::class, 'showWelcomePage'])->name('welcome');
 
 
 //สิทธิ์เฉพาะสำหรับเจ้าของร้านและพนักงานเท่านั้น
@@ -52,6 +71,8 @@ Route::middleware(['auth', 'check.profile'])->group(function () {
 
     //จัดการพนักงาน แบบ Resourceful Routes ประกอบด้วย index, create, store, show, edit, update, destroy
     Route::resource('employees', EmployeeController::class);
+
+
 
     //จัดการประเภทวัตถุดิบ แบบ Resourceful Routes ประกอบด้วย index, create, store, show, edit, update, destroy
     Route::resource('ingredient_types', IngredientTypeController::class);
@@ -89,4 +110,6 @@ Route::middleware(['auth', 'check.profile'])->group(function () {
     Route::get('salaries/{employee}/edit', [SalaryController::class, 'edit'])->name('salaries.edit');
     Route::put('salaries/{employee}', [SalaryController::class, 'update'])->name('salaries.update');
     Route::get('salaries/{employee}', [SalaryController::class, 'show'])->name('salaries.show');
+
+    Route::resource('allocations', MenuAllocationController::class);
 });

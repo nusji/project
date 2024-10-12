@@ -32,7 +32,7 @@
                                     // แปลงเป็นรูปแบบที่เหมาะสมกับ input type="datetime-local"
                                     const year = now.getFullYear();
                                     const month = String(now.getMonth() + 1).padStart(2,
-                                    '0'); // เพิ่ม 1 เพราะเดือนใน JavaScript เริ่มจาก 0
+                                        '0'); // เพิ่ม 1 เพราะเดือนใน JavaScript เริ่มจาก 0
                                     const day = String(now.getDate()).padStart(2, '0');
                                     const hours = String(now.getHours()).padStart(2, '0');
                                     const minutes = String(now.getMinutes()).padStart(2, '0');
@@ -60,12 +60,14 @@
                                 <div class="flex flex-wrap -mx-4">
                                     <!-- คอลัมน์สำหรับอัปโหลดรูปภาพ -->
                                     <div class="w-full md:w-1/2 px-4 mb-4">
-                                        <label for="order_receipt" class="block text-sm font-medium text-gray-700 mb-2">แนบรูปใบเสร็จ</label>
+                                        <label for="order_receipt"
+                                            class="block text-sm font-medium text-gray-700 mb-2">แนบรูปใบเสร็จ</label>
                                         <div class="flex items-center">
                                             <label for="order_receipt" class="flex items-center cursor-pointer">
                                                 <span
                                                     class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-l-md">เลือกไฟล์</span>
-                                                <input type="file" name="order_receipt" id="order_receipt" accept="image/*" class="hidden">
+                                                <input type="file" name="order_receipt" id="order_receipt"
+                                                    accept="image/*" class="hidden">
                                             </label>
                                             <span id="file-name" class="ml-4 text-gray-600">ยังไม่ได้เลือกไฟล์</span>
                                         </div>
@@ -73,7 +75,7 @@
                                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                         @enderror
                                     </div>
-                                    
+
 
                                     <!-- คอลัมน์สำหรับแสดงรูปภาพ -->
                                     <div class="w-full md:w-1/2 px-4 mb-4">
@@ -168,6 +170,9 @@
                                                     placeholder="จำนวน" value="{{ $ingredient['quantity'] }}"
                                                     class="w-32 py-1 px-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                                                     required>
+                                                <span
+                                                    class="text-sm text-gray-600">{{ $ingredients->firstWhere('id', $ingredient['id'])->ingredient_unit }}</span>
+
                                                 <input type="number" name="ingredients[{{ $index }}][price]"
                                                     placeholder="ราคา" value="{{ $ingredient['price'] }}"
                                                     class="w-32 py-1 px-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
@@ -259,7 +264,7 @@
             <div class="flex items-center space-x-2">
                 <input type="number" name="ingredients[${ingredientIndex}][quantity]" placeholder="จำนวน" required 
                        class="w-32 py-1 px-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                       
+                <span>${ingredient.ingredient_unit}</span>
                 <input type="number" name="ingredients[${ingredientIndex}][price]" placeholder="ราคารวม" required 
                        class="w-32 py-1 px-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
             </div>

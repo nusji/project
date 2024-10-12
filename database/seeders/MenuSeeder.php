@@ -2,122 +2,628 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 class MenuSeeder extends Seeder
 {
-    public function run()
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
     {
-        // Insert menus
         DB::table('menus')->insert([
-            // ทอด
-            ['menu_name' => 'ไก่ทอดกระเทียมพริกไทย', 'menu_detail' => 'ไก่ทอดกรอบกับกระเทียมและพริกไทย', 'menu_type_id' => 1, 'menu_price' => 50.00, 'menu_status' => true, 'menu_image' => null],
-            ['menu_name' => 'หมูทอดน้ำปลา', 'menu_detail' => 'หมูทอดกรอบราดน้ำปลา', 'menu_type_id' => 1, 'menu_price' => 55.00, 'menu_status' => true, 'menu_image' => null],
-            ['menu_name' => 'ปลาทอดขมิ้น', 'menu_detail' => 'ปลาทอดกรอบกับเครื่องเทศ', 'menu_type_id' => 1, 'menu_price' => 60.00, 'menu_status' => true, 'menu_image' => null],
+            // ประเภทที่ 1: ทอด (Fried)
+            [
+                'menu_name' => 'ไก่ทอดกระเทียม',
+                'menu_detail' => 'ไก่ทอดกรอบคลุกกระเทียม',
+                'menu_type_id' => 1,
+                'menu_price' => 150.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'กุ้งทอดน้ำปลา',
+                'menu_detail' => 'กุ้งสดทอดกรอบราดน้ำปลารสชาติเข้มข้น',
+                'menu_type_id' => 1,
+                'menu_price' => 180.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'ปลาหมึกทอดพริกไทย',
+                'menu_detail' => 'ปลาหมึกทอดกรอบราดพริกไทยดำ',
+                'menu_type_id' => 1,
+                'menu_price' => 160.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'เนื้อวัวทอดกระเทียม',
+                'menu_detail' => 'เนื้อวัวทอดกรอบคลุกกระเทียม',
+                'menu_type_id' => 1,
+                'menu_price' => 200.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'กุ้งทอดกรอบซีอิ๊วดำ',
+                'menu_detail' => 'กุ้งสดทอดกรอบราดซีอิ๊วดำหวาน',
+                'menu_type_id' => 1,
+                'menu_price' => 190.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'ปลาโอทอดพริกแกงเผ็ด',
+                'menu_detail' => 'ปลาโอทอดกรอบราดพริกแกงเผ็ด',
+                'menu_type_id' => 1,
+                'menu_price' => 170.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'กุ้งแม่น้ำทอดกระเทียม',
+                'menu_detail' => 'กุ้งแม่น้ำทอดกรอบคลุกกระเทียม',
+                'menu_type_id' => 1,
+                'menu_price' => 175.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'เนื้อแกะทอดพริกไทย',
+                'menu_detail' => 'เนื้อแกะทอดกรอบราดพริกไทยดำ',
+                'menu_type_id' => 1,
+                'menu_price' => 220.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'ปลาเนื้อขาวทอดซีอิ๊วขาว',
+                'menu_detail' => 'ปลาเนื้อขาวทอดกรอบราดซีอิ๊วขาว',
+                'menu_type_id' => 1,
+                'menu_price' => 160.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'เนื้อเป็ดทอดซอสกระเทียม',
+                'menu_detail' => 'เนื้อเป็ดทอดกรอบราดซอสกระเทียม',
+                'menu_type_id' => 1,
+                'menu_price' => 210.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
 
-            // ผัด
-            ['menu_name' => 'ผัดเผ็ดเนื้อ', 'menu_detail' => 'ผัดเผ็ดเนื้อกับพริกแกงเผ็ด', 'menu_type_id' => 2, 'menu_price' => 65.00, 'menu_status' => true, 'menu_image' => null],
-            ['menu_name' => 'ผัดกระเพราหมู', 'menu_detail' => 'หมูผัดกระเพราใส่กระเทียมและพริก', 'menu_type_id' => 2, 'menu_price' => 50.00, 'menu_status' => true, 'menu_image' => null],
-            ['menu_name' => 'ผัดฉ่ากุ้ง', 'menu_detail' => 'กุ้งผัดฉ่ารสจัดจ้าน', 'menu_type_id' => 2, 'menu_price' => 70.00, 'menu_status' => true, 'menu_image' => null],
+            // ประเภทที่ 2: ผัด (Stir-Fried)
+            [
+                'menu_name' => 'ผัดกระเพราไก่',
+                'menu_detail' => 'ไก่ผัดกระเพรากับพริกขี้หนูและใบโหระพา',
+                'menu_type_id' => 2,
+                'menu_price' => 140.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'ผัดกระเพรากุ้ง',
+                'menu_detail' => 'กุ้งผัดกระเพรารสเผ็ดจัดจ้าน',
+                'menu_type_id' => 2,
+                'menu_price' => 160.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'ผัดกระเพราเนื้อวัว',
+                'menu_detail' => 'เนื้อวัวผัดกระเพรากับพริกขี้หนูและใบโหระพา',
+                'menu_type_id' => 2,
+                'menu_price' => 180.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'ผัดพริกแกงกุ้งสด',
+                'menu_detail' => 'กุ้งสดผัดพริกแกงกุ้งสดกับเครื่องเทศ',
+                'menu_type_id' => 2,
+                'menu_price' => 170.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'ผัดกระเพางะปิ',
+                'menu_detail' => 'เนื้อไก่ผัดพริกแกงกะปิกับกระเทียม',
+                'menu_type_id' => 2,
+                'menu_price' => 150.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'ผัดกระเพาระเบิด',
+                'menu_detail' => 'ผัดกระเพรากับเนื้อวัวและพริกขี้หนูจำนวนมาก',
+                'menu_type_id' => 2,
+                'menu_price' => 190.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'ผัดกระเพ่าชะอม',
+                'menu_detail' => 'ชะอมผัดกับกระเพราและเนื้อปลา',
+                'menu_type_id' => 2,
+                'menu_price' => 160.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'ผัดกระเพารากุ้งแม่น้ำ',
+                'menu_detail' => 'กุ้งแม่น้ำผัดกระเพรากับพริกขี้หนู',
+                'menu_type_id' => 2,
+                'menu_price' => 175.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'ผัดกระเพางวัว',
+                'menu_detail' => 'เนื้อวัวผัดกระเพรารสเข้มข้น',
+                'menu_type_id' => 2,
+                'menu_price' => 185.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'ผัดกระเพารุ้งกระเทียม',
+                'menu_detail' => 'กุ้งผัดกระเพรากับกระเทียมสด',
+                'menu_type_id' => 2,
+                'menu_price' => 170.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
 
-            // แกง
-            ['menu_name' => 'แกงเขียวหวานไก่', 'menu_detail' => 'แกงเขียวหวานไก่ใส่กะทิและพริกแกงเขียวหวาน', 'menu_type_id' => 3, 'menu_price' => 60.00, 'menu_status' => true, 'menu_image' => null],
-            ['menu_name' => 'แกงส้มปลาชะอม', 'menu_detail' => 'แกงส้มใส่ปลากับชะอม', 'menu_type_id' => 3, 'menu_price' => 65.00, 'menu_status' => true, 'menu_image' => null],
-            ['menu_name' => 'แกงมัสมั่นเนื้อ', 'menu_detail' => 'แกงมัสมั่นเนื้อรสเข้มข้น', 'menu_type_id' => 3, 'menu_price' => 80.00, 'menu_status' => true, 'menu_image' => null],
+            // ประเภทที่ 3: แกง (Curry)
+            [
+                'menu_name' => 'แกงเขียวหวานไก่',
+                'menu_detail' => 'แกงเขียวหวานไก่ราดข้าวหอมมะลิ',
+                'menu_type_id' => 3,
+                'menu_price' => 160.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'แกงมัสมั่นเนื้อวัว',
+                'menu_detail' => 'แกงมัสมั่นเนื้อวัวรสหอมหวาน',
+                'menu_type_id' => 3,
+                'menu_price' => 200.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'แกงส้มกุ้งสด',
+                'menu_detail' => 'แกงส้มกุ้งสดรสเปรี้ยวหวาน',
+                'menu_type_id' => 3,
+                'menu_price' => 180.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'แกงเผ็ดปลาหมึก',
+                'menu_detail' => 'แกงเผ็ดปลาหมึกรสจัดจ้าน',
+                'menu_type_id' => 3,
+                'menu_price' => 190.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'แกงปักษ์ใต้ไก่',
+                'menu_detail' => 'แกงปักษ์ใต้ไก่รสเผ็ดและหอมสมุนไพร',
+                'menu_type_id' => 3,
+                'menu_price' => 170.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'แกงกะทิเนื้อแกะ',
+                'menu_detail' => 'แกงกะทิเนื้อแกะรสเข้มข้น',
+                'menu_type_id' => 3,
+                'menu_price' => 210.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'แกงแดงกุ้ง',
+                'menu_detail' => 'แกงแดงกุ้งรสเผ็ดและเข้มข้น',
+                'menu_type_id' => 3,
+                'menu_price' => 180.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'แกงต้มยำกุ้ง',
+                'menu_detail' => 'แกงต้มยำกุ้งรสเผ็ดเปรี้ยว',
+                'menu_type_id' => 3,
+                'menu_price' => 170.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'แกงส้มโอเนื้อวัว',
+                'menu_detail' => 'แกงส้มโอเนื้อวัวรสเปรี้ยวหวาน',
+                'menu_type_id' => 3,
+                'menu_price' => 200.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'แกงใบเตยไก่',
+                'menu_detail' => 'แกงใบเตยไก่รสหวานหอมมะกรูด',
+                'menu_type_id' => 3,
+                'menu_price' => 180.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
 
-            // ต้ม
-            ['menu_name' => 'ต้มยำกุ้ง', 'menu_detail' => 'ต้มยำกุ้งน้ำข้น', 'menu_type_id' => 4, 'menu_price' => 70.00, 'menu_status' => true, 'menu_image' => null],
-            ['menu_name' => 'ต้มข่าไก่', 'menu_detail' => 'ต้มข่าไก่ใส่กะทิ', 'menu_type_id' => 4, 'menu_price' => 55.00, 'menu_status' => true, 'menu_image' => null],
-            ['menu_name' => 'แกงจืดเต้าหู้หมูสับ', 'menu_detail' => 'แกงจืดใส่เต้าหู้และหมูสับ', 'menu_type_id' => 4, 'menu_price' => 45.00, 'menu_status' => true, 'menu_image' => null],
+            // ประเภทที่ 4: ต้ม (Boiled)
+            [
+                'menu_name' => 'ต้มยำกุ้ง',
+                'menu_detail' => 'ต้มยำกุ้งรสเผ็ดเปรี้ยว',
+                'menu_type_id' => 4,
+                'menu_price' => 150.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'ต้มจืดเนื้อวัว',
+                'menu_detail' => 'ต้มจืดเนื้อวัวใส่ผัก',
+                'menu_type_id' => 4,
+                'menu_price' => 130.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'ต้มข่าไก่',
+                'menu_detail' => 'ต้มข่าไก่รสหอมสมุนไพร',
+                'menu_type_id' => 4,
+                'menu_price' => 160.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'ต้มส้มกุ้งสด',
+                'menu_detail' => 'ต้มส้มกุ้งสดรสเปรี้ยวหวาน',
+                'menu_type_id' => 4,
+                'menu_price' => 170.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'ต้มปลาเนื้อขาว',
+                'menu_detail' => 'ต้มปลาเนื้อขาวรสเผ็ดจัดจ้าน',
+                'menu_type_id' => 4,
+                'menu_price' => 160.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'ต้มแซ่บเนื้อแกะ',
+                'menu_detail' => 'ต้มแซ่บเนื้อแกะรสเผ็ดเปรี้ยว',
+                'menu_type_id' => 4,
+                'menu_price' => 210.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'ต้มยำปลาหมึก',
+                'menu_detail' => 'ต้มยำปลาหมึกรสเผ็ดเปรี้ยว',
+                'menu_type_id' => 4,
+                'menu_price' => 180.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'ต้มขมิ้นกุ้ง',
+                'menu_detail' => 'ต้มขมิ้นกุ้งรสชาติเข้มข้น',
+                'menu_type_id' => 4,
+                'menu_price' => 170.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'ต้มจืดกุ้งแม่น้ำ',
+                'menu_detail' => 'ต้มจืดกุ้งแม่น้ำใส่ผัก',
+                'menu_type_id' => 4,
+                'menu_price' => 160.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'ต้มแซ่บไก่',
+                'menu_detail' => 'ต้มแซ่บไก่รสเผ็ดเปรี้ยว',
+                'menu_type_id' => 4,
+                'menu_price' => 150.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
 
-            // ยำ
-            ['menu_name' => 'ยำวุ้นเส้น', 'menu_detail' => 'ยำวุ้นเส้นรสจัดจ้าน', 'menu_type_id' => 5, 'menu_price' => 55.00, 'menu_status' => true, 'menu_image' => null],
-            ['menu_name' => 'ยำหมูยอ', 'menu_detail' => 'ยำหมูยอใส่พริกและน้ำมะนาว', 'menu_type_id' => 5, 'menu_price' => 50.00, 'menu_status' => true, 'menu_image' => null],
-            ['menu_name' => 'ยำไข่ดาว', 'menu_detail' => 'ยำไข่ดาวทอดกรอบ', 'menu_type_id' => 5, 'menu_price' => 45.00, 'menu_status' => true, 'menu_image' => null],
-        ]);
+            // ประเภทที่ 5: ยำ (Spicy Salad)
+            [
+                'menu_name' => 'ยำกุ้งสด',
+                'menu_detail' => 'ยำกุ้งสดรสเผ็ดเปรี้ยว',
+                'menu_type_id' => 5,
+                'menu_price' => 130.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'ยำปลาเนื้อขาว',
+                'menu_detail' => 'ยำปลาเนื้อขาวรสชาติเผ็ดเปรี้ยว',
+                'menu_type_id' => 5,
+                'menu_price' => 140.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'ยำเนื้อวัว',
+                'menu_detail' => 'ยำเนื้อวัวรสเผ็ดจัดจ้าน',
+                'menu_type_id' => 5,
+                'menu_price' => 160.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'ยำปลาหมึก',
+                'menu_detail' => 'ยำปลาหมึกรสเปรี้ยวเผ็ด',
+                'menu_type_id' => 5,
+                'menu_price' => 150.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'ยำกุ้งแม่น้ำ',
+                'menu_detail' => 'ยำกุ้งแม่น้ำรสเผ็ดและเปรี้ยว',
+                'menu_type_id' => 5,
+                'menu_price' => 140.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'ยำเนื้อแกะ',
+                'menu_detail' => 'ยำเนื้อแกะรสเผ็ดและหอมสมุนไพร',
+                'menu_type_id' => 5,
+                'menu_price' => 180.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'ยำกุ้งมังกร',
+                'menu_detail' => 'ยำกุ้งมังกรรสเปรี้ยวเผ็ด',
+                'menu_type_id' => 5,
+                'menu_price' => 200.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'ยำไก่ย่าง',
+                'menu_detail' => 'ยำไก่ย่างรสเผ็ดและเปรี้ยว',
+                'menu_type_id' => 5,
+                'menu_price' => 150.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'ยำปลากะพง',
+                'menu_detail' => 'ยำปลากะพงรสเปรี้ยวเผ็ด',
+                'menu_type_id' => 5,
+                'menu_price' => 170.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'ยำเนื้อเป็ด',
+                'menu_detail' => 'ยำเนื้อเป็ดรสเผ็ดเปรี้ยว',
+                'menu_type_id' => 5,
+                'menu_price' => 190.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
 
-        // Insert menu recipes
-        DB::table('menu_recipes')->insert([
-            // ไก่ทอดกระเทียมพริกไทย
-            ['menu_id' => 1, 'ingredient_id' => 27, 'Amount' => 0.5], // เนื้อไก่
-            ['menu_id' => 1, 'ingredient_id' => 32, 'Amount' => 0.05], // กระเทียม
-            ['menu_id' => 1, 'ingredient_id' => 8, 'Amount' => 0.02], // พริกไทยดำ
-
-            // หมูทอดน้ำปลา
-            ['menu_id' => 2, 'ingredient_id' => 2, 'Amount' => 0.5], // เนื้อหมู
-            ['menu_id' => 2, 'ingredient_id' => 16, 'Amount' => 0.05], // น้ำปลา
-
-            // ปลาทอดขมิ้น
-            ['menu_id' => 3, 'ingredient_id' => 4, 'Amount' => 0.5], // ข่า
-            ['menu_id' => 3, 'ingredient_id' => 7, 'Amount' => 0.05], // ใบมะกรูด
-            ['menu_id' => 3, 'ingredient_id' => 8, 'Amount' => 0.05], // พริกไทยดำ
-
-            // ผัดเผ็ดเนื้อ
-            ['menu_id' => 4, 'ingredient_id' => 3, 'Amount' => 0.3], // เนื้อวัว
-            ['menu_id' => 4, 'ingredient_id' => 12, 'Amount' => 0.1], // พริกแกงเผ็ด
-            ['menu_id' => 4, 'ingredient_id' => 19, 'Amount' => 0.1], // กะทิ
-
-            // ผัดกระเพราหมู
-            ['menu_id' => 5, 'ingredient_id' => 2, 'Amount' => 0.3], // เนื้อหมู
-            ['menu_id' => 5, 'ingredient_id' => 6, 'Amount' => 0.03], // กระเทียม
-            ['menu_id' => 5, 'ingredient_id' => 7, 'Amount' => 0.02], // ใบมะกรูด
-
-            // ผัดฉ่ากุ้ง
-            ['menu_id' => 6, 'ingredient_id' => 5, 'Amount' => 0.3], // กุ้ง
-            ['menu_id' => 6, 'ingredient_id' => 11, 'Amount' => 0.05], // พริกแกงฉ่า
-            ['menu_id' => 6, 'ingredient_id' => 8, 'Amount' => 0.02], // พริกไทยดำ
-
-            // แกงเขียวหวานไก่
-            ['menu_id' => 7, 'ingredient_id' => 1, 'Amount' => 0.3], // เนื้อไก่
-            ['menu_id' => 7, 'ingredient_id' => 11, 'Amount' => 0.1], // พริกแกงเขียวหวาน
-            ['menu_id' => 7, 'ingredient_id' => 19, 'Amount' => 0.2], // กะทิ
-
-            // แกงส้มปลาชะอม
-            ['menu_id' => 8, 'ingredient_id' => 4, 'Amount' => 0.3], // ข่า
-            ['menu_id' => 8, 'ingredient_id' => 1, 'Amount' => 0.3], // เนื้อปลา
-            ['menu_id' => 8, 'ingredient_id' => 17, 'Amount' => 0.05], // น้ำมะขามเปียก
-
-            // แกงมัสมั่นเนื้อ
-            ['menu_id' => 9, 'ingredient_id' => 3, 'Amount' => 0.3], // เนื้อวัว
-            ['menu_id' => 9, 'ingredient_id' => 14, 'Amount' => 0.1], // พริกแกงมัสมั่น
-            ['menu_id' => 9, 'ingredient_id' => 19, 'Amount' => 0.2], // กะทิ
-
-            // ต้มยำกุ้ง
-            ['menu_id' => 10, 'ingredient_id' => 5, 'Amount' => 0.3], // กุ้ง
-            ['menu_id' => 10, 'ingredient_id' => 6, 'Amount' => 0.03], // กระเทียม
-            ['menu_id' => 10, 'ingredient_id' => 7, 'Amount' => 0.03], // ใบมะกรูด
-            ['menu_id' => 10, 'ingredient_id' => 17, 'Amount' => 0.05], // น้ำมะขามเปียก
-
-            // ต้มข่าไก่
-            ['menu_id' => 11, 'ingredient_id' => 1, 'Amount' => 0.3], // เนื้อไก่
-            ['menu_id' => 11, 'ingredient_id' => 4, 'Amount' => 0.05], // ข่า
-            ['menu_id' => 11, 'ingredient_id' => 7, 'Amount' => 0.03], // ใบมะกรูด
-
-            // แกงจืดเต้าหู้หมูสับ
-            ['menu_id' => 12, 'ingredient_id' => 2, 'Amount' => 0.2], // เนื้อหมู
-            ['menu_id' => 12, 'ingredient_id' => 15, 'Amount' => 0.1], // เต้าหู้
-            ['menu_id' => 12, 'ingredient_id' => 6, 'Amount' => 0.02], // กระเทียม
-
-            // ยำวุ้นเส้น
-            ['menu_id' => 13, 'ingredient_id' => 18, 'Amount' => 0.1], // วุ้นเส้น
-            ['menu_id' => 13, 'ingredient_id' => 6, 'Amount' => 0.02], // กระเทียม
-            ['menu_id' => 13, 'ingredient_id' => 17, 'Amount' => 0.05], // น้ำมะขามเปียก
-
-            // ยำหมูยอ
-            ['menu_id' => 14, 'ingredient_id' => 2, 'Amount' => 0.2], // เนื้อหมู
-            ['menu_id' => 14, 'ingredient_id' => 15, 'Amount' => 0.1], // หมูยอ
-            ['menu_id' => 14, 'ingredient_id' => 17, 'Amount' => 0.05], // น้ำมะขามเปียก
-
-            // ยำไข่ดาว
-            ['menu_id' => 15, 'ingredient_id' => 19, 'Amount' => 0.1], // ไข่ดาว
-            ['menu_id' => 15, 'ingredient_id' => 6, 'Amount' => 0.02], // กระเทียม
-            ['menu_id' => 15, 'ingredient_id' => 17, 'Amount' => 0.05], // น้ำมะขามเปียก
-
-            // เพิ่มสูตรสำหรับเมนูอื่นๆ
-            // ...
+            // ประเภทที่ 6: ข้าว (Rice)
+            [
+                'menu_name' => 'ข้าวมันไก่',
+                'menu_detail' => 'ข้าวหอมมะลิหุงสุกมะนาวพร้อมกับไก่ต้ม',
+                'menu_type_id' => 6,
+                'menu_price' => 120.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'ข้าวหมกไก่',
+                'menu_detail' => 'ข้าวหอมมะลิหมกกับไก่และเครื่องเทศ',
+                'menu_type_id' => 6,
+                'menu_price' => 150.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'ข้าวผัดกระเพราไก่',
+                'menu_detail' => 'ข้าวหอมมะลิผัดกับไก่และกระเพรา',
+                'menu_type_id' => 6,
+                'menu_price' => 130.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'ข้าวมันปลาหมึก',
+                'menu_detail' => 'ข้าวหอมมะลิหุงพร้อมปลาหมึกต้ม',
+                'menu_type_id' => 6,
+                'menu_price' => 140.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'ข้าวห่อส้ม',
+                'menu_detail' => 'ข้าวเหนียวห่อในใบส้มราดน้ำจิ้ม',
+                'menu_type_id' => 6,
+                'menu_price' => 100.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'ข้าวผัดกุ้ง',
+                'menu_detail' => 'ข้าวหอมมะลิผัดกับกุ้งสดและเครื่องปรุงรส',
+                'menu_type_id' => 6,
+                'menu_price' => 140.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'ข้าวผัดเนื้อวัว',
+                'menu_detail' => 'ข้าวหอมมะลิผัดกับเนื้อวัวและพริกแกง',
+                'menu_type_id' => 6,
+                'menu_price' => 160.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'ข้าวกะเพราไก่',
+                'menu_detail' => 'ข้าวหอมมะลิราดกับไก่ผัดกะเพรา',
+                'menu_type_id' => 6,
+                'menu_price' => 130.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'ข้าวคลุกกะปิ',
+                'menu_detail' => 'ข้าวหอมมะลิคลุกกะปิพร้อมเนื้อสัตว์',
+                'menu_type_id' => 6,
+                'menu_price' => 150.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'menu_name' => 'ข้าวผัดกระเทียมกุ้ง',
+                'menu_detail' => 'ข้าวหอมมะลิผัดกับกุ้งและกระเทียมสด',
+                'menu_type_id' => 6,
+                'menu_price' => 140.00,
+                'menu_status' => true,
+                'menu_image' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
         ]);
     }
 }
-

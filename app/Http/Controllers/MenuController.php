@@ -137,7 +137,6 @@ class MenuController extends Controller
     public function destroy($id)
     {
         $menu = Menu::findOrFail($id);
-        // Soft delete the menu
         $menu->delete();
 
         return redirect()->route('menus.index')->with('success', 'เมนูถูกลบเรียบร้อยแล้ว');

@@ -15,4 +15,9 @@ class MenuAllocationDetail extends Model
     {
         return $this->belongsTo(MenuAllocation::class);
     }
+
+    public function menu()
+    {
+        return $this->belongsTo(Menu::class);
+    }
 }

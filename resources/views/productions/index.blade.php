@@ -19,6 +19,10 @@
                     </a>
                 </div>
         @endif
+        <a href="{{ route('allocations.index') }}" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+            View Menu Allocations
+        </a>
+        
         <form action="#" method="GET" class="flex-grow md:max-w-md">
             <div class="relative">
                 <input type="text" name="search" placeholder="ค้นหา..." value="{{ request('search') }}"
@@ -33,6 +37,7 @@
                 </button>
             </div>
         </form>
+
     </div>
 
     <!-- ส่วนของตาราง-->

@@ -9,10 +9,18 @@ class MenuAllocation extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['allocation_date'];
+    protected $fillable = ['allocation_date', 'menu_id'];
 
-    public function menuAllocationDetails()
+    // ความสัมพันธ์ระหว่าง MenuAllocation กับ Menu
+    public function menu()
+    {
+        return $this->belongsTo(Menu::class);
+    }
+
+    // ความสัมพันธ์ระหว่าง MenuAllocation กับ MenuAllocationDetail
+    public function allocationDetails()
     {
         return $this->hasMany(MenuAllocationDetail::class);
     }
+    
 }

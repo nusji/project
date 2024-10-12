@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Production;
+use App\Models\ProductionDetail;
 use App\Models\Menu;
 use App\Models\MenuRecipe;
 use App\Models\Ingredient;
@@ -123,11 +124,11 @@ class ProductionController extends Controller
     {
         // Load the related production details and menus using eager loading
         $production->load('productionDetails.menu');
-        
+
         // Pass the $production object to the view
         return view('productions.show', compact('production'));
     }
-    
+
 
 
     public function destroy($id)
@@ -159,5 +160,28 @@ class ProductionController extends Controller
             Log::error('Production destroy error: ' . $e->getMessage());
             return redirect()->route('productions.index')->with('error', 'เกิดข้อผิดพลาดในการยกเลิกรายการผลิต: ' . $e->getMessage());
         }
+    }
+
+    public function showWelcomePage()
+    {
+        // กำหนดวันที่วันนี้
+        $today = now()->startOfDay();
+
+        // ดึงข้อมูลจากตาราง production โดยใช้ created_at จากตาราง production
+        $menus = Production::whereDate('created_at', $today)
+            ->with(['productionDetails.menu'])  // เชื่อมโยงกับ production_details และ menu
+            ->get()
+            ->pluck('productionDetails.*.menu')  // ดึงเฉพาะข้อมูลเมนู
+            ->flatten();  // แบนข้อมูลเพื่อให้อยู่ในรูปแบบที่ง่ายต่อการใช้งาน
+
+        // ตรวจสอบว่าเมนูมีค่าของ menu_image
+        foreach ($menus as $menu) {
+            if (empty($menu->menu_image)) {
+                // แสดงข้อความเตือนถ้าภาพไม่มีการตั้งค่า
+                Log::warning('Menu ' . $menu->name . ' does not have an image.');
+            }
+        }
+
+        return view('welcome', compact('menus'));
     }
 }
