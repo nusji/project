@@ -6,22 +6,35 @@ use App\Models\Menu;
 use App\Models\MenuType;
 use App\Models\Ingredient;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class MenuController extends Controller
 {
     public function index(Request $request)
     {
+        // ดึงข้อมูลประเภทของเมนูสำหรับ chart
+        $menuTypes = Menu::select('menu_type_id')
+            ->selectRaw('count(*) as count')
+            ->groupBy('menu_type_id')
+            ->with('menuType') // เพิ่ม eager loading สำหรับ ingredient type
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'type' => $item->menuType->menu_type_name, // สมมติว่า ingredient type มี column 'ingredient_type_name'
+                    'count' => $item->count
+                ];
+            });
         // รับค่าการค้นหาจาก request
         $search = $request->input('search');
-    
+
         // ดึงเมนู โดยค้นหาตามชื่อหากมีการส่งค่าการค้นหา
         $menus = Menu::with('menuType')
             ->when($search, function ($query, $search) {
                 return $query->where('name', 'like', "%{$search}%"); // ค้นหาจากชื่อเมนู
             })
-            ->paginate(10);
-    
-        return view('menus.index', compact('menus', 'search')); // ส่ง $search ไปยัง view
+            ->paginate(20);
+
+        return view('menus.index', compact('menus', 'search','menuTypes'));
     }
     public function create()
     {
@@ -37,6 +50,7 @@ class MenuController extends Controller
             'menu_type_id' => 'required|exists:menu_types,id',
             'menu_price' => 'required|numeric|min:0',
             'menu_status' => 'required|boolean',
+            'menu_taste' => 'nullable|string',
             'menu_image' => 'nullable|image',
             'ingredients' => 'required|array',
             'ingredients.*.id' => 'required|exists:ingredients,id',
@@ -97,6 +111,7 @@ class MenuController extends Controller
             'menu_name' => 'required|string|max:255',
             'menu_detail' => 'nullable|string',
             'menu_type_id' => 'required|exists:menu_types,id',
+            'menu_taste' => 'nullable|string',
             'menu_price' => 'required|numeric|min:0',
             'menu_status' => 'required|boolean',
             'menu_image' => 'nullable|image',
@@ -114,6 +129,7 @@ class MenuController extends Controller
             'menu_type_id' => $validatedData['menu_type_id'],
             'menu_price' => $validatedData['menu_price'],
             'menu_status' => $validatedData['menu_status'],
+            'menu_taste' => $validatedData['menu_taste'],
         ]);
 
         // Handle image upload

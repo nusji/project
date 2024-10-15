@@ -11,6 +11,7 @@ use App\Models\ProductionDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 
 class SaleController extends Controller
@@ -36,7 +37,6 @@ class SaleController extends Controller
         return view('sales.create', compact('menus', 'categories', 'today'));
     }
 
-
     private function getProductionWithMenus($date)
     {
         return Production::whereDate('production_date', $date)
@@ -60,9 +60,24 @@ class SaleController extends Controller
         $date = Carbon::parse($request->date);
         $productions = $this->getProductionWithMenus($date);
         $menus = $this->getMenusFromProduction($productions);
-
+        
+        if ($productions->isEmpty()) {
+            return response()->json([
+                'menus' => [],
+                'date' => $date->format('Y-m-d'),
+                'message' => 'ไม่มีข้อมูลเมนูสำหรับวันที่เลือก'
+            ]);
+        }
         return response()->json([
-            'menus' => $menus,
+            'menus' => $menus->map(function ($menu) {
+                return [
+                    'id' => $menu->id,
+                    'name' => $menu->menu_name,
+                    'price' => $menu->menu_price,
+                    'image' => $menu->menu_image ? Storage::url($menu->menu_image) : null,
+                    'menu_type_id' => $menu->menu_type_id,
+                ];
+            }),
             'date' => $date->format('Y-m-d')
         ]);
     }
@@ -72,10 +87,10 @@ class SaleController extends Controller
     {
         $productionDetails = $production->productionDetails()->with('menu')->get();
         $selectedDate = $production->production_date->format('Y-m-d');
-    
+
         return view('sales.manage_sold_out', compact('productionDetails', 'selectedDate', 'production'));
     }
-    
+
 
     public function updateSoldOutStatus(Request $request, Production $production)
     {

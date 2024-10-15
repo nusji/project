@@ -36,8 +36,8 @@ class IngredientController extends Controller
         }
 
         // ดึงข้อมูลวัตถุดิบพร้อมแบ่งหน้า
-        $ingredients = $query->paginate(10);
-
+        $ingredients = $query->paginate(20);
+        
         // ดึงข้อมูลประเภทของวัตถุดิบสำหรับ chart
         $ingredientTypes = Ingredient::select('ingredient_type_id')
             ->selectRaw('count(*) as count')
@@ -51,8 +51,11 @@ class IngredientController extends Controller
                 ];
             });
 
+        // ดึงวัตถุดิบที่มีปริมาณต่ำกว่าหรือเท่ากับ minimum_quantity
+        $lowStockIngredients = Ingredient::whereColumn('ingredient_stock', '<=', 'minimum_quantity')->get();
+
         // ส่งข้อมูลไปยัง view
-        return view('ingredients.index', compact('ingredients', 'ingredientTypes'));
+        return view('ingredients.index', compact('ingredients', 'ingredientTypes', 'lowStockIngredients'));
     }
 
     public function create()
@@ -166,7 +169,7 @@ class IngredientController extends Controller
         if ($ingredient->menuRecipes()->exists()) {
             return redirect()->route('ingredients.index')->with('error', 'ไม่สามารถลบวัตถุดิบได้ เนื่องจากยังมีการใช้งานอยู่ในสูตรอาหาร');
         }
-    
+
         try {
             $ingredient->forceDelete(); // ลบถาวร
             return redirect()->route('ingredients.index')->with('success', 'ลบวัตถุดิบเรียบร้อยแล้ว');

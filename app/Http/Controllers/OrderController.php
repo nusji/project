@@ -66,6 +66,19 @@ class OrderController extends Controller
                 'order_receipt.image' => 'ไฟล์ที่อัปโหลดต้องเป็นรูปภาพเท่านั้น',
                 'order_receipt.mimes' => 'ไฟล์ที่อัปโหลดต้องเป็นไฟล์ประเภท jpeg, png, jpg, gif, svg เท่านั้น',
                 'order_receipt.max' => 'ไฟล์ที่อัปโหลดต้องมีขนาดไม่เกิน 2 MB',
+                'ingredients.required' => 'โปรดเลือกวัตถุดิบที่ต้องการสั่งซื้อ',
+                'ingredients.*.id.required' => 'ข้อมูลวัตถุดิบไม่ถูกต้อง',
+                'ingredients.*.id.exists' => 'ข้อมูลวัตถุดิบไม่ถูกต้อง',
+                'ingredients.*.quantity.required' => 'โปรดกรอกจำนวนวัตถุดิบ',
+                'ingredients.*.quantity.numeric' => 'จำนวนวัตถุดิบต้องเป็นตัวเลข',
+                'ingredients.*.quantity.min' => 'จำนวนวัตถุดิบต้องมากกว่า 0',
+                'ingredients.*.price.required' => 'โปรดกรอกราคาวัตถุดิบ',
+                'ingredients.*.price.numeric' => 'ราคาวัตถุดิบต้องเป็นตัวเลข',
+                'ingredients.*.price.min' => 'ราคาวัตถุดิบต้องมากกว่า 0',
+                'order_date.required' => 'โปรดเลือกวันที่สั่งซื้อ',
+                'order_date.date' => 'รูปแบบวันที่ไม่ถูกต้อง',
+                'order_detail.required' => 'โปรดกรอกรายละเอียดการสั่งซื้อ',
+
             ]
         );
 

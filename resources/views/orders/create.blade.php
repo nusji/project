@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('content')
-    <div class="py-6">
+    <div class="py-0">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <x-breadcrumb :paths="[
                 ['label' => 'ระบบสั่งซื้อวัตถุดิบ', 'url' => route('orders.index')],
@@ -49,26 +49,31 @@
                             <label for="order_detail"
                                 class="block text-sm font-medium text-gray-700 mb-2">รายละเอียดการสั่งซื้อ</label>
                             <textarea name="order_detail" id="order_detail" rows="3"
-                                class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                required>{{ old('order_detail') }}</textarea>
+                                class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">{{ old('order_detail') }}</textarea>
                             @error('order_detail')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
                         </div>
                         <div class="mb-4">
-                            <div class="container mx-auto px-4">
+                            <div class="container mx-auto px-4 border-2 rounded-md p-2">
                                 <div class="flex flex-wrap -mx-4">
                                     <!-- คอลัมน์สำหรับอัปโหลดรูปภาพ -->
-                                    <div class="w-full md:w-1/2 px-4 mb-4">
+                                    <div class="w-full md:w-1/2 px-4 mb-4 ">
                                         <label for="order_receipt"
                                             class="block text-sm font-medium text-gray-700 mb-2">แนบรูปใบเสร็จ</label>
-                                        <div class="flex items-center">
-                                            <label for="order_receipt" class="flex items-center cursor-pointer">
-                                                <span
-                                                    class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-l-md">เลือกไฟล์</span>
-                                                <input type="file" name="order_receipt" id="order_receipt"
-                                                    accept="image/*" class="hidden">
+                                        <div class="flex items-center ">
+                                            <label for="order_receipt"
+                                                class="flex items-center cursor-pointer bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md transition duration-300 ease-in-out">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2"
+                                                    viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fill-rule="evenodd"
+                                                        d="M4 3a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V4a1 1 0 00-1-1H4zm3 5a1 1 0 112 0 1 1 0 11-2 0zm3-2a2 2 0 100 4 2 2 0 000-4zm3 2a1 1 0 110-2 1 1 0 010 2z"
+                                                        clip-rule="evenodd" />
+                                                </svg>
+                                                เลือกไฟล์
                                             </label>
+                                            <input type="file" name="order_receipt" id="order_receipt" accept="image/*"
+                                                class="hidden">
                                             <span id="file-name" class="ml-4 text-gray-600">ยังไม่ได้เลือกไฟล์</span>
                                         </div>
                                         @error('order_receipt')
@@ -76,12 +81,13 @@
                                         @enderror
                                     </div>
 
-
                                     <!-- คอลัมน์สำหรับแสดงรูปภาพ -->
-                                    <div class="w-full md:w-1/2 px-4 mb-4">
-                                        <div id="image-preview-container" style="display: none;">
-                                            <img id="image-preview" class="w-32 h-32 object-cover rounded cursor-pointer"
-                                                alt="Preview" onclick="openModal()">
+                                    <div class="w-full md:w-1/4 px-4 mb-4">
+                                        <div id="image-preview-container"
+                                            class="border border-gray-300 rounded-lg overflow-hidden bg-gray-50 p-4 hidden">
+                                            <img id="image-preview"
+                                                class="w-full h-auto object-cover rounded cursor-pointer" alt="Preview"
+                                                onclick="openModal()">
                                         </div>
                                     </div>
                                 </div>
@@ -90,14 +96,13 @@
                             <!-- Modal -->
                             <div id="imageModal" class="fixed z-10 inset-0 overflow-y-auto hidden"
                                 aria-labelledby="modal-title" role="dialog" aria-modal="true">
-                                <div
-                                    class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                                <div class="flex items-center justify-center min-h-screen px-4 text-center sm:block sm:p-0">
                                     <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
                                         aria-hidden="true"></div>
                                     <span class="hidden sm:inline-block sm:align-middle sm:h-screen"
                                         aria-hidden="true">&#8203;</span>
                                     <div
-                                        class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                                        class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:align-middle sm:max-w-lg sm:w-full">
                                         <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                                             <img id="modalImage" class="w-full h-auto" alt="Full size preview">
                                         </div>
@@ -116,6 +121,7 @@
                                 document.getElementById('order_receipt').addEventListener('change', function(event) {
                                     const input = event.target;
                                     const file = input.files[0];
+                                    const fileNameElement = document.getElementById('file-name');
 
                                     if (file) {
                                         const reader = new FileReader();
@@ -126,9 +132,12 @@
 
                                             imagePreview.src = e.target.result;
                                             modalImage.src = e.target.result;
-                                            previewContainer.style.display = 'block';
+                                            previewContainer.classList.remove('hidden');
+                                            fileNameElement.textContent = file.name;
                                         };
                                         reader.readAsDataURL(file);
+                                    } else {
+                                        fileNameElement.textContent = 'ยังไม่ได้เลือกไฟล์';
                                     }
                                 });
 
@@ -148,7 +157,7 @@
                                 <input type="text" id="ingredient-search" placeholder="ค้นหาวัตถุดิบ"
                                     class="flex-grow mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                                 <button type="button" id="search-ingredient"
-                                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">
+                                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-10 rounded-md">
                                     ค้นหา
                                 </button>
                             </div>
@@ -189,12 +198,22 @@
                                         </div>
                                     @endforeach
                                 @endif
+
+                                @error('ingredients')
+                                    <p class="text-red-500 text-sm">{{ $message }}</p>
+                                @enderror
                             </div>
                         </div>
 
                         <div class="flex items-center justify-end mt-6">
                             <button type="submit"
-                                class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full">
+                                class="inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150 ease-in-out">
+                                <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                    fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd"
+                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                        clip-rule="evenodd" />
+                                </svg>
                                 บันทึกรายการสั่งซื้อ
                             </button>
                         </div>

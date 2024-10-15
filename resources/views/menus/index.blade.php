@@ -3,8 +3,15 @@
     <div class="container mx-auto px-4 py-0">
         <!-- เรียกใช้ breadcrumb component -->
         <x-breadcrumb :paths="[['label' => 'ระบบเมนูข้าวแกง', 'url' => route('menus.index')], ['label' => '']]" />
-
         <h2 class="text-2xl font-bold text-gray-800 mb-4">ระบบจัดการเมนูข้าวแกง</h2>
+        <div class="bg-white shadow-lg rounded-lg p-6 flex flex-col h-full mb-2">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">วัตถุดิบตามประเภท</h3>
+
+            <div class="flex-grow">
+                <canvas id="menuTypeChart"></canvas>
+            </div>
+
+        </div>
         <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0 md:space-x-4">
             @if (auth()->user()->role === 'owner')
             <div class="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
@@ -168,4 +175,38 @@
             {{ $menus->links() }}
         </div>
     </div>
+
+    <script>
+         document.addEventListener('DOMContentLoaded', function() {
+            var ctx = document.getElementById('menuTypeChart').getContext('2d');
+            var data = @json($menuTypes);
+
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.map(item => item.type),
+                    datasets: [{
+                        data: data.map(item => item.count),
+                        backgroundColor: [
+                            '#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8',
+                            '#82ca9d', '#a4de6c', '#d0ed57', '#ffc658', '#8884d8'
+                        ],
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        },
+                        title: {
+                            display: true,
+                            text: 'วัตถุดิบตามประเภท'
+                        }
+                    }
+                }
+            });
+        });
+    </script>
 @endsection

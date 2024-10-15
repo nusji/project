@@ -27,24 +27,64 @@
                                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                             @enderror
                         </div>
-                        <div class="mb-4">
-                            <label for="menu_type_id" class="block text-sm font-medium text-gray-700">ประเภทเมนู</label>
-                            <select name="menu_type_id" id="menu_type_id"
-                                class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                                @if ($menuTypes->isEmpty())
-                                    <option disabled>ไม่พบประเภท กรุณาเพิ่มประเภทก่อน</option>
-                                @else
-                                    @foreach ($menuTypes as $menuType)
-                                        <option value="{{ $menuType->id }}"
-                                            {{ old('menu_type_id') == $menuType->id ? 'selected' : '' }}>
-                                            {{ $menuType->menu_type_name }}</option>
-                                    @endforeach
-                                @endif
-                            </select>
-                            @error('menu_type_id')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
+                        <div class="mb-4 grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="menu_type_id" class="block text-sm font-medium text-gray-700">ประเภทเมนู</label>
+                                <select name="menu_type_id" id="menu_type_id"
+                                    class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                    @if ($menuTypes->isEmpty())
+                                        <option disabled>ไม่พบประเภท กรุณาเพิ่มประเภทก่อน</option>
+                                    @else
+                                        @foreach ($menuTypes as $menuType)
+                                            <option value="{{ $menuType->id }}"
+                                                {{ old('menu_type_id') == $menuType->id ? 'selected' : '' }}>
+                                                {{ $menuType->menu_type_name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                @error('menu_type_id')
+                                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div class="">
+                                <label for="menu_taste" class="block text-sm font-medium text-gray-700">รสชาติหลัก</label>
+                                <div class="mt-2 flex space-x-2">
+                                    <label>
+                                        <input type="radio" name="menu_taste" value="หวาน" class="hidden peer"
+                                            {{ old('menu_taste') == 'หวาน' ? 'checked' : '' }}>
+                                        <span
+                                            class="inline-block px-4 py-2 bg-white text-gray-800 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500 peer-checked:bg-green-500 peer-checked:text-white peer-checked:ring-2 peer-checked:ring-green-500">หวาน</span>
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="menu_taste" value="เค็ม" class="hidden peer"
+                                            {{ old('menu_taste') == 'เค็ม' ? 'checked' : '' }}>
+                                        <span
+                                            class="inline-block px-4 py-2 bg-white text-gray-800 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500 peer-checked:bg-green-500 peer-checked:text-white peer-checked:ring-2 peer-checked:ring-green-500">เค็ม</span>
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="menu_taste" value="เปรี้ยว" class="hidden peer"
+                                            {{ old('menu_taste') == 'เปรี้ยว' ? 'checked' : '' }}>
+                                        <span
+                                            class="inline-block px-4 py-2 bg-white text-gray-800 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500 peer-checked:bg-green-500 peer-checked:text-white peer-checked:ring-2 peer-checked:ring-green-500">เปรี้ยว</span>
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="menu_taste" value="เผ็ด" class="hidden peer"
+                                            {{ old('menu_taste') == 'เผ็ด' ? 'checked' : '' }}>
+                                        <span
+                                            class="inline-block px-4 py-2 bg-white text-gray-800 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500 peer-checked:bg-green-500 peer-checked:text-white peer-checked:ring-2 peer-checked:ring-green-500">เผ็ด</span>
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="menu_taste" value="จืด" class="hidden peer"
+                                            {{ old('menu_taste') == 'จืด' ? 'checked' : '' }}>
+                                        <span
+                                            class="inline-block px-4 py-2 bg-white text-gray-800 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500 peer-checked:bg-green-500 peer-checked:text-white peer-checked:ring-2 peer-checked:ring-green-500">จืด</span>
+                                    </label>
+                                </div>
+                            </div>
                         </div>
+
+
                         <div class="flex space-x-4">
                             <!-- ราคาต่อทัพพี -->
                             <div class="w-1/3">
@@ -70,20 +110,61 @@
                                 @enderror
                             </div>
 
-                            <!-- รูปเมนู -->
-                            <div class="w-1/3">
-                                <label for="menu_image" class="block text-sm font-medium text-gray-700">รูปเมนู</label>
-                                <input type="file" name="menu_image" id="menu_image"
-                                    class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            <div class="w-full max-w-md">
+                                <label for="menu_image" class="block text-sm font-medium text-gray-700 mb-2">
+                                    รูปเมนู
+                                </label>
+                                <div class="mt-1 flex items-center space-x-4">
+                                    <div id="image_container" class="flex-shrink-0 w-24 h-24 border border-gray-300 rounded-md overflow-hidden bg-gray-100 flex items-center justify-center">
+                                        <svg id="upload_icon" class="h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                        <img id="image_preview" class="w-full h-full object-cover hidden" alt="Preview">
+                                    </div>
+                                    <div class="flex-grow">
+                                        <label for="menu_image" class="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                            <svg class="-ml-1 mr-2 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                            เลือกรูปภาพ
+                                        </label>
+                                        <input id="menu_image" name="menu_image" type="file" class="sr-only" accept="image/*">
+                                        <p id="file_name" class="mt-2 text-sm text-gray-500"></p>
+                                    </div>
+                                </div>
                                 @error('menu_image')
                                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
+
+                            <script>
+                                document.getElementById('menu_image').addEventListener('change', function(event) {
+                                    const file = event.target.files[0];
+                                    const uploadIcon = document.getElementById('upload_icon');
+                                    const imagePreview = document.getElementById('image_preview');
+                                    const fileName = document.getElementById('file_name');
+                                    
+                                    if (file) {
+                                        const reader = new FileReader();
+                                        reader.onload = function(e) {
+                                            imagePreview.src = e.target.result;
+                                            uploadIcon.classList.add('hidden');
+                                            imagePreview.classList.remove('hidden');
+                                        }
+                                        reader.readAsDataURL(file);
+                                        fileName.textContent = 'ไฟล์ที่เลือก: ' + file.name;
+                                    } else {
+                                        uploadIcon.classList.remove('hidden');
+                                        imagePreview.classList.add('hidden');
+                                        fileName.textContent = '';
+                                    }
+                                });
+                                </script>
                         </div>
 
                         <div class="mb-6">
                             <label class="block text-sm font-medium text-gray-700 mb-2">วัตถุดิบที่ใช้</label>
-                            <p class="text-sm text-gray-600 mb-4">สูตรอาหารต่อ 1 กิโล จะได้ 10 ทัพพี ต่อ 1 กิโลกรัม</p>
+                            <p class="text-sm text-gray-600 mb-4">สูตรอาหารต่อ 1 กิโล</p>
                             <div class="flex space-x-2 mb-4">
                                 <input type="text" id="ingredient-search" placeholder="ค้นหาวัตถุดิบ"
                                     class="flex-grow mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
@@ -104,7 +185,8 @@
                                                 class="flex-grow">{{ $ingredients->firstWhere('id', $ingredient['id'])->ingredient_name }}</span>
                                             <div class="flex items-center space-x-2">
                                                 <input type="number" name="ingredients[{{ $index }}][amount]"
-                                                    step="0.01" placeholder="จำนวน" value="{{ $ingredient['amount'] }}"
+                                                    step="0.01" placeholder="จำนวน"
+                                                    value="{{ $ingredient['amount'] }}"
                                                     class="w-24 py-1 px-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                                                     required>
                                                 <span
@@ -125,7 +207,13 @@
                         </div>
                         <div class="flex items-center justify-end mt-6">
                             <button type="submit"
-                                class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                                class="inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150 ease-in-out">
+                                <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                    fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd"
+                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                        clip-rule="evenodd" />
+                                </svg>
                                 บันทึกเมนูใหม่
                             </button>
                         </div>

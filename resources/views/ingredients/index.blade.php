@@ -11,44 +11,37 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="bg-white shadow-lg rounded-lg p-6 flex flex-col h-full">
                     <h3 class="text-xl font-semibold text-gray-800 mb-4">วัตถุดิบตามประเภท</h3>
+
                     <div class="flex-grow">
                         <canvas id="ingredientTypeChart"></canvas>
                     </div>
+
                 </div>
 
                 <div class="bg-white shadow-lg rounded-lg p-6 flex flex-col h-full">
                     <h3 class="text-xl font-semibold text-gray-800 mb-4">วัตถุดิบเหลือน้อย</h3>
                     <div class="space-y-3 flex-grow overflow-y-auto">
-                        @php
-                            $lowStockCount = 0;
-                        @endphp
-                        @forelse ($ingredients as $ingredient)
-                            @if ($ingredient->ingredient_stock <= $ingredient->minimum_quantity)
-                                @if ($lowStockCount < 4)
-                                    <div
-                                        class="flex items-center justify-between bg-red-50 border border-red-200 rounded-lg p-3">
-                                        <div>
-                                            <p class="text-sm font-medium text-gray-700">{{ $ingredient->ingredient_name }}
-                                            </p>
-                                        </div>
-                                        <div class="text-right">
-                                            <p class="text-sm font-bold text-red-600">เหลือ:
-                                                {{ $ingredient->ingredient_stock }} {{ $ingredient->ingredient_unit }}</p>
-                                        </div>
+                        @forelse ($lowStockIngredients as $ingredient)
+                            @if ($loop->index < 4)
+                                <div
+                                    class="flex items-center justify-between bg-red-50 border border-red-200 rounded-lg p-3">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-700">{{ $ingredient->ingredient_name }}</p>
+                                        <p class="text-xs text-gray-500">ปริมาณต่ำสุด: {{ $ingredient->minimum_quantity }}
+                                            {{ $ingredient->ingredient_unit }}</p>
                                     </div>
-                                    @php
-                                        $lowStockCount++;
-                                    @endphp
-                                @endif
+                                    <div class="text-right">
+                                        <p class="text-sm font-bold text-red-600">เหลือ: {{ $ingredient->ingredient_stock }}
+                                            {{ $ingredient->ingredient_unit }}</p>
+                                    </div>
+                                </div>
                             @endif
                         @empty
                             <p class="text-sm text-gray-500 italic">ไม่มีวัตถุดิบที่เหลือน้อยในขณะนี้</p>
                         @endforelse
                     </div>
-                    @if (
-                        $ingredients->filter(function ($ingredient) {
-                                return $ingredient->ingredient_stock <= $ingredient->minimum_quantity;
-                            })->count() > 4)
+
+                    @if ($lowStockIngredients->count() > 4)
                         <div class="mt-4">
                             <button id="viewMoreBtn"
                                 class="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">ดูเพิ่มเติม</button>
@@ -58,34 +51,27 @@
             </div>
 
             <!-- Modal -->
-            <div id="ingredientModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full">
+            <div id="ingredientModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
                 <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
                     <div class="mt-3 text-center">
                         <h3 class="text-lg leading-6 font-medium text-gray-900">วัตถุดิบเหลือน้อยทั้งหมด</h3>
                         <div class="mt-2 px-7 py-3 max-h-96 overflow-y-auto">
-                            @foreach ($ingredients as $ingredient)
-                                @if ($ingredient->ingredient_stock <= $ingredient->minimum_quantity)
-                                    <div
-                                        class="flex items-center justify-between bg-red-50 border border-red-200 rounded-lg p-3 mb-3">
-                                        <div>
-                                            <p class="text-sm font-medium text-gray-700">
-                                                {{ $ingredient->ingredient_name }}</p>
-                                            <p class="text-xs text-gray-500">ปริมาณต่ำสุด:
-                                                {{ $ingredient->minimum_quantity }}
-                                                {{ $ingredient->ingredient_unit }}</p>
-                                        </div>
-                                        <div class="text-right">
-                                            <p class="text-sm font-bold text-red-600">เหลือ:
-                                                {{ $ingredient->ingredient_stock }}
-                                                {{ $ingredient->ingredient_unit }}</p>
-                                            <p class="text-xs text-red-500">
-                                                ต่ำกว่าขั้นต่ำ
-                                                {{ $ingredient->minimum_quantity - $ingredient->ingredient_stock }}
-                                                {{ $ingredient->ingredient_unit }}
-                                            </p>
-                                        </div>
+                            @foreach ($lowStockIngredients as $ingredient)
+                                <div
+                                    class="flex items-center justify-between bg-red-50 border border-red-200 rounded-lg p-3 mb-3">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-700">{{ $ingredient->ingredient_name }}</p>
+                                        <p class="text-xs text-gray-500">ปริมาณต่ำสุด: {{ $ingredient->minimum_quantity }}
+                                            {{ $ingredient->ingredient_unit }}</p>
                                     </div>
-                                @endif
+                                    <div class="text-right">
+                                        <p class="text-sm font-bold text-red-600">เหลือ: {{ $ingredient->ingredient_stock }}
+                                            {{ $ingredient->ingredient_unit }}</p>
+                                        <p class="text-xs text-red-500">ต่ำกว่าขั้นต่ำ
+                                            {{ $ingredient->minimum_quantity - $ingredient->ingredient_stock }}
+                                            {{ $ingredient->ingredient_unit }}</p>
+                                    </div>
+                                </div>
                             @endforeach
                         </div>
                         <div class="items-center px-4 py-3">
@@ -97,6 +83,7 @@
                     </div>
                 </div>
             </div>
+
 
             <script>
                 document.addEventListener('DOMContentLoaded', function() {
@@ -175,7 +162,8 @@
                             ชื่อวัตถุดิบ</option>
                         <option value="ingredient_stock" {{ request('orderBy') === 'ingredient_stock' ? 'selected' : '' }}>
                             จำนวนคงเหลือ</option>
-                        <option value="ingredient_type_id" {{ request('orderBy') === 'ingredient_type_id' ? 'selected' : '' }}>
+                        <option value="ingredient_type_id"
+                            {{ request('orderBy') === 'ingredient_type_id' ? 'selected' : '' }}>
                             ประเภทวัตถุดิบ</option>
                     </select>
                     <select name="direction" id="direction"
@@ -249,7 +237,7 @@
                                     <span class="bg-green-200 text-green-600 py-1 px-3 rounded-full text-xs">
                                         {{ $ingredient->ingredient_unit }}
                                     </span>
-                                    
+
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-center text-orange-500 font-bold">
                                     <span id="quantity-{{ $ingredient->id }}">{{ $ingredient->minimum_quantity }}</span>
@@ -315,7 +303,7 @@
             Swal.fire({
                 title: 'คุณแน่ใจหรือไม่?',
                 html: 'การลบรายการวัตถุดิบจะไม่สามารถกู้คืนได้!<br><br>' +
-                '<span style="color: red; font-weight: bold;"></span>',
+                    '<span style="color: red; font-weight: bold;"></span>',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',

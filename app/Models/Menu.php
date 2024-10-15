@@ -18,6 +18,7 @@ class Menu extends Model
         'menu_type_id',
         'menu_price',
         'menu_status',
+        'menu_taste',
         'menu_image',
     ];
 

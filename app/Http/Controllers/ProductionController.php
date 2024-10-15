@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Production;
 use App\Models\ProductionDetail;
 use App\Models\Menu;
+use App\Models\MenuType;
 use App\Models\MenuRecipe;
 use App\Models\Ingredient;
 use Illuminate\Http\Request;
@@ -22,7 +23,8 @@ class ProductionController extends Controller
     public function create()
     {
         $menus = Menu::all(); // Assuming you have a Menu model
-        return view('productions.create', compact('menus'));
+        $menuCategories = MenuType::all(); // MenuCategory เป็นโมเดลของตารางประเภทเมนู
+        return view('productions.create', compact('menus', 'menuCategories'));
     }
 
     public function store(Request $request)
@@ -184,4 +186,28 @@ class ProductionController extends Controller
 
         return view('welcome', compact('menus'));
     }
+
+    public function showMenuToday()
+    {
+        // กำหนดวันที่วันนี้
+        $today = now()->startOfDay();
+
+        // ดึงข้อมูลจากตาราง production โดยใช้ created_at จากตาราง production
+        $menus = Production::whereDate('created_at', $today)
+            ->with(['productionDetails.menu'])  // เชื่อมโยงกับ production_details และ menu
+            ->get()
+            ->pluck('productionDetails.*.menu')  // ดึงเฉพาะข้อมูลเมนู
+            ->flatten();  // แบนข้อมูลเพื่อให้อยู่ในรูปแบบที่ง่ายต่อการใช้งาน
+
+        // ตรวจสอบว่าเมนูมีค่าของ menu_image
+        foreach ($menus as $menu) {
+            if (empty($menu->menu_image)) {
+                // แสดงข้อความเตือนถ้าภาพไม่มีการตั้งค่า
+                Log::warning('Menu ' . $menu->name . ' does not have an image.');
+            }
+        }
+
+        return view('menu-today', compact('menus'));
+    }
+
 }

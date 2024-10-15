@@ -16,21 +16,24 @@ use App\Http\Controllers\SalaryController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\MenuAllocationController;
 
-
 Route::get('/', function () {
     return view('welcome');
 });
 Route::get('/no-access', function () {
     return view('no-access');
 });
+
 // สร้าง Route สำหรับการล็อกอินและล็อกเอาท์
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // สร้าง Route สำหรับการลงทะเบียนและยืนยันการลงทะเบียน
-Route::get('/profile/complete', [ProfileController::class, 'showCompleteForm'])->name('employees.complete_profile');
-Route::post('/profile/complete', [ProfileController::class, 'completeProfile'])->name('employees.update_profile');
+Route::get('/profile/complete', [ProfileController::class, 'showCompleteForm'])->name('employees.complete_profile')->middleware('auth');
+Route::post('/profile/complete', [ProfileController::class, 'completeProfile'])->name('employees.update_profile')->middleware('auth');
+
+//Route for Guest
+Route::get('/menu-today', [ProductionController::class, 'showMenuToday'])->name('menu-today');
 
 //สิทธิ์เฉพาะสำหรับพนักงานเท่านั้น
 Route::middleware(['auth', 'role:employee', 'check.profile'])->group(function () {
@@ -56,7 +59,8 @@ Route::get('/password/reset-custom', [ProfileController::class, 'showCustomPassw
 Route::post('/password/reset-custom', [ProfileController::class, 'resetPasswordWithVerification'])->name('profile.reset_custom.post');
 
 use App\Http\Controllers\FeedbackController;
-Route::resource('feedbacks',FeedbackController::class);
+
+Route::resource('feedbacks', FeedbackController::class);
 
 use App\Http\Controllers\ReportController;
 use App\Models\Production;
@@ -65,6 +69,7 @@ Route::get('reports', [ReportController::class, 'index'])->name('reports.index')
 
 Route::get('/', [ProductionController::class, 'showWelcomePage'])->name('welcome');
 
+Route::get('/sales/menus-by-date', [SaleController::class, 'getMenusByDate'])->name('sales.menusByDate');
 
 //สิทธิ์เฉพาะสำหรับเจ้าของร้านและพนักงานเท่านั้น
 Route::middleware(['auth', 'check.profile'])->group(function () {

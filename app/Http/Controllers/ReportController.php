@@ -27,25 +27,25 @@ class ReportController extends Controller
     protected function getTopSellingMenus()
     {
         return ProductionDetail::select('menu_id', DB::raw('SUM(quantity) as total_sold'))
-                    ->groupBy('menu_id')
-                    ->orderBy('total_sold', 'desc')
-                    ->take(5)
-                    ->with('menu')
-                    ->get();
+            ->groupBy('menu_id')
+            ->orderBy('total_sold', 'desc')
+            ->take(5)
+            ->with('menu')
+            ->get();
     }
-    
+
 
     // เมนูที่ขายได้น้อยที่สุด
     protected function getLeastSellingMenus()
     {
         return ProductionDetail::select('menu_id', DB::raw('SUM(quantity) as total_sold'))
-                    ->groupBy('menu_id')
-                    ->orderBy('total_sold', 'asc')
-                    ->take(5)
-                    ->with('menu')
-                    ->get();
+            ->groupBy('menu_id')
+            ->orderBy('total_sold', 'asc')
+            ->take(5)
+            ->with('menu')
+            ->get();
     }
-    
+
 
     protected function getMostUsedIngredients()
     {
@@ -53,13 +53,13 @@ class ReportController extends Controller
         return DB::table('production_details')
             ->join('menu_recipes', 'production_details.menu_id', '=', 'menu_recipes.menu_id') // เชื่อมต่อกับ menu_recipes
             ->join('ingredients', 'menu_recipes.ingredient_id', '=', 'ingredients.id') // เชื่อมต่อกับ ingredients
-            ->select('ingredients.ingredient_name', DB::raw('sum(menu_recipes.amount * production_details.quantity) as total_used'))
+            ->select('ingredients.ingredient_name', DB::raw('count(production_details.menu_id) as total_used'))
             ->groupBy('ingredients.ingredient_name')
             ->orderBy('total_used', 'desc')
             ->take(5)
             ->get();
     }
-    
+
 
     protected function getDailySales()
     {
@@ -71,5 +71,4 @@ class ReportController extends Controller
             ->take(7)
             ->get();
     }
-    
 }
