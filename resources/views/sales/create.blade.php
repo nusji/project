@@ -6,7 +6,7 @@
             <div class="bg-white overflow-hidden">
                 <div class="flex">
                     <!-- ซ้าย: รายการเมนู -->
-                    <div class="w-2/3 p-4">
+                    <div class="w-2/3 p-4 min-h-screen pb-24">
                         <div class="mb-4">
                             <div class="flex justify-between items-center mb-2">
                                 <h2 class="text-2xl font-bold" id="menu-title">เมนูวันที่ <span
@@ -20,25 +20,14 @@
                                     </button>
                                 </div>
                             </div>
-                            <!-- เพิ่มส่วนของประเภทเมนู -->
-                            <div class="mb-4">
-                                <h3 class="text-xl font-semibold mb-2">ประเภทเมนู</h3>
-                                <div class="flex space-x-2" id="category-buttons">
-                                    <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
-                                        onclick="filterMenuItems('all')">ทั้งหมด</button>
-                                    @foreach ($categories as $category)
-                                        <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
-                                            onclick="filterMenuItems({{ $category->id }})">{{ $category->menu_type_name }}</button>
-                                    @endforeach
-                                </div>
-                            </div>
+
                             <div class="grid grid-cols-5 gap-4" id="menu-items-container">
                                 @foreach ($menus as $menu)
                                     <div class="bg-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-200 transition menu-item"
                                         data-category="{{ $menu->menu_type_id }}" onclick="addToCart({{ $menu->id }})">
                                         @if ($menu->menu_image)
                                             <img src="{{ Storage::url($menu->menu_image) }}" alt="{{ $menu->menu_name }}"
-                                                class="menu-image h-10 w-10">
+                                                class="menu-image h-10 w-10 rounded-md">
                                         @endif
                                         <h3 class="font-semibold">{{ $menu->menu_name }}</h3>
                                         <p class="text-gray-600">{{ number_format($menu->menu_price, 2) }} บาท</p>
@@ -47,9 +36,19 @@
                             </div>
                         </div>
                     </div>
-
+                    <!-- เพิ่มส่วนของประเภทเมนู -->
+                    <div class="fixed bottom-0 w-full bg-gray-200 justify-around">
+                        <div class="flex space-x-2 p-4" id="category-buttons">
+                            <button class="bg-green-500 hover:bg-green-600 text-white font-bold w-20 h-12 rounded"
+                                onclick="filterMenuItems('all')">ทั้งหมด</button>
+                            @foreach ($categories as $category)
+                                <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold w-20 h-12 rounded"
+                                    onclick="filterMenuItems({{ $category->id }})">{{ $category->menu_type_name }}</button>
+                            @endforeach
+                        </div>
+                    </div>
                     <!-- ขวา: ตะกร้าสินค้า -->
-                    <div class="w-1/3 bg-gray-800 text-white p-4">
+                    <div class="w-1/3 bg-gray-800 text-white p-4 z-50">
                         <h2 class="text-2xl font-bold mb-4">ตะกร้า</h2>
                         <div class="mb-4 h-96 overflow-y-auto" id="cart-items-container">
                             <!-- รายการในตะกร้าจะถูกแสดงที่นี่ -->
@@ -61,13 +60,13 @@
                             </div>
                         </div>
                         <div class="mb-4">
-                            <label for="payment_type"
-                                class="block mb-2 font-medium text-white-700">ประเภทการชำระเงิน:</label>
-                            <div class="flex space-x-4">
+                            <label for="payment_type" class="block mb-2 font-medium text-white-700">ประเภทการชำระเงิน
+                                :</label>
+                            <div class="flex space-x-4 ">
                                 <label class="relative">
                                     <input type="radio" name="payment_type" value="เงินสด" class="sr-only peer">
                                     <div
-                                        class="flex items-center px-4 py-2 border rounded-md transition-colors cursor-pointer
+                                        class="flex items-center px-16 py-2 border rounded-md transition-colors cursor-pointer
                                                 peer-checked:bg-blue-500 peer-checked:text-white peer-checked:border-blue-500
                                                 bg-white text-gray-700 border-gray-300 hover:bg-gray-50">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none"
@@ -81,7 +80,7 @@
                                 <label class="relative">
                                     <input type="radio" name="payment_type" value="โอนเงิน" class="sr-only peer">
                                     <div
-                                        class="flex items-center px-4 py-2 border rounded-md transition-colors cursor-pointer
+                                        class="flex items-center px-16 py-2 border rounded-md transition-colors cursor-pointer
                                                 peer-checked:bg-blue-500 peer-checked:text-white peer-checked:border-blue-500
                                                 bg-white text-gray-700 border-gray-300 hover:bg-gray-50">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none"
@@ -98,6 +97,11 @@
                             class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded transition">
                             ชำระเงิน
                         </button>
+
+                        <button onclick="clearCart()"
+                            class="w-full bg-grey-500 hover:bg-red-600 text-white font-bold py-3 px-4 rounded transition mt-4">
+                            เคลียร์ตะกร้า
+                        </button>
                     </div>
                 </div>
             </div>
@@ -112,7 +116,7 @@
             </div>
             <div class="flex items-center">
                 <button onclick="decreaseQuantity({id})" class="px-2 py-1 bg-red-500 rounded-l">-</button>
-                <span class="px-2 bg-gray-700">{quantity}</span>
+                <span class="px-4 py-1 bg-gray-700">{quantity}</span>
                 <button onclick="increaseQuantity({id})" class="px-2 py-1 bg-green-500 rounded-r">+</button>
             </div>
         </div>
@@ -281,6 +285,12 @@
                         text: 'เกิดข้อผิดพลาดในการชำระเงิน: ' + error.response.data.message,
                     });
                 });
+        }
+
+        // ฟังก์ชันสำหรับเคลียร์ตะกร้า
+        function clearCart() {
+            cart = []; // ล้างรายการในตะกร้า
+            renderCart(); // อัปเดตการแสดงผล
         }
     </script>
 @endsection

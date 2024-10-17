@@ -11,11 +11,16 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="bg-white shadow-lg rounded-lg p-6 flex flex-col h-full">
                     <h3 class="text-xl font-semibold text-gray-800 mb-4">วัตถุดิบตามประเภท</h3>
-
-                    <div class="flex-grow">
-                        <canvas id="ingredientTypeChart"></canvas>
+                    <div style="display: flex;">
+                        <!-- ส่วนของกราฟ -->
+                        <div style="flex: 1;">
+                            <canvas id="ingredientTypeChart" width="300" height="300"></canvas>
+                        </div>
+                        <!-- ส่วนของข้อความกำกับข้างๆ กราฟ -->
+                        <div id="chartLabels" style="flex: 1; padding-left: 20px;">
+                            <!-- ข้อความจะถูกเติมในนี้ผ่าน JavaScript -->
+                        </div>
                     </div>
-
                 </div>
 
                 <div class="bg-white shadow-lg rounded-lg p-6 flex flex-col h-full">
@@ -138,9 +143,10 @@
                 </a>
             </div>
         @endif
+
         <form action="#" method="GET" class="flex-grow md:max-w-md">
             <div class="relative">
-                <input type="text" name="search" placeholder="ค้นหาวัตถุดิบ..." value="{{ request('search') }}"
+                <input type="text" name="search" placeholder="ค้นหา..." value="{{ request('search') }}"
                     class="w-full px-4 py-2 rounded-md border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                 <button type="submit"
                     class="absolute inset-y-0 right-0 flex items-center px-4 text-gray-700 bg-white-800 border-l border-gray-300 rounded-r-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-300 ease-in-out">
@@ -152,6 +158,7 @@
                 </button>
             </div>
         </form>
+        
         <div class="mb-4 flex justify-end">
             <form action="{{ route('ingredients.index') }}" method="GET" class="flex items-center">
                 <div class="bg-white p-2.5 border rounded-xl">
@@ -182,7 +189,7 @@
         </div>
 
     </div>
-    </div>
+
     <!-- ส่วนของตาราง-->
     <div class="p-6">
         <h1 class="text-xl font-bold text-gray-800 mb-4">รายการวัตถุดิบ</h1>
@@ -355,13 +362,14 @@
         document.addEventListener('DOMContentLoaded', function() {
             var ctx = document.getElementById('ingredientTypeChart').getContext('2d');
             var data = @json($ingredientTypes);
-
+    
+            // สร้างกราฟโดนัท
             new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: data.map(item => item.type),
+                    labels: data.map(item => item.type), // ชื่อประเภทเมนู
                     datasets: [{
-                        data: data.map(item => item.count),
+                        data: data.map(item => item.count), // จำนวนเมนูแต่ละประเภท
                         backgroundColor: [
                             '#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8',
                             '#82ca9d', '#a4de6c', '#d0ed57', '#ffc658', '#8884d8'
@@ -377,10 +385,18 @@
                         },
                         title: {
                             display: true,
-                            text: 'วัตถุดิบตามประเภท'
+                            text: 'จำนวนเมนูตามประเภท'
                         }
                     }
                 }
+            });
+    
+            // สร้างข้อความกำกับข้างๆ กราฟ
+            var chartLabels = document.getElementById('chartLabels');
+            data.forEach(function(item, index) {
+                var label = document.createElement('p');
+                label.innerHTML = `<span style="color: ${['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82ca9d', '#a4de6c', '#d0ed57', '#ffc658', '#8884d8'][index]};">●</span> ${item.type} : ${item.count} รายการ`;
+                chartLabels.appendChild(label);
             });
         });
     </script>

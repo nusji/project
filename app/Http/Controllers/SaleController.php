@@ -16,16 +16,31 @@ use Illuminate\Support\Facades\Storage;
 
 class SaleController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $sales = Sale::with('employee', 'saleDetails.menu')
-            ->orderBy('sale_date', 'desc')
-            ->paginate(20);
-        return view('sales.index', compact('sales'));
+        // รับค่าการค้นหาและการเรียงลำดับจากคำขอ
+        $search = $request->input('search');
+        $sortBy = $request->input('sort_by', 'sale_date'); // ค่าเริ่มต้นคือ 'sale_date'
+        $sortOrder = $request->input('sort_order', 'desc'); // ค่าเริ่มต้นคือ 'desc'
+
+        // ดึงข้อมูลจากฐานข้อมูลพร้อมกับเงื่อนไขการค้นหาและการเรียงลำดับ
+        $sales = Sale::with(['employee', 'saleDetails.menu'])
+            ->when($search, function ($query, $search) {
+                return $query->where(function ($q) use ($search) {
+                    $q->where('id', 'like', "%{$search}%")
+                        ->orWhere('sale_date', 'like', "%{$search}%")
+                        ->orWhereHas('employee', function ($q) use ($search) {
+                            $q->where('name', 'like', "%{$search}%");
+                        })
+                        ->orWhere('payment_type', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy($sortBy, $sortOrder)
+            ->paginate(10);
+
+        // ส่งค่าที่จำเป็นไปยัง View
+        return view('sales.index', compact('sales', 'search', 'sortBy', 'sortOrder'));
     }
-
-
-
 
     public function create()
     {
@@ -37,52 +52,22 @@ class SaleController extends Controller
         return view('sales.create', compact('menus', 'categories', 'today'));
     }
 
-    private function getProductionWithMenus($date)
+    public function show($id)
     {
-        return Production::whereDate('production_date', $date)
-            ->with('productionDetails.menu.menuType')
-            ->get();
+        // ดึงข้อมูลคำสั่งขาย และรายละเอียดคำสั่งขายที่เกี่ยวข้อง
+        $sale = Sale::with('saleDetails.menu')->findOrFail($id);
+
+        // ส่งข้อมูลไปยัง view
+        return view('sales.show', compact('sale'));
     }
 
-    private function getMenusFromProduction($productions)
+    public function destroy(Sale $sale)
     {
-        return $productions->flatMap(function ($production) {
-            return $production->productionDetails
-                ->where('is_sold_out', false) // Exclude sold-out items
-                ->map(function ($detail) {
-                    return $detail->menu;
-                });
-        })->unique('id');
+        $sale->delete();
+        return redirect()->route('sales.index')->with('success', 'ลบรายการขายเรียบร้อยแล้ว');
     }
 
-    public function getMenusByDate(Request $request)
-    {
-        $date = Carbon::parse($request->date);
-        $productions = $this->getProductionWithMenus($date);
-        $menus = $this->getMenusFromProduction($productions);
-        
-        if ($productions->isEmpty()) {
-            return response()->json([
-                'menus' => [],
-                'date' => $date->format('Y-m-d'),
-                'message' => 'ไม่มีข้อมูลเมนูสำหรับวันที่เลือก'
-            ]);
-        }
-        return response()->json([
-            'menus' => $menus->map(function ($menu) {
-                return [
-                    'id' => $menu->id,
-                    'name' => $menu->menu_name,
-                    'price' => $menu->menu_price,
-                    'image' => $menu->menu_image ? Storage::url($menu->menu_image) : null,
-                    'menu_type_id' => $menu->menu_type_id,
-                ];
-            }),
-            'date' => $date->format('Y-m-d')
-        ]);
-    }
-
-
+    //ส่วนของเมธอดที่สร้างขึ้น
     public function showSoldOutManagement(Request $request, Production $production)
     {
         $productionDetails = $production->productionDetails()->with('menu')->get();
@@ -90,8 +75,6 @@ class SaleController extends Controller
 
         return view('sales.manage_sold_out', compact('productionDetails', 'selectedDate', 'production'));
     }
-
-
     public function updateSoldOutStatus(Request $request, Production $production)
     {
         $menuIds = $request->input('menu_ids', []);
@@ -105,8 +88,9 @@ class SaleController extends Controller
         }
 
         return redirect()->route('sales.manageSoldOut', ['production' => $production->id])
-            ->with('success', 'อัปเดตสถานะขายหมดเรียบร้อยแล้ว');
+            ->with('success', 'อัปเดตเรียบร้อยแล้ว');
     }
+
     public function store(Request $request)
     {
         // ตรวจสอบข้อมูลที่ได้รับ
@@ -139,26 +123,57 @@ class SaleController extends Controller
 
             DB::commit();
 
-            return response()->json(['success' => true, 'message' => 'Sale completed successfully!']);
+            return response()->json(['success' => true, 'message' => 'บันทึกการขายเรียบร้อย!']);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['success' => false, 'message' => 'Error during sale: ' . $e->getMessage()], 500);
         }
     }
 
-    public function show($id)
+    
+    private function getProductionWithMenus($date)
     {
-        // ดึงข้อมูลคำสั่งขาย และรายละเอียดคำสั่งขายที่เกี่ยวข้อง
-        $sale = Sale::with('saleDetails.menu')->findOrFail($id);
-
-        // ส่งข้อมูลไปยัง view
-        return view('sales.show', compact('sale'));
+        return Production::whereDate('production_date', $date)
+            ->with('productionDetails.menu.menuType')
+            ->get();
     }
 
-
-    public function destroy(Sale $sale)
+    private function getMenusFromProduction($productions)
     {
-        $sale->delete();
-        return redirect()->route('sales.index')->with('success', 'Sale deleted successfully!');
+        return $productions->flatMap(function ($production) {
+            return $production->productionDetails
+                ->where('is_sold_out', false) // Exclude sold-out items
+                ->map(function ($detail) {
+                    return $detail->menu;
+                });
+        })->unique('id');
+    }
+
+    public function getMenusByDate(Request $request)
+    {
+        $date = Carbon::parse($request->date);
+        $productions = $this->getProductionWithMenus($date);
+        $menus = $this->getMenusFromProduction($productions);
+    
+        if ($productions->isEmpty()) {
+            return response()->json([
+                'menus' => [],
+                'date' => $date->format('Y-m-d'),
+                'message' => 'ไม่มีข้อมูลเมนูสำหรับวันที่เลือก'
+            ]);
+        }
+    
+        return response()->json([
+            'menus' => $menus->map(function ($menu) {
+                return [
+                    'id' => $menu->id,
+                    'menu_name' => $menu->menu_name,  // เปลี่ยน key เป็น 'menu_name'
+                    'menu_price' => $menu->menu_price, // เปลี่ยน key เป็น 'menu_price'
+                    'menu_image' => $menu->menu_image ? Storage::url($menu->menu_image) : null,
+                    'menu_type_id' => $menu->menu_type_id,
+                ];
+            }),
+            'date' => $date->format('Y-m-d')
+        ]);
     }
 }

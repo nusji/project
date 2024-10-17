@@ -41,13 +41,13 @@
                             <div class="flex space-x-2 mb-4">
                                 <input type="text" id="menu-search" placeholder="ค้นหาเมนู"
                                     class="flex-grow mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                                <button type="button" id="search-menu"
-                                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">
+                                    <button type="button" id="search-menu"
+                                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md">
                                     ค้นหา
                                 </button>
                             </div>
                             <div class="flex space-x-2 mb-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">ประเภทเมนู:</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">ประเภทเมนู :</label>
 
                                 <button type="button" id="show-all-categories"
                                     class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-1 px-2 rounded mr-2">
@@ -93,8 +93,14 @@
 
                         <div class="flex items-center justify-end mt-6">
                             <button type="submit"
-                                class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full">
-                                บันทึกรายการผลิต
+                                class="inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150 ease-in-out">
+                                <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                    fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd"
+                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                                บันทึกการผลิต
                             </button>
                         </div>
                     </form>
@@ -254,21 +260,34 @@
             let insufficientIngredients = @json(session('insufficientIngredients'));
             let message = '';
 
+            let menuMap = new Map();
+
+            // จัดกลุ่มวัตถุดิบตามเมนู
             insufficientIngredients.forEach(item => {
-                message += `เมนู : ${item.menu_name}\n`;
-                message += `วัตถุดิบ : ${item.ingredient_name}\n`;
-                message += `ต้องการ : ${item.required}\n`;
-                message += `${item.unit}\n`;
-                message += `คงเหลือ : ${item.available}\n\n`;
+                if (!menuMap.has(item.menu_name)) {
+                    menuMap.set(item.menu_name, []); // สร้างรายการวัตถุดิบสำหรับเมนูใหม่
+                }
+                menuMap.get(item.menu_name).push(item); // เพิ่มวัตถุดิบเข้าไปในเมนูที่มีอยู่
+            });
+
+            // สร้างข้อความเพื่อแสดงผล
+            menuMap.forEach((ingredients, menuName) => {
+                message += `เมนู: ${menuName}<br>`; // แสดงชื่อเมนู
+                ingredients.forEach((ingredient, index) => {
+                    message +=
+                        `วัตถุดิบที่ ${index + 1}: ${ingredient.ingredient_name}  ต้องการ: ${ingredient.required} ${ingredient.unit} คงเหลือ: ${ingredient.available} ${ingredient.unit}<br>`;
+                });
+                message += '<br>'; // เพิ่มบรรทัดว่างระหว่างเมนูแต่ละรายการ
             });
 
             Swal.fire({
                 title: 'วัตถุดิบไม่เพียงพอ!',
-                text: message,
+                html: message, // เปลี่ยนจาก 'text' เป็น 'html'
                 icon: 'error',
                 confirmButtonText: 'ตกลง'
             });
         @endif
+
 
         @if (session('success'))
             Swal.fire({

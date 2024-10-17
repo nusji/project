@@ -8,18 +8,17 @@
             <!-- Header Section -->
             <div class="flex flex-wrap gap-6 mb-8">
                 <!-- Sales Entry Button -->
-                <div
-                    class="ml-20 flex items-center justify-center w-32 h-32 bg-yellow-100 rounded-xl shadow-sm cursor-pointer hover:shadow-md transition-shadow">
+                <div class=" flex items-center justify-center w-40 h-40 bg-orange-400 rounded-xl shadow-md cursor-pointer hover:bg-orange-500 shadow-md transition-shadow border-2 p-4">
                     <a href="{{ route('sales.create') }}" class="text-center">
                         <div class="flex justify-center mb-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-blue-600" fill="none"
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-50" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                             </svg>
 
                         </div>
-                        <span class="text-sm font-medium text-gray-700">บันทึกการขาย</span>
+                        <span class="text-md font-medium text-gray-50">บันทึกการขาย</span>
                     </a>
                 </div>
 
@@ -51,6 +50,7 @@
                         </div>
                     </div>
                 </div>
+                
             </div>
         </div>
         <!-- ส่วนของตาราง-->
@@ -60,21 +60,112 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                รหัสการขาย
+                            <!-- รหัสการขาย -->
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider {{ $sortBy == 'id' ? 'text-indigo-600' : 'text-gray-500' }}">
+                                <a href="{{ route('sales.index', array_merge(request()->all(), ['sort_by' => 'id', 'sort_order' => $sortBy == 'id' && $sortOrder == 'asc' ? 'desc' : 'asc'])) }}"
+                                    class="flex items-center">
+                                    รหัสการขาย
+                                    @if ($sortBy == 'id')
+                                        @if ($sortOrder == 'asc')
+                                            <svg class="h-4 w-4 ml-1" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                <path d="M5 15l7-7 7 7" />
+                                            </svg>
+                                        @else
+                                            <svg class="h-4 w-4 ml-1" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                <path d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        @endif
+                                    @endif
+                                </a>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                วันที่เวลาขาย
+                            <!-- วันที่เวลาขาย -->
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider {{ $sortBy == 'sale_date' ? 'text-indigo-600' : 'text-gray-500' }}">
+                                <a href="{{ route('sales.index', array_merge(request()->all(), ['sort_by' => 'sale_date', 'sort_order' => $sortBy == 'sale_date' && $sortOrder == 'asc' ? 'desc' : 'asc'])) }}"
+                                    class="flex items-center">
+                                    วันที่เวลาขาย
+                                    @if ($sortBy == 'sale_date')
+                                        @if ($sortOrder == 'asc')
+                                            <svg class="h-4 w-4 ml-1" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                <path d="M5 15l7-7 7 7" />
+                                            </svg>
+                                        @else
+                                            <svg class="h-4 w-4 ml-1" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                <path d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        @endif
+                                    @endif
+                                </a>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                พนักงานขาย
+                            <!-- พนักงานขาย -->
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider {{ $sortBy == 'employee_name' ? 'text-indigo-600' : 'text-gray-500' }}">
+                                <a href="{{ route('sales.index', array_merge(request()->all(), ['sort_by' => 'employee_name', 'sort_order' => $sortBy == 'employee_name' && $sortOrder == 'asc' ? 'desc' : 'asc'])) }}"
+                                    class="flex items-center">
+                                    พนักงานขาย
+                                    @if ($sortBy == 'employee_name')
+                                        @if ($sortOrder == 'asc')
+                                            <svg class="h-4 w-4 ml-1" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                <path d="M5 15l7-7 7 7" />
+                                            </svg>
+                                        @else
+                                            <svg class="h-4 w-4 ml-1" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                <path d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        @endif
+                                    @endif
+                                </a>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                จ่ายด้วย
+                            <!-- จ่ายด้วย -->
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider {{ $sortBy == 'payment_type' ? 'text-indigo-600' : 'text-gray-500' }}">
+                                <a href="{{ route('sales.index', array_merge(request()->all(), ['sort_by' => 'payment_type', 'sort_order' => $sortBy == 'payment_type' && $sortOrder == 'asc' ? 'desc' : 'asc'])) }}"
+                                    class="flex items-center">
+                                    จ่ายด้วย
+                                    @if ($sortBy == 'payment_type')
+                                        @if ($sortOrder == 'asc')
+                                            <svg class="h-4 w-4 ml-1" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                <path d="M5 15l7-7 7 7" />
+                                            </svg>
+                                        @else
+                                            <svg class="h-4 w-4 ml-1" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                <path d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        @endif
+                                    @endif
+                                </a>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                ยอดรวม
+                            <!-- ยอดรวม -->
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider {{ $sortBy == 'total_amount' ? 'text-indigo-600' : 'text-gray-500' }}">
+                                <a href="{{ route('sales.index', array_merge(request()->all(), ['sort_by' => 'total_amount', 'sort_order' => $sortBy == 'total_amount' && $sortOrder == 'asc' ? 'desc' : 'asc'])) }}"
+                                    class="flex items-center">
+                                    ยอดรวม
+                                    @if ($sortBy == 'total_amount')
+                                        @if ($sortOrder == 'asc')
+                                            <svg class="h-4 w-4 ml-1" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                <path d="M5 15l7-7 7 7" />
+                                            </svg>
+                                        @else
+                                            <svg class="h-4 w-4 ml-1" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                <path d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        @endif
+                                    @endif
+                                </a>
                             </th>
+                            <!-- การจัดการ -->
                             <th
                                 class="text-center px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 การจัดการ
@@ -131,12 +222,12 @@
                                             @method('DELETE') <!-- เพิ่ม METHOD DELETE -->
                                             <button type="button" onclick="confirmDelete({{ $sale->id }})"
                                                 class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-                                                <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                    viewBox="0 0 24 24" stroke="currentColor">
+                                                <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg"
+                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                 </svg>
-                                                ยกเลิกการขาย
+                                                 ลบข้อมูล
                                             </button>
                                         </form>
 
@@ -144,7 +235,7 @@
                                             function confirmDelete(saleId) {
                                                 Swal.fire({
                                                     title: 'คุณแน่ใจหรือไม่?',
-                                                    text: "กรุณาพิมพ์คำว่า 'ยกเลิกการผลิต' เพื่อยืนยันการลบข้อมูล!",
+                                                    text: "กรุณาพิมพ์คำว่า 'ลบ' เพื่อยืนยันการลบข้อมูล!",
                                                     icon: 'warning',
                                                     input: 'text',
                                                     inputPlaceholder: 'พิมพ์ที่นี่...',
@@ -156,8 +247,8 @@
                                                         cancelButton: 'bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded'
                                                     },
                                                     preConfirm: (inputValue) => {
-                                                        if (inputValue !== 'ยกเลิกการผลิต') {
-                                                            Swal.showValidationMessage('คำที่พิมพ์ไม่ถูกต้อง! กรุณาพิมพ์ "ยกเลิกการผลิต".');
+                                                        if (inputValue !== 'ลบ') {
+                                                            Swal.showValidationMessage('คำที่พิมพ์ไม่ถูกต้อง! กรุณาพิมพ์ "ลบ".');
                                                         }
                                                         return inputValue;
                                                     }

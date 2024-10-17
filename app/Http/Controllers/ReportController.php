@@ -65,7 +65,7 @@ class ReportController extends Controller
     {
         return DB::table('sale_details')
             ->join('sales', 'sale_details.sale_id', '=', 'sales.id') // เชื่อมกับตาราง sales เพื่อดึงข้อมูลวันที่
-            ->select(DB::raw('DATE(sales.created_at) as date'), DB::raw('sum(sale_details.quantity) as daily_sales')) // คำนวณยอดขายต่อวัน
+            ->select(DB::raw('DATE(sales.sale_date) as date'), DB::raw('sum(sale_details.quantity) as daily_sales')) // คำนวณยอดขายต่อวัน
             ->groupBy('date')
             ->orderBy('date', 'desc')
             ->take(7)

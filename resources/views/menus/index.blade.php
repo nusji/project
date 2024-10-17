@@ -6,11 +6,16 @@
         <h2 class="text-2xl font-bold text-gray-800 mb-4">ระบบจัดการเมนูข้าวแกง</h2>
         <div class="bg-white shadow-lg rounded-lg p-6 flex flex-col h-full mb-2">
             <h3 class="text-xl font-semibold text-gray-800 mb-4">วัตถุดิบตามประเภท</h3>
-
-            <div class="flex-grow">
-                <canvas id="menuTypeChart"></canvas>
+            <div style="display: flex;">
+                <!-- ส่วนของกราฟ -->
+                <div style="flex: 1;">
+                    <canvas id="menuTypeChart" width="300" height="300"></canvas>
+                </div>
+                <!-- ส่วนของข้อความกำกับข้างๆ กราฟ -->
+                <div id="chartLabels" style="flex: 1; padding-left: 20px;">
+                    <!-- ข้อความจะถูกเติมในนี้ผ่าน JavaScript -->
+                </div>
             </div>
-
         </div>
         <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0 md:space-x-4">
             @if (auth()->user()->role === 'owner')
@@ -177,16 +182,17 @@
     </div>
 
     <script>
-         document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function() {
             var ctx = document.getElementById('menuTypeChart').getContext('2d');
             var data = @json($menuTypes);
-
+    
+            // สร้างกราฟโดนัท
             new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: data.map(item => item.type),
+                    labels: data.map(item => item.type), // ชื่อประเภทเมนู
                     datasets: [{
-                        data: data.map(item => item.count),
+                        data: data.map(item => item.count), // จำนวนเมนูแต่ละประเภท
                         backgroundColor: [
                             '#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8',
                             '#82ca9d', '#a4de6c', '#d0ed57', '#ffc658', '#8884d8'
@@ -202,10 +208,18 @@
                         },
                         title: {
                             display: true,
-                            text: 'วัตถุดิบตามประเภท'
+                            text: 'จำนวนเมนูตามประเภท'
                         }
                     }
                 }
+            });
+    
+            // สร้างข้อความกำกับข้างๆ กราฟ
+            var chartLabels = document.getElementById('chartLabels');
+            data.forEach(function(item, index) {
+                var label = document.createElement('p');
+                label.innerHTML = `<span style="color: ${['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82ca9d', '#a4de6c', '#d0ed57', '#ffc658', '#8884d8'][index]};">●</span> ${item.type} : ${item.count} รายการ`;
+                chartLabels.appendChild(label);
             });
         });
     </script>

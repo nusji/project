@@ -70,7 +70,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M4 5h16v14H4V5zm4 0v14m8-14v14"></path>
                 </svg>
-                จัดการการผลิต
+                การผลิต
             </a>
 
             <!-- Employee Management -->
@@ -82,7 +82,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M12 14.25c2.485 0 4.5-2.015 4.5-4.5S14.485 5.25 12 5.25 7.5 7.265 7.5 9.75s2.015 4.5 4.5 4.5Zm0 0c2.692 0 5.25 1.343 5.25 2.684v1.316H6.75v-1.316c0-1.341 2.558-2.684 5.25-2.684Z" />
                     </svg>
-                    จัดการพนักงาน
+                    พนักงาน
                 </a>
                 <a href="{{ route('payrolls.index') }}"
                     class="py-2.5 px-4 text-lg font-medium text-[#F1F5F9] rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center {{ request()->routeIs('payrolls.*') || request()->routeIs('salaries.*') ? 'bg-[#E2725B] text-white' : '' }}">
@@ -91,16 +91,16 @@
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    จัดการเงินเดือน
+                    เงินเดือน
                 </a>
-                <a href="{{ route('payrolls.index') }}"
-                    class="py-2.5 px-4 text-lg font-medium text-[#F1F5F9] rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center {{ request()->routeIs('payrolls.*') || request()->routeIs('salaries.*') ? 'bg-[#E2725B] text-white' : '' }}">
+                <a href="{{ route('finance.index') }}"
+                    class="py-2.5 px-4 text-lg font-medium text-[#F1F5F9] rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center {{ request()->routeIs('finance.*') ? 'bg-[#E2725B] text-white' : '' }}">
                     <svg class="w-5 h-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                         stroke-width="1.5" stroke="currentColor" class="size-6">
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    จัดการการเงิน
+                    การเงิน
                 </a>
                 <a href="{{ route('reports.index') }}"
                     class="py-2.5 px-4 text-lg font-medium text-[#F1F5F9] rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center {{ request()->routeIs('reports.*') ? 'bg-[#E2725B] text-white' : '' }}">

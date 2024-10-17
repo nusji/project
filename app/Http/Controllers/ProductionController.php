@@ -110,18 +110,6 @@ class ProductionController extends Controller
         }
     }
 
-
-    public function edit(Production $production)
-    {
-        return view('productions.edit', compact('production'));
-    }
-
-    public function update(Request $request, Production $production)
-    {
-        $production->update($request->all());
-        return redirect()->route('productions.index');
-    }
-
     public function show(Production $production)
     {
         // Load the related production details and menus using eager loading
@@ -130,8 +118,6 @@ class ProductionController extends Controller
         // Pass the $production object to the view
         return view('productions.show', compact('production'));
     }
-
-
 
     public function destroy($id)
     {
@@ -164,6 +150,7 @@ class ProductionController extends Controller
         }
     }
 
+    // แสดงเมนูที่ผลิตในวันนี้ ในฝั่งของคนดู
     public function showWelcomePage()
     {
         // กำหนดวันที่วันนี้
@@ -179,14 +166,13 @@ class ProductionController extends Controller
         // ตรวจสอบว่าเมนูมีค่าของ menu_image
         foreach ($menus as $menu) {
             if (empty($menu->menu_image)) {
-                // แสดงข้อความเตือนถ้าภาพไม่มีการตั้งค่า
+
                 Log::warning('Menu ' . $menu->name . ' does not have an image.');
             }
         }
 
         return view('welcome', compact('menus'));
     }
-
     public function showMenuToday()
     {
         // กำหนดวันที่วันนี้
@@ -194,20 +180,19 @@ class ProductionController extends Controller
 
         // ดึงข้อมูลจากตาราง production โดยใช้ created_at จากตาราง production
         $menus = Production::whereDate('created_at', $today)
-            ->with(['productionDetails.menu'])  // เชื่อมโยงกับ production_details และ menu
+            ->with(['productionDetails.menu'])
             ->get()
-            ->pluck('productionDetails.*.menu')  // ดึงเฉพาะข้อมูลเมนู
-            ->flatten();  // แบนข้อมูลเพื่อให้อยู่ในรูปแบบที่ง่ายต่อการใช้งาน
+            ->pluck('productionDetails.*.menu')
+            ->flatten();
 
         // ตรวจสอบว่าเมนูมีค่าของ menu_image
         foreach ($menus as $menu) {
             if (empty($menu->menu_image)) {
-                // แสดงข้อความเตือนถ้าภาพไม่มีการตั้งค่า
+
                 Log::warning('Menu ' . $menu->name . ' does not have an image.');
             }
         }
 
         return view('menu-today', compact('menus'));
     }
-
 }

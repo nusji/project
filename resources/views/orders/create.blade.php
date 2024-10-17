@@ -8,7 +8,7 @@
             ]" />
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
-                    <h1 class="text-2xl font-semibold mb-6">สร้างรายการสั่งซื้อใหม่</h1>
+                    <h1 class="text-2xl font-semibold mb-6">บันทึกรายการสั่งซื้อใหม่</h1>
                     <form action="{{ route('orders.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="mb-4">

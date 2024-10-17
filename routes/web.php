@@ -15,6 +15,7 @@ use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\SalaryController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\MenuAllocationController;
+use App\Http\Controllers\FinanceController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -46,6 +47,7 @@ Route::middleware(['auth', 'role:employee', 'check.profile'])->group(function ()
 //สิทธิ์เฉพาะสำหรับเจ้าของร้านเท่านั้น
 Route::middleware(['auth', 'role:owner', 'check.profile'])->group(function () {
     Route::get('/owner', [DashboardController::class, 'owner'])->name('dashboard.owner');
+    Route::resource('finance', FinanceController::class);
 });
 
 //ยกเว้น ใช้ได้ทุกคน
@@ -97,6 +99,8 @@ Route::middleware(['auth', 'check.profile'])->group(function () {
 
     //จัดการการผลิต แบบ Resourceful Routes ประกอบด้วย index, create, store, show, edit, update, destroy
     Route::resource('productions', ProductionController::class);
+    Route::post('/productions/check-ingredients', [ProductionController::class, 'checkIngredients'])->name('productions.checkIngredients');
+
 
     //จัดการการขาย แบบ Resourceful Routes ประกอบด้วย index, create, store, show, edit, update, destroy
     route::resource('sales', SaleController::class);
