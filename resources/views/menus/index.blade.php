@@ -4,16 +4,18 @@
         <!-- เรียกใช้ breadcrumb component -->
         <x-breadcrumb :paths="[['label' => 'ระบบเมนูข้าวแกง', 'url' => route('menus.index')], ['label' => '']]" />
         <h2 class="text-2xl font-bold text-gray-800 mb-4">ระบบจัดการเมนูข้าวแกง</h2>
-        <div class="bg-white shadow-lg rounded-lg p-6 flex flex-col h-full mb-2">
-            <h3 class="text-xl font-semibold text-gray-800 mb-4">เมนูตามประเภท</h3>
-            <div style="display: flex;">
-                <!-- ส่วนของกราฟ -->
-                <div style="flex: 1;">
-                    <canvas id="menuTypeChart" width="300" height="300"></canvas>
-                </div>
-                <!-- ส่วนของข้อความกำกับข้างๆ กราฟ -->
-                <div id="chartLabels" style="flex: 1; padding-left: 20px;">
-                    <!-- ข้อความจะถูกเติมในนี้ผ่าน JavaScript -->
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <div class="bg-white shadow-lg rounded-lg p-6 flex flex-col h-full mb-2">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">เมนูตามประเภท</h3>
+                <div style="display: flex;">
+                    <!-- ส่วนของกราฟ -->
+                    <div style="flex: 1;">
+                        <canvas id="menuTypeChart" width="200" height="200"></canvas>
+                    </div>
+                    <!-- ส่วนของข้อความกำกับข้างๆ กราฟ -->
+                    <div id="chartLabels" style="flex: 1; padding-left: 0 px;">
+                        <!-- ข้อความจะถูกเติมในนี้ผ่าน JavaScript -->
+                    </div>
                 </div>
             </div>
         </div>
