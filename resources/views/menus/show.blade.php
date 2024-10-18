@@ -1,7 +1,9 @@
 <!-- resources/views/menus/show.blade.php -->
 @extends('layouts.app')
 @section('content')
-    <div class="py-12">
+    <div class="container mx-auto px-4 py-0">
+        <!-- เรียกใช้ breadcrumb component -->
+        <x-breadcrumb :paths="[['label' => 'ระบบเมนูข้าวแกง', 'url' => route('menus.index')], ['label' => 'แสดงเมนูรายการที่ ' . $menu->id]]" />
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
@@ -85,12 +87,15 @@
                             </div>
                         </div>
                         <div>
-                            <h2 class="text-2xl font-semibold mb-4">รายละเอียดเมนู</h2>
-                            <p class="text-gray-700 mb-4">{{ $menu->menu_detail ?: 'No details available.' }}</p>
-
-                            <h2 class="text-2xl font-semibold mb-4">สูตรเมนู/วัตถุดิบที่ใช้</h2>
+                            <h2 class="text-2xl font-semibold ">รายละเอียดเมนู</h2>
+                            <p class="text-gray-700 mb-4">{{ $menu->menu_detail ?: 'ไม่มีรายละเอียด' }}</p>
+                            <h2 class="text-2xl font-semibold ">รสชาติหลัก</h2>
+                            <p class="text-gray-700 mb-4 ">{{ $menu->menu_taste ?: 'ไม่มีรสชาติหลัก' }}</p>
+                            <h2 class="text-2xl font-semibold ">ปริมาณหักต่อทัพพี</h2>
+                            <p class="text-gray-700 mb-4 ">{{ $menu->portion_size ?: 'ไม่มีปริมาณหัก' }} กิโลกรัม</p>
+                            <h2 class="text-2xl font-semibold">สูตรเมนู/วัตถุดิบที่ใช้</h2>
                             @if ($menu->recipes->count() > 0)
-                                <ul class="list-disc list-inside space-y-2">
+                                <ul class="list-disc list-inside space-y-2 mb-4">
                                     @foreach ($menu->recipes as $recipe)
                                         <li class="text-gray-700">
                                             {{ $recipe->ingredient->ingredient_name }} {{ $recipe->amount }}
@@ -101,7 +106,13 @@
                             @else
                                 <p class="text-gray-700">ไม่มีวัตถุดิบที่ใช้ในเมนูนี้</p>
                             @endif
+
+                            <div>
+                                <h2 class="text-2xl font-semibold">รีวิวเมนู</h2>
+                                
+                            </div>
                         </div>
+                        
                     </div>
 
                     <div class="mt-8 right">

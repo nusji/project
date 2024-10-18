@@ -57,10 +57,7 @@
                             รายละเอียด
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            เมนูที่ผลิต
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            จำนวนกิโลกรัมที่ผลิต
+                            จำนวนเมนูที่ผลิตทั้งหมด
                         </th>
                         <th
                             class="text-center px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -88,14 +85,7 @@
                                     {{ $production->production_detail }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <ul>
-                                        @foreach ($production->productionDetails as $detail)
-                                            <li>{{ $detail->menu->menu_name }} ({{ $detail->quantity }})</li>
-                                        @endforeach
-                                    </ul>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    {{ $production->productionDetails->sum('quantity') }}
+                                    {{ $production->productionDetails->count('menu_id') }}
                                 </td>
                                 <!-- ส่วนของการจัดการ -->
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2 text-center">
@@ -162,6 +152,9 @@
                     @endif
                 </tbody>
             </table>
+        </div>
+        <div class="m-5">
+            {{ $productions->links() }}
         </div>
     </div>
 

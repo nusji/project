@@ -5,7 +5,7 @@
         <x-breadcrumb :paths="[['label' => 'ระบบเมนูข้าวแกง', 'url' => route('menus.index')], ['label' => '']]" />
         <h2 class="text-2xl font-bold text-gray-800 mb-4">ระบบจัดการเมนูข้าวแกง</h2>
         <div class="bg-white shadow-lg rounded-lg p-6 flex flex-col h-full mb-2">
-            <h3 class="text-xl font-semibold text-gray-800 mb-4">วัตถุดิบตามประเภท</h3>
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">เมนูตามประเภท</h3>
             <div style="display: flex;">
                 <!-- ส่วนของกราฟ -->
                 <div style="flex: 1;">
@@ -218,7 +218,7 @@
             var chartLabels = document.getElementById('chartLabels');
             data.forEach(function(item, index) {
                 var label = document.createElement('p');
-                label.innerHTML = `<span style="color: ${['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82ca9d', '#a4de6c', '#d0ed57', '#ffc658', '#8884d8'][index]};">●</span> ${item.type} : ${item.count} รายการ`;
+                label.innerHTML = `<span style="color: ${['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82ca9d', '#a4de6c', '#d0ed57', '#ffc658', '#8884d8'][index]};">●</span> ${item.type} : ${item.count} เมนู`;
                 chartLabels.appendChild(label);
             });
         });

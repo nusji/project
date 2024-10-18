@@ -16,7 +16,9 @@ class ProductionController extends Controller
 {
     public function index()
     {
-        $productions = Production::with('productionDetails.menu')->get();
+        $productions = Production::with('productionDetails.menu')
+            ->orderBy('id', 'desc')
+            ->paginate(20);
         return view('productions.index', compact('productions'));
     }
 
@@ -32,7 +34,7 @@ class ProductionController extends Controller
         $validatedData = $request->validate(
             [
                 'production_date' => 'required|date',
-                'production_detail' => 'required|string',
+                'production_detail' => 'nullable|string',
                 'menus' => 'required|array',
                 'menus.*.id' => 'required|exists:menus,id',
                 'menus.*.quantity' => 'required|numeric|min:1',
@@ -40,7 +42,6 @@ class ProductionController extends Controller
             [
                 'production_date.required' => 'กรุณาเลือกวันที่ผลิต',
                 'production_date.date' => 'รูปแบบวันที่ผิดพลาด',
-                'production_detail.required' => 'กรุณากรอกรายละเอียดการผลิต',
                 'menus.required' => 'กรุณาเลือกเมนูที่ต้องการผลิต',
                 'menus.*.id.required' => 'เมนูไม่ถูกต้อง',
                 'menus.*.id.exists' => 'เมนูไม่ถูกต้อง',
@@ -91,7 +92,10 @@ class ProductionController extends Controller
             $production->save();
 
             foreach ($validatedData['menus'] as $menuData) {
-                $production->menus()->attach($menuData['id'], ['quantity' => $menuData['quantity']]);
+                $production->menus()->attach($menuData['id'], [
+                    'quantity' => $menuData['quantity'],
+                    'remaining_amount' => $menuData['quantity'], // จำนวนที่เหลือ
+                ]);
 
                 // หักลบสต็อกวัตถุดิบ
                 foreach ($menu->recipes as $recipe) {

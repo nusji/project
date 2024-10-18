@@ -7,10 +7,15 @@
         <h2 class="text-2xl font-bold text-gray-800 mb-4">ระบบสั่งซื้อวัตถุดิบ</h2>
         <div class="bg-white shadow-lg rounded-lg p-6 flex flex-col h-full">
             <div style="display: flex;">
-                <h2>ยอดการสั่งซื้อรายเดือน</h2>
-                <div style="flex: 1;">
-                    <canvas id="monthlyChart" width="50" height="50" class="size-40"></canvas>
+                <!-- ส่วนของกราฟและตัวเลือก -->
+                <div>
+                    <select id="timePeriod" onchange="updateChart()">
+                        <option value="monthly">รายเดือน</option>
+                        <option value="weekly">รายสัปดาห์</option>
+                        <option value="yearly">รายปี</option>
+                    </select>
                 </div>
+                <canvas id="orderChart" width="400" height="200"></canvas>
             </div>
         </div>
         <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0 md:space-x-4">
@@ -41,8 +46,8 @@
                 </div>
             </form>
         </div>
-    </div>
 
+    </div>
     <!-- ส่วนของตาราง-->
     <div class="p-6">
         <h1 class="text-xl font-bold text-gray-800 mb-4">ประวัติการสั่งซื้อวัตถุดิบ</h1>
@@ -162,41 +167,56 @@
                 </tbody>
             </table>
         </div>
+
     </div>
 
     <script>
-        const monthlyLabels = {!! json_encode(
-            $monthlyData->map(function ($item) {
-                return $item->year . '-' . str_pad($item->month, 2, '0', STR_PAD_LEFT);
-            }),
-        ) !!};
+        let chart;
 
-        const monthlyTotals = {!! json_encode($monthlyData->pluck('total')) !!};
+        // ฟังก์ชันสำหรับโหลดข้อมูลเริ่มต้น
+        window.onload = function() {
+            fetchChartData('monthly');
+        };
 
-        const monthlyChartCtx = document.getElementById('monthlyChart').getContext('2d');
-        new Chart(monthlyChartCtx, {
-            type: 'bar',
-            data: {
-                labels: monthlyLabels,
-                datasets: [{
-                    label: 'ยอดการสั่งซื้อ (บาท)',
-                    data: monthlyTotals,
-                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1,
-                }]
-            },
-            options: {
-                scales: {
-                    x: {
-                        display: true
-                    },
-                    y: {
-                        display: true,
-                        beginAtZero: true
+        // ฟังก์ชันสำหรับอัพเดตกราฟ
+        function updateChart() {
+            const period = document.getElementById('timePeriod').value;
+            fetchChartData(period);
+        }
+
+        // ฟังก์ชันสำหรับดึงข้อมูลจากเซิร์ฟเวอร์
+        function fetchChartData(period) {
+            fetch(`/api/order-data?period=${period}`)
+                .then(response => response.json())
+                .then(data => {
+                    const ctx = document.getElementById('orderChart').getContext('2d');
+
+                    // ถ้ามีกราฟอยู่แล้ว ให้ทำลายก่อน
+                    if (chart) {
+                        chart.destroy();
                     }
-                }
-            }
-        });
+
+                    chart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: data.labels,
+                            datasets: [{
+                                label: 'ยอดการสั่งซื้อ',
+                                data: data.totals,
+                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+                });
+        }
     </script>
 @endsection

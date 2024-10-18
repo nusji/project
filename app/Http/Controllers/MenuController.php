@@ -34,7 +34,7 @@ class MenuController extends Controller
             })
             ->paginate(20);
 
-        return view('menus.index', compact('menus', 'search','menuTypes'));
+        return view('menus.index', compact('menus', 'search', 'menuTypes'));
     }
     public function create()
     {
@@ -42,20 +42,39 @@ class MenuController extends Controller
         $ingredients = Ingredient::all();
         return view('menus.create', compact('menuTypes', 'ingredients'));
     }
+
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'menu_name' => 'required|string|max:255',
-            'menu_detail' => 'nullable|string',
-            'menu_type_id' => 'required|exists:menu_types,id',
-            'menu_price' => 'required|numeric|min:0',
-            'menu_status' => 'required|boolean',
-            'menu_taste' => 'nullable|string',
-            'menu_image' => 'nullable|image',
-            'ingredients' => 'required|array',
-            'ingredients.*.id' => 'required|exists:ingredients,id',
-            'ingredients.*.amount' => 'required|numeric|min:0',
-        ]);
+        $validatedData = $request->validate(
+            [
+                'menu_name' => 'required|string|max:255',
+                'menu_detail' => 'nullable|string',
+                'menu_type_id' => 'required|exists:menu_types,id',
+                'menu_price' => 'required|numeric|min:0',
+                'menu_status' => 'required|boolean',
+                'menu_taste' => 'required|string',
+                'portion_size' => 'required|numeric|min:0.01',
+                'menu_image' => 'nullable|image',
+                'ingredients' => 'required|array',
+                'ingredients.*.id' => 'required|exists:ingredients,id',
+                'ingredients.*.amount' => 'required|numeric|min:0',
+            ],
+            [
+                'menu_name.required' => 'กรุณากรอกชื่อเมนู',
+                'menu_name.string' => 'ชื่อเมนูต้องเป็นข้อความ',
+                'menu_price.required' => 'กรุณากรอกราคา',
+                'menu_taste.required' => 'กรุณากรอกรสชาติ',
+                'portion_size.required' => 'กรุณากรอกขนาดเสิร์ฟ',
+                'portion_size.numeric' => 'ขนาดเสิร์ฟต้องเป็นตัวเลข',
+                'portion_size.min' => 'ขนาดเสิร์ฟต้องมีค่ามากกว่า 0.00',
+                'ingredients.required' => 'กรุณาเลือกวัตถุดิบ',
+                'ingredients.*.id.required' => 'ข้อมูลวัตถุดิบไม่ถูกต้อง',
+                'ingredients.*.id.exists' => 'ข้อมูลวัตถุดิบไม่ถูกต้อง',
+                'ingredients.*.amount.required' => 'โปรดกรอกปริมาณวัตถุดิบ',
+                'ingredients.*.amount.numeric' => 'ปริมาณวัตถุดิบต้องเป็นตัวเลข',
+                'ingredients.*.amount.min' => 'ปริมาณวัตถุดิบต้องมากกว่า 0',
+            ]
+        );
 
         // Check if a menu with the same name exists and is not soft-deleted
         $existingMenu = Menu::where('menu_name', $validatedData['menu_name'])
@@ -93,11 +112,13 @@ class MenuController extends Controller
 
         return redirect()->route('menus.index')->with('success', 'เมนูถูกสร้างเรียบร้อยแล้ว');
     }
+
     public function show(Menu $menu)
     {
         $menu->load('menuType', 'recipes.ingredient')->withTrashed();
         return view('menus.show', compact('menu'));
     }
+
     public function edit($id)
     {
         $menu = Menu::with('recipes')->findOrFail($id);
@@ -105,6 +126,7 @@ class MenuController extends Controller
         $menuTypes = menuType::all();
         return view('menus.edit', compact('menu', 'ingredients', 'menuTypes'));
     }
+
     public function update(Request $request, $id)
     {
         $validatedData = $request->validate([

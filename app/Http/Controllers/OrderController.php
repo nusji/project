@@ -33,51 +33,14 @@ class OrderController extends Controller
     {
         // ข้อมูลสรุปการสั่งซื้อ
         $orderSummaries = $this->getOrderSummaries();
-    
-        // คำนวณยอดการสั่งซื้อรายเดือน
-        $monthlyData = Order::select(
-            DB::raw('YEAR(order_date) as year'),
-            DB::raw('MONTH(order_date) as month'),
-            DB::raw('SUM(order_details.price * order_details.quantity) as total')
-        )
-        ->join('order_details', 'orders.id', '=', 'order_details.order_id')
-        ->groupBy('year', 'month')
-        ->orderBy('year', 'asc')
-        ->orderBy('month', 'asc')
-        ->get();
-    
-        // คำนวณยอดการสั่งซื้อรายสัปดาห์
-        $weeklyData = Order::select(
-            DB::raw('YEAR(order_date) as year'),
-            DB::raw('WEEK(order_date, 1) as week'),
-            DB::raw('SUM(order_details.price * order_details.quantity) as total')
-        )
-        ->join('order_details', 'orders.id', '=', 'order_details.order_id')
-        ->groupBy('year', 'week')
-        ->orderBy('year', 'asc')
-        ->orderBy('week', 'asc')
-        ->get();
-    
-        // หาวัตถุดิบที่ถูกสั่งซื้อมากที่สุด
-        $ingredientData = OrderDetail::select(
-            'ingredients.ingredient_name',
-            DB::raw('SUM(order_details.quantity) as total_quantity')
-        )
-        ->join('ingredients', 'order_details.ingredient_id', '=', 'ingredients.id')
-        ->groupBy('ingredients.ingredient_name')
-        ->orderBy('total_quantity', 'desc')
-        ->limit(5) // แสดงเฉพาะ 5 รายการแรก
-        ->get();
-    
+
         return view('orders.index', [
             'orderSummaries' => $orderSummaries,
-            'monthlyData' => $monthlyData,
-            'weeklyData' => $weeklyData,
-            'ingredientData' => $ingredientData,
+
         ]);
     }
-    
-    
+
+
 
     public function create()
     {
@@ -258,6 +221,4 @@ class OrderController extends Controller
 
         return redirect()->route('orders.index')->with('success', 'รายการสั่งซื้อถูกลบเรียบร้อยแล้ว');
     }
-
-    
 }

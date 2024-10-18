@@ -38,8 +38,31 @@ class SaleController extends Controller
             ->orderBy($sortBy, $sortOrder)
             ->paginate(10);
 
+        $todaySalesData = DB::table('sale_details')
+            ->join('menus', 'sale_details.menu_id', '=', 'menus.id') // เชื่อมกับตาราง menus
+            ->join('sales', 'sale_details.sale_id', '=', 'sales.id') // เชื่อมกับตาราง sales
+            ->select(
+                DB::raw('SUM(sale_details.quantity * menus.menu_price) as total_revenue_today'), // ยอดรวมรายรับ
+                DB::raw('COUNT(sales.id) as total_sales_today') // จำนวนครั้งการขาย
+            )
+            ->whereDate('sales.sale_date', Carbon::today()) // เงื่อนไข: วันที่เป็นวันนี้
+            ->first(); // ดึงผลลัพธ์ชุดแรก
+
+        $todaySalesByPaymentMethod = DB::table('sale_details')
+            ->join('menus', 'sale_details.menu_id', '=', 'menus.id')
+            ->join('sales', 'sale_details.sale_id', '=', 'sales.id')
+            ->select(
+                'sales.payment_type', // เพิ่มคอลัมน์ payment_type
+                DB::raw('SUM(sale_details.quantity * menus.menu_price) as total_revenue'), // เปลี่ยนชื่อเป็น total_revenue
+                DB::raw('COUNT(sales.id) as total_sales') // เปลี่ยนชื่อเป็น total_sales
+            )
+            ->whereDate('sales.sale_date', Carbon::today())
+            ->groupBy('sales.payment_type')
+            ->get(); // เปลี่ยนเป็น get() เพื่อดึงข้อมูลทั้งหมด
+
+
         // ส่งค่าที่จำเป็นไปยัง View
-        return view('sales.index', compact('sales', 'search', 'sortBy', 'sortOrder'));
+        return view('sales.index', compact('sales', 'search', 'sortBy', 'sortOrder', 'todaySalesData', 'todaySalesByPaymentMethod'));
     }
 
     public function create()
@@ -130,7 +153,7 @@ class SaleController extends Controller
         }
     }
 
-    
+
     private function getProductionWithMenus($date)
     {
         return Production::whereDate('production_date', $date)
@@ -154,7 +177,7 @@ class SaleController extends Controller
         $date = Carbon::parse($request->date);
         $productions = $this->getProductionWithMenus($date);
         $menus = $this->getMenusFromProduction($productions);
-    
+
         if ($productions->isEmpty()) {
             return response()->json([
                 'menus' => [],
@@ -162,7 +185,7 @@ class SaleController extends Controller
                 'message' => 'ไม่มีข้อมูลเมนูสำหรับวันที่เลือก'
             ]);
         }
-    
+
         return response()->json([
             'menus' => $menus->map(function ($menu) {
                 return [

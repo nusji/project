@@ -8,7 +8,8 @@
             <!-- Header Section -->
             <div class="flex flex-wrap gap-6 mb-8">
                 <!-- Sales Entry Button -->
-                <div class=" flex items-center justify-center w-40 h-40 bg-orange-400 rounded-xl shadow-md cursor-pointer hover:bg-orange-500 shadow-md transition-shadow border-2 p-4">
+                <div
+                    class=" flex items-center justify-center w-40 h-40 bg-orange-400 rounded-xl shadow-md cursor-pointer hover:bg-orange-500 shadow-md transition-shadow border-2 p-4">
                     <a href="{{ route('sales.create') }}" class="text-center">
                         <div class="flex justify-center mb-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-50" fill="none"
@@ -26,36 +27,69 @@
                 <div class="flex-1 bg-white rounded-xl shadow-sm p-6">
                     <h2 class="text-lg font-medium text-gray-700 mb-4">ช่องทางรับเงิน</h2>
                     <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <p class="text-sm text-emerald-600">รายรับวันนี้ (บาท)</p>
-                            <p class="text-2xl font-semibold">12,741</p>
-                        </div>
-                        <div>
-                            <p class="text-sm text-emerald-600">จำนวนการขาย (ครั้ง)</p>
-                            <p class="text-2xl font-semibold">120</p>
-                        </div>
+                        @foreach ($todaySalesByPaymentMethod as $payment)
+                            <div>
+                                <p class="text-sm text-emerald-600">{{ $payment->payment_type }}</p>
+                                <p class="text-2xl font-semibold">{{ number_format($payment->total_revenue, 2) }} บาท</p>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
-
                 <div class="flex-1 bg-white rounded-xl shadow-sm p-6">
                     <h2 class="text-lg font-medium text-gray-700 mb-4">สรุปการขาย</h2>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <p class="text-sm text-emerald-600">รายรับวันนี้ (บาท)</p>
-                            <p class="text-2xl font-semibold">12,741</p>
+                            <p class="text-2xl font-semibold">{{ number_format($todaySalesData->total_revenue_today, 2) }}
+                            </p>
                         </div>
                         <div>
                             <p class="text-sm text-emerald-600">จำนวนการขาย (ครั้ง)</p>
-                            <p class="text-2xl font-semibold">120</p>
+                            <p class="text-2xl font-semibold">{{ $todaySalesData->total_sales_today }}</p>
                         </div>
                     </div>
                 </div>
-                
+
             </div>
         </div>
+
         <!-- ส่วนของตาราง-->
         <div class="p-6">
             <h1 class="text-xl font-bold text-gray-800 mb-4">ประวัตการขาย</h1>
+            <!-- Sorting Form -->
+            <form method="GET" action="{{ route('sales.index') }}" class="mb-4">
+                <div class="flex items-center space-x-4">
+                    <!-- Sorting Criteria -->
+                    <div>
+                        <label for="sort_by" class="block text-sm font-medium text-gray-700">เรียงลำดับตาม</label>
+                        <select name="sort_by" id="sort_by" class="mt-1 block w-full border-gray-300 rounded-md">
+                            <option value="sale_date" {{ request('sort_by') == 'sale_date' ? 'selected' : '' }}>วันที่ขาย
+                            </option>
+                            <option value="total_amount" {{ request('sort_by') == 'total_amount' ? 'selected' : '' }}>ยอดรวม
+                            </option>
+                            <option value="employee_name" {{ request('sort_by') == 'employee_name' ? 'selected' : '' }}>
+                                ชื่อพนักงาน</option>
+                            <!-- เพิ่มตัวเลือกอื่น ๆ ตามต้องการ -->
+                        </select>
+                    </div>
+
+                    <!-- Sorting Order -->
+                    <div>
+                        <label for="sort_order" class="block text-sm font-medium text-gray-700">ทิศทางการเรียงลำดับ</label>
+                        <select name="sort_order" id="sort_order" class="mt-1 block w-full border-gray-300 rounded-md">
+                            <option value="asc" {{ request('sort_order') == 'asc' ? 'selected' : '' }}>น้อยไปมาก</option>
+                            <option value="desc" {{ request('sort_order') == 'desc' ? 'selected' : '' }}>มากไปน้อย
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="flex items-end">
+                        <button type="submit" class="mt-1 px-4 py-2 bg-blue-500 text-white rounded-md">เรียงลำดับ</button>
+                    </div>
+                </div>
+            </form>
+
             <div class="bg-white shadow rounded-lg overflow-hidden">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
@@ -227,7 +261,7 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                 </svg>
-                                                 ลบข้อมูล
+                                                ลบข้อมูล
                                             </button>
                                         </form>
 
@@ -266,9 +300,9 @@
                         @endif
                     </tbody>
                 </table>
-                <div class="mt-4">
-                    {{ $sales->links() }}
-                </div>
+            </div>
+            <div class="mt-4">
+                {{ $sales->links() }}
             </div>
         </div>
     @endsection

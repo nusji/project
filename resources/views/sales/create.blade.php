@@ -49,7 +49,7 @@
                     </div>
                     <!-- ขวา: ตะกร้าสินค้า -->
                     <div class="w-1/3 bg-gray-800 text-white p-4 z-50">
-                        <h2 class="text-2xl font-bold mb-4">ตะกร้า</h2>
+                        <h2 class="text-2xl font-bold mb-4">ตะกร้า (ทัพพี)</h2>
                         <div class="mb-4 h-96 overflow-y-auto" id="cart-items-container">
                             <!-- รายการในตะกร้าจะถูกแสดงที่นี่ -->
                         </div>
@@ -62,11 +62,11 @@
                         <div class="mb-4">
                             <label for="payment_type" class="block mb-2 font-medium text-white-700">ประเภทการชำระเงิน
                                 :</label>
-                            <div class="flex space-x-4 ">
+                            <div class="flex justify-center items-center space-x-4">
                                 <label class="relative">
                                     <input type="radio" name="payment_type" value="เงินสด" class="sr-only peer">
                                     <div
-                                        class="flex items-center px-16 py-2 border rounded-md transition-colors cursor-pointer
+                                        class="flex items-center px-14 py-2 border rounded-md transition-colors cursor-pointer
                                                 peer-checked:bg-blue-500 peer-checked:text-white peer-checked:border-blue-500
                                                 bg-white text-gray-700 border-gray-300 hover:bg-gray-50">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none"
@@ -80,7 +80,7 @@
                                 <label class="relative">
                                     <input type="radio" name="payment_type" value="โอนเงิน" class="sr-only peer">
                                     <div
-                                        class="flex items-center px-16 py-2 border rounded-md transition-colors cursor-pointer
+                                        class="flex items-center px-14 py-2 border rounded-md transition-colors cursor-pointer
                                                 peer-checked:bg-blue-500 peer-checked:text-white peer-checked:border-blue-500
                                                 bg-white text-gray-700 border-gray-300 hover:bg-gray-50">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none"

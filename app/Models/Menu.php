@@ -20,6 +20,7 @@ class Menu extends Model
         'menu_status',
         'menu_taste',
         'menu_image',
+        'portion_size',
     ];
 
     public function menuType()
