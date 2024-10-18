@@ -105,8 +105,7 @@ Route::middleware(['auth', 'check.profile'])->group(function () {
     //จัดการการขาย แบบ Resourceful Routes ประกอบด้วย index, create, store, show, edit, update, destroy
     route::resource('sales', SaleController::class);
     Route::get('sales/menus-by-date', [SaleController::class, 'getMenusByDate'])->name('sales.menus-by-date');
-
-
+    Route::get('sales/manage-sold', [SaleController::class, 'manage_sold'])->name('sales.manage-sold');
 
     // สำหรับการดึงรายละเอียดเมนู
     Route::post('menus/details', [MenuController::class, 'getMenuDetails'])->name('menus.details');

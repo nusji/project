@@ -35,7 +35,7 @@
                 </div>
                 <div>
                     <label for="salary" class="block text-sm font-medium text-gray-700 mb-2">ฐานเงินเดือน</label>
-                    <input type="number" name="salary" id="salary" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" step="0.01" min="0" value="{{ $payroll->salary }}" readonly>
+                    <input type="number" name="salary" id="salary" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" step="0.01" min="0" value="{{ $payroll->employee->salary }}" readonly>
                 </div>
             </div>
 

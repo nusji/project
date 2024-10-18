@@ -26,11 +26,12 @@ class PayrollController extends Controller
             ->whereYear('payment_date', $currentYear)
             ->sum('net_salary');
     
-        // ดึงรายชื่อพนักงานที่ยังไม่ได้รับเงินเดือนในเดือนปัจจุบัน
-        $unpaidEmployees = Employee::whereDoesntHave('payrolls', function ($query) use ($currentMonth, $currentYear) {
+        // ดึงรายชื่อพนักงานที่ยังไม่ได้รับเงินเดือนในเดือนปัจจุบันและมีบทบาทเป็นพนักงาน
+        $unpaidEmployees = Employee::where('role', 'employee')
+            ->whereDoesntHave('payrolls', function ($query) use ($currentMonth, $currentYear) {
             $query->whereMonth('payment_date', $currentMonth)
                 ->whereYear('payment_date', $currentYear);
-        })->get();
+            })->get();
     
         return view('payrolls.index', compact('payrolls', 'totalEmployees', 'totalPaidMonth', 'unpaidEmployees', 'currentMonth', 'currentYear'));
     }
@@ -38,7 +39,7 @@ class PayrollController extends Controller
 
     public function create()
     {
-        $employees = Employee::all();
+        $employees = Employee::where('role', 'employee')->get();
         return view('payrolls.create', compact('employees'));
     }
 
@@ -60,7 +61,7 @@ class PayrollController extends Controller
     
         Payroll::create($validatedData);
     
-        return redirect()->route('payrolls.index')->with('success', 'Payroll record created successfully.');
+        return redirect()->route('payrolls.index')->with('success', 'บันทึกการจ่ายเงินเดือนเรียบร้อยแล้ว');
     }
     
 
@@ -92,14 +93,14 @@ class PayrollController extends Controller
 
         $payroll->update($validatedData);
 
-        return redirect()->route('payrolls.index')->with('success', 'Payroll record updated successfully.');
+        return redirect()->route('payrolls.index')->with('success', 'แก้ไขการจ่ายเงินเดือนเรียบร้อยแล้ว');
     }
 
     public function destroy(Payroll $payroll)
     {
         $payroll->delete();
 
-        return redirect()->route('payrolls.index')->with('success', 'Payroll record deleted successfully.');
+        return redirect()->route('payrolls.index')->with('success', 'ลบการจ่ายเงินเดือนเรียบร้อยแล้ว');
     }
 
     public function getUnpaidEmployeesForCurrentMonth()

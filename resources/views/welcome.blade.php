@@ -13,7 +13,7 @@
             <div class="text-center">
                 <a href="#"
                     class="bg-white text-red-500 font-bold py-3 px-8 rounded-full text-xl hover:bg-red-100 transition duration-300 mb-4 inline-block">
-                    สั่งอาหารเลย!
+                    แนะนำเมนูตามความชอบ!
                 </a>
                 <br>
                 <a href="{{ route('menu-today') }}"
