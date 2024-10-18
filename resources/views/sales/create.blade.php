@@ -31,6 +31,8 @@
                                         @endif
                                         <h3 class="font-semibold">{{ $menu->menu_name }}</h3>
                                         <p class="text-gray-600">{{ number_format($menu->menu_price, 2) }} บาท</p>
+                                        <p class="text-gray-600">เหลือ:
+                                            {{ number_format($menu->total_remaining_amount, 1) }} กิโลกรัม</p>
                                     </div>
                                 @endforeach
                             </div>
@@ -131,7 +133,7 @@
                 .then(data => {
                     currentMenus = data.menus;
                     document.getElementById('selected-date').textContent = new Date(data.date).toLocaleDateString(
-                        'th-TH');
+                        'en-GB');
                     renderMenuItems();
                 })
                 .catch(error => {
@@ -142,6 +144,7 @@
 
 
         function renderMenuItems() {
+            console.log('Rendering menu items:', currentMenus); // ตรวจสอบว่ามีเมนูอะไรบ้าง
             const container = document.getElementById('menu-items-container');
             container.innerHTML = '';
 
@@ -150,12 +153,23 @@
                 menuItem.className =
                     'bg-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-200 transition menu-item';
                 menuItem.dataset.category = menu.menu_type_id;
+
+                // Check if the item is sold out
+                let soldOut = menu.total_remaining_amount <= 0;
+
                 menuItem.innerHTML = `
             ${menu.menu_image ? `<img src="${menu.menu_image}" alt="${menu.menu_name}" class="menu-image h-10 w-10">` : ''}
             <h3 class="font-semibold">${menu.menu_name}</h3>
             <p class="text-gray-600">${Number(menu.menu_price).toFixed(2)} บาท</p>
+            <p class="text-gray-600">เหลือ: ${Number(menu.total_remaining_amount).toFixed(1)} กิโลกรัม</p>
+            ${soldOut ? '<p class="text-red-500 font-bold">สินค้าหมด</p>' : ''}
         `;
-                menuItem.onclick = () => addToCart(menu.id);
+                // Disable click if sold out
+                if (!soldOut) {
+                    menuItem.onclick = () => addToCart(menu.id);
+                } else {
+                    menuItem.classList.add('opacity-50', 'cursor-not-allowed');
+                }
                 container.appendChild(menuItem);
             });
         }

@@ -58,7 +58,6 @@
                     </svg>
                     ย้อนกลับ
                 </a>
-                
             @elseif (Route::is('sales.manageSoldOut'))
                 <a href="{{ route('sales.create') }}"
                     class="border-1 py-2.5 px-4 text-sm font-regular text-[#F1F5F9] text-center border-2 rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center">
@@ -70,16 +69,18 @@
                     ย้อนกลับ
                 </a>
             @endif
-            <a href="manage_sold.blade.php"
-            onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
-            class="border-1 py-2.5 px-4 text-sm font-regular text-[#F1F5F9] text-center border-2 rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center">
-            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M19 13l-7 7-7-7m14-8l-7 7-7-7"></path>
-            </svg>
-            จัดการ<br>เมนูเหลือ
-        </a>
+            <a href="#" onclick="event.preventDefault(); showManageSoldOutModal();"
+                class="border-1 py-2.5 px-4 text-sm font-regular text-[#F1F5F9] text-center border-2 rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 13l-7 7-7-7m14-8l-7 7-7-7"></path>
+                </svg>
+                จัดการ<br>เมนูเหลือ
+            </a>
+
+            <!-- Include modal component -->
+            @include('components.manage-sold-out-modal')
             <hr>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
@@ -114,6 +115,30 @@
     </main>
     <!-- เรียกใช้ alert component -->
     <x-alert />
+    <script>
+        function showManageSoldOutModal() {
+            document.getElementById('manageSoldOutModal').classList.remove('hidden');
+        }
+
+        document.getElementById('cancelSoldOut').addEventListener('click', function() {
+            document.getElementById('manageSoldOutModal').classList.add('hidden');
+        });
+
+        document.getElementById('saveSoldOut').addEventListener('click', function () {
+        const form = document.getElementById('manageSoldOutForm');
+        const formData = new FormData(form);
+        
+        axios.post('/sales/update-sold-out-status', formData)
+            .then(response => {
+                console.log(response.data);
+                // ซ่อน modal หลังบันทึก
+                document.getElementById('manageSoldOutModal').classList.add('hidden');
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    });
+    </script>
 </body>
 
 </html>
