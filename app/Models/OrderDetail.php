@@ -6,7 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class OrderDetail extends Model
 {
-    protected $fillable = ['order_id', 'ingredient_id', 'quantity', 'price'];
+    protected $table = 'order_details';
+    protected $primaryKey = 'id';
+    protected $fillable = [
+        'order_id', 
+        'ingredient_id', 
+        'quantity', 
+        'price'];
 
     public function order()
     {
@@ -15,6 +21,7 @@ class OrderDetail extends Model
 
     public function ingredient()
     {
-        return $this->belongsTo(Ingredient::class);
+        return $this->belongsTo(Ingredient::class)->withTrashed();
     }
+    
 }

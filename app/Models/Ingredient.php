@@ -4,29 +4,54 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Ingredient extends Model
 {
-    use HasFactory;
-
+    //latest
+    use HasFactory, SoftDeletes;
     protected $table = 'ingredients'; // Your table name here
     protected $primaryKey = 'id'; // ตรวจสอบว่าใช้ 'id' เป็น primary key
-
     protected $fillable = [
         'ingredient_name',
-        'ingredient_detail',
         'ingredient_unit',
-        'ingredient_quantity',
+        'ingredient_stock',
+        'minimum_quantity',
         'ingredient_type_id',
     ];
+    protected $dates = [
+        'deleted_at',
 
+    ];
+
+    // ในโมเดล Ingredient
     public function ingredientType()
     {
         return $this->belongsTo(IngredientType::class);
     }
-
-    public static function isDuplicateIngredient($ingredient_name)
+    public function orders()
     {
-        return self::where('ingredient_name', $ingredient_name)->exists();
+        return $this->hasMany(Order::class, 'id');
+    }
+    public function orderDetails()
+    {
+        return $this->hasMany(OrderDetail::class, 'id');
+    }
+    public function menuRecipes()
+    {
+        return $this->hasMany(Ingredient::class, 'id');
+    }
+
+    public function menus()
+    {
+        // ใช้ 'menu_recipes' เป็นชื่อ Pivot Table
+        return $this->belongsToMany(Menu::class, 'menu_recipes')
+                    ->withPivot('quantity_required');
+    }
+
+    public function isLowStock()
+    {
+        // ตรวจสอบว่าจำนวนสต็อกปัจจุบันน้อยกว่าหรือเท่ากับปริมาณขั้นต่ำ
+        return $this->ingredient_quantity <= $this->minimum_quantity;
     }
 }

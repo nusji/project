@@ -21,16 +21,31 @@ class MenuTypeController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'menu_type_name' => 'required|string|max:255|unique:menu_types',
+        $validatedData = $request->validate([
+            'menu_type_name' => 'required|string|max:255',
             'menu_type_detail' => 'nullable|string',
-        ],[
-            'menu_type_name.unique'=> 'พบวัตถุดิบนี้ในระบบแล้ว',
-            'menu_type_detail.require'=> 'กรุณากรอกรายละเอียดประเภทเมนู',
-        ]);
+        ], [
+            'menu_type_detail.require' => 'กรุณากรอกรายละเอียดประเภทเมนู',
 
-        MenuType::create($request->all());
-        return redirect()->route('menu_types.index');
+        ]);
+        // ตรวจสอบเฉพาะข้อมูลที่ยังไม่ถูกลบ
+        $exists = MenuType::where('menu_type_name', $request->menu_type_name)->exists();
+        if ($exists) {
+            return redirect()->back()->withErrors(['menu_type_name' => 'พบประเภทเมนูนี้ในระบบแล้ว']);
+        }
+        // ตรวจสอบว่ามีข้อมูลที่ถูกลบแล้วหรือไม่
+        $deletedMenuType = MenuType::onlyTrashed()
+            ->where('menu_type_name', $request->menu_type_name)
+            ->first();
+        if ($deletedMenuType) {
+            // ถ้าพบข้อมูลที่ถูกลบแล้ว ให้เปิดใช้งานใหม่
+            $deletedMenuType->restore();
+            $deletedMenuType->update($validatedData);
+            return redirect()->route('menu_types.index')->with('success', 'เปิดใช้งานและอัปเดตประเภทเมนูเรียบร้อยแล้ว');
+        }
+        // ถ้าไม่พบข้อมูลที่ซ้ำ ให้สร้างใหม่
+        MenuType::create($validatedData);
+        return redirect()->route('menu_types.index')->with('success', 'ประเภทเมนูถูกเพิ่มเรียบร้อยแล้ว');
     }
 
     public function edit(MenuType $menuType)
@@ -38,24 +53,42 @@ class MenuTypeController extends Controller
         return view('menus.menu_types.edit', compact('menuType'));
     }
 
-    public function update(Request $request, MenuType $menuType)
+    public function update(Request $request, $id)
     {
-        $request->validate([
-            'menu_type_name' => 'required|string|max:255|unique:menu_types,menu_type_name,',
-            'menu_type_detail' => 'nullable|string',
-        ],
-        [
-            'menu_type_name.unique'=> 'พบประเภทเมนูนี้ในระบบแล้ว',
-            'menu_type_detail.require'=> 'กรุณากรอกรายละเอียดประเภทเมนู',
-        ]);
+        $validatedData = $request->validate(
+            [
+                'menu_type_name' => 'required|string|max:255',
+                'menu_type_detail' => 'nullable|string',
+            ],
+            [
+                'menu_type_detail.required' => 'กรุณากรอกรายละเอียดประเภทเมนู',
+            ]
+        );
 
-        $menuType->update($request->all());
-        return redirect()->route('menu_types.index');
+        $menuType = MenuType::findOrFail($id);
+        if ($menuType->menu_type_name !== $request->menu_type_name) {
+            $exists = MenuType::where('menu_type_name', $request->menu_type_name)
+                ->where('id', '!=', $id)
+                ->exists();
+            if ($exists) {
+                return redirect()->back()->withErrors(['menu_type_name' => 'พบประเภทเมนูนี้ในระบบแล้ว']);
+            }
+            $deletedmenuType = MenuType::onlyTrashed()
+                ->where('menu_type_name', $request->menu_type_name)
+                ->where('id', '!=', $id)
+                ->first();
+            if ($deletedmenuType) {
+                return redirect()->back()->withErrors(['menu_type_name' => 'มีประเภทเมนูนี้ในระบบที่ถูกลบไปแล้ว กรุณาใช้ชื่ออื่น']);
+            }
+        }
+        $menuType->update($validatedData);
+        return redirect()->route('menu_types.index')->with('success', 'อัปเดตประเภทเมนูเรียบร้อยแล้ว');
     }
+
 
     public function destroy(MenuType $menuType)
     {
         $menuType->delete();
-        return redirect()->route('menu_types.index');
+        return redirect()->route('menu_types.index')->with('success', 'ลบประเภทเมนูเรียบร้อยแล้ว');
     }
 }

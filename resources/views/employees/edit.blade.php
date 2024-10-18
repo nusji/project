@@ -1,111 +1,162 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto px-4 py-8">
-    <div class="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
-        <div class="px-6 py-4 bg-gray-100 border-b border-gray-200">
-            <h1 class="text-2xl font-bold text-gray-800">แก้ไขข้อมูลพนักงาน</h1>
-        </div>
+    <div class="container mx-auto px-4 py-0">
+        <x-breadcrumb :paths="[
+            ['label' => 'ระบบจัดการพนักงาน', 'url' => route('employees.index')],
+            ['label' => 'เพิ่มข้อมูลพนักงานใหม่'],
+        ]" />
 
-        <form action="{{ route('employees.update', $employee->id) }}" method="POST" enctype="multipart/form-data" class="p-6">
+        <h1 class="text-3xl font-semibold text-gray-800 mb-6">แก้ไขข้อมูลพนักงาน</h1>
+        <form action="{{ route('employees.update', $employee->id) }}" method="POST" enctype="multipart/form-data"
+            class="space-y-6">
             @csrf
             @method('PUT')
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="p-6 space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label for="name" class="text-sm font-medium text-gray-700">ชื่อ-สกุลจริง</label>
+                            <input type="text" id="name" name="name"
+                                value="{{ old('first_name', $employee->name) }} "
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                required>
+                            @error('name')
+                                <p class="text-red-500 text-xs italic">{{ $message }}</p>
+                            @enderror
+                        </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label for="first_name" class="block text-sm font-medium text-gray-700">ชื่อจริง</label>
-                    <input type="text" name="first_name" id="first_name" value="{{ old('first_name', $employee->first_name) }}" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
-                </div>
+                        <div class="space-y-2">
+                            <label for="id_card_number" class="text-sm font-medium text-gray-700">เลขบัตรประชาชน</label>
+                            <input type="text" id="id_card_number" name="id_card_number" maxlength="13"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                value="{{ old('id_card_number', $employee->id_card_number) }}" readonly required>
+                            @error('id_card_number')
+                                <p class="text-red-500 text-xs italic">{{ $message }}</p>
+                            @enderror
+                        </div>
 
-                <div>
-                    <label for="last_name" class="block text-sm font-medium text-gray-700">นามสกุล</label>
-                    <input type="text" name="last_name" id="last_name" value="{{ old('last_name', $employee->last_name) }}" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
-                </div>
+                        <div class="space-y-2">
+                            <label for="phone_number" class="text-sm font-medium text-gray-700">เบอร์โทร</label>
+                            <input type="text" id="phone_number" name="phone_number" maxlength="10"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                value="{{ old('phone_number', $employee->phone_number) }}" required>
+                            @error('phone_number')
+                                <p class="text-red-500 text-xs italic">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div class="space-y-2">
+                            <label for="employment_type" class="text-sm font-medium text-gray-700">ประเภทการจ้าง</label>
+                            <select id="employment_type" name="employment_type"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                required>
+                                <option value="พนักงานประจำ"
+                                    {{ $employee->employment_type == 'พนักงานประจำ' ? 'selected' : '' }}>
+                                    พนักงานประจำ
+                                </option>
+                                <option value="พนักงานชั่วคราว"
+                                    {{ $employee->employment_type == 'พนักงานชั่วคราว' ? 'selected' : '' }}>
+                                    พนักงานชั่วคราว
+                                </option>
 
-                <div>
-                    <label for="username" class="block text-sm font-medium text-gray-700">ชื่อผู้ใช้</label>
-                    <input type="text" name="username" id="username" value="{{ old('username', $employee->username) }}" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
-                </div>
+                            </select>
+                            @error('employment_type')
+                                <p class="text-red-500 text-xs italic">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div class="space-y-2">
+                            <label for="username" class="text-sm font-medium text-gray-700">ชื่อเข้าใช้ / username</label>
+                            <input type="text" id="username" name="username"
+                                class="w-full px-3 py-2 border border-yellow-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-yellow-50"
+                                value="{{ old('username', $employee->username) }}" required>
+                            @error('username')
+                                <p class="text-red-500 text-xs italic">{{ $message }}</p>
+                            @enderror
+                        </div>
 
-                <div>
-                    <label for="role" class="block text-sm font-medium text-gray-700">บทบาท</label>
-                    <select name="role" id="role" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                        <option value="employee" {{ $employee->role == 'employee' ? 'selected' : '' }}>พนักงาน</option>
-                        <option value="owner" {{ $employee->role == 'owner' ? 'selected' : '' }}>ผู้ดูแลระบบ (เจ้าของร้าน)</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label for="id_card_number" class="block text-sm font-medium text-gray-700">เลขบัตรประจำตัวประชาชน</label>
-                    <input type="text" name="id_card_number" id="id_card_number" value="{{ old('id_card_number', $employee->id_card_number) }}" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
-                </div>
-
-                <div>
-                    <label for="phone_number" class="block text-sm font-medium text-gray-700">เบอร์โทรศัพท์</label>
-                    <input type="text" name="phone_number" id="phone_number" value="{{ old('phone_number', $employee->phone_number) }}" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
-                </div>
-
-                <div>
-                    <label for="employment_status" class="block text-sm font-medium text-gray-700">สถานะการจ้างงาน</label>
-                    <select name="employment_status" id="employment_status" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                        <option value="พนักงานประจำ" {{ $employee->employment_status == 'พนักงานประจำ' ? 'selected' : '' }}>พนักงานประจำ (Full-time)</option>
-                        <option value="พนักงานชั่วคราว" {{ $employee->employment_status == 'พนักงานชั่วคราว' ? 'selected' : '' }}>พนักงานชั่วคราว (Part-time)</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label for="start_date" class="block text-sm font-medium text-gray-700">วันเริ่มงาน</label>
-                    <input type="date" name="start_date" id="start_date" value="{{ old('start_date', $employee->start_date) }}" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
-                </div>
-
-                <div>
-                    <label for="date_of_birth" class="block text-sm font-medium text-gray-700">วันเดือนปีเกิด</label>
-                    <input type="date" name="date_of_birth" id="date_of_birth" value="{{ old('date_of_birth', $employee->date_of_birth) }}" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
-                </div>
-            </div>
-
-            <div class="mt-6">
-                <label for="address" class="block text-sm font-medium text-gray-700">ที่อยู่</label>
-                <textarea name="address" id="address" rows="3" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">{{ old('address', $employee->address) }}</textarea>
-            </div>
-
-            <div class="mt-6">
-                <label for="previous_experience" class="block text-sm font-medium text-gray-700">ประวัติการทำงานก่อนหน้า</label>
-                <textarea name="previous_experience" id="previous_experience" rows="3" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">{{ old('previous_experience', $employee->previous_experience) }}</textarea>
-            </div>
-
-            <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label for="bank_account" class="block text-sm font-medium text-gray-700">ชื่อธนาคาร</label>
-                    <input type="text" name="bank_account" id="bank_account" value="{{ old('bank_account', $employee->bank_account) }}" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
-                </div>
-
-                <div>
-                    <label for="bank_account_number" class="block text-sm font-medium text-gray-700">เลขที่บัญชีธนาคาร</label>
-                    <input type="text" name="bank_account_number" id="bank_account_number" value="{{ old('bank_account_number', $employee->bank_account_number) }}" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
-                </div>
-            </div>
-
-            <div class="mt-6">
-                <label for="profile_picture" class="block text-sm font-medium text-gray-700">รูปโปรไฟล์</label>
-                <input type="file" name="profile_picture" id="profile_picture" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
-                @if($employee->profile_picture)
-                    <div class="mt-2">
-                        <img src="{{ asset('storage/' . $employee->profile_picture) }}" alt="รูปโปรไฟล์ปัจจุบัน" class="w-32 h-32 object-cover rounded-full">
-                        <p class="mt-1 text-sm text-gray-500">รูปโปรไฟล์ปัจจุบัน</p>
+                        <div class="space-y-2">
+                            <label for="role" class="text-sm font-medium text-gray-700">บทบาท/สิทธิ์</label>
+                            <select id="role" name="role"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-yellow-50"
+                                required>
+                                <option value="employee" {{ $employee->role == 'employee' ? 'selected' : '' }}>
+                                    พนักงาน
+                                </option>
+                                <option value="owner" {{ $employee->role == 'owner' ? 'selected' : '' }}>
+                                    เจ้าของ
+                                </option>
+                                <option value="none" {{ $employee->role == 'none' ? 'selected' : '' }}>
+                                    ไม่มีบทบาท (ลาออก)
+                                </option>
+                                @error('role')
+                                    <p class="text-red-500 text-xs italic">{{ $message }}</p>
+                                @enderror
+                        </div>
+                        <div class="space-y-2">
+                            <label for="start_date" class="text-sm font-medium text-gray-700">วันที่เริ่มทำงาน</label>
+                            <input type="date" id="start_date" name="start_date"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                value="{{ old('start_date', \Carbon\Carbon::now()->format('Y-m-d')) }}" required>
+                            @error('start_date')
+                                <p class="text-red-500 text-xs italic">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div class="space-y-2">
+                            <label for="salary" class="text-sm font-medium text-gray-700">ฐานเงินเดือน</label>
+                            <input type="number" id="salary" name="salary"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                value="{{ old('salary', $employee->salary) }}" required min="0">
+                            @error('salary')
+                                <p class="text-red-500 text-xs italic">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div class="space-y-2">
+                            <label for="address" class="text-sm font-medium text-gray-700">ที่อยู่ปัจจุบัน</label>
+                            <input type="text" id="address" name="address"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                value="{{ old('address', $employee->address) }}" required min="0">
+                            @error('address')
+                                <p class="text-red-500 text-xs italic">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div class="space-y-2">
+                            <label for="salary" class="text-sm font-medium text-gray-700">ฐานเงินเดือน</label>
+                            <input type="number" id="salary" name="salary"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                value="{{ old('salary', $employee->salary) }}" required min="0">
+                            @error('salary')
+                                <p class="text-red-500 text-xs italic">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div class="space-y-2">
+                            <label for="salary" class="text-sm font-medium text-gray-700">ฐานเงินเดือน</label>
+                            <input type="number" id="salary" name="salary"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                value="{{ old('salary', $employee->salary) }}" required min="0">
+                            @error('salary')
+                                <p class="text-red-500 text-xs italic">{{ $message }}</p>
+                            @enderror
+                        </div>
                     </div>
-                @endif
-            </div>
-
-            <div class="mt-8 flex justify-end space-x-3">
-                <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    บันทึกการเปลี่ยนแปลง
-                </button>
-                <a href="{{ route('employees.show', $employee->id) }}" class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    ยกเลิก
-                </a>
+                </div>
+                <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
+                    <button type="submit"
+                        class="w-full md:w-auto px-6 py-3 bg-blue-600 text-white font-semibold rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-300">
+                        เพิ่มข้อมูลพนักงานใหม่
+                    </button>
+                </div>
             </div>
         </form>
     </div>
-</div>
+
+    @if (session('success'))
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'สำเร็จ!',
+                text: '{{ session('success') }}',
+                confirmButtonText: 'ตกลง'
+            });
+        </script>
+    @endif
 @endsection

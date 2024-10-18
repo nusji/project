@@ -51,16 +51,54 @@
                                 d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>แก้ไข
                     </a>
-                    <button onclick="confirmDelete({{ $ingredientType->id }})"
-                        class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-                        <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>ลบ
-                    </button>
+                    <form id="delete-form-{{ $ingredientType->id }}"
+                        action="{{ route('ingredient_types.destroy', ['ingredient_type' => $ingredientType->id]) }}"
+                        method="POST" class="inline-block">
+                        @csrf
+                        @method('DELETE')
+                        <button type="button"
+                            class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                            onclick="confirmDelete({{ $ingredientType->id }})">
+                            <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            ลบ
+                        </button>
+                    </form>
                 </div>
             </div>
         @endforeach
     </div>
+    <script>
+        // Confirm delete ingredient with input confirmation
+        function confirmDelete(ingredientTypeId) {
+            Swal.fire({
+                title: 'คุณแน่ใจหรือไม่?',
+                html: "<span style='color: red;'>วัตถุดิบที่อยู่ในประเภทนี้จะถูกลบไปด้วย</span><br>ยืนยันพิมพ์ 'ลบ' เพื่อยืนยันการลบประเภทนี้!",
+                icon: 'warning',
+                input: 'text',
+                inputPlaceholder: 'พิมพ์ "ลบ"',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'ใช่, ลบเลย!',
+                cancelButtonText: 'ยกเลิก',
+                preConfirm: (inputValue) => {
+                    return new Promise((resolve) => {
+                        if (inputValue === 'ลบ') {
+                            resolve(true);
+                        } else {
+                            Swal.showValidationMessage('กรุณาพิมพ์ "ลบ" ให้ถูกต้อง');
+                        }
+                    });
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('delete-form-' + ingredientTypeId).submit();
+                }
+            });
+        }
+    </script>
 @endsection

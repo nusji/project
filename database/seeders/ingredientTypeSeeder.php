@@ -13,7 +13,7 @@ class ingredientTypeSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('ingredients_type')->insert([
+        DB::table('ingredient_types')->insert([
             ['ingredient_type_name' => 'เนื้อสัตว์', 'ingredient_type_detail' => 'เนื้อไก่, เนื้อหมู, เนื้อวัว, เนื้อปลา, กุ้ง, ปลาหมึก'],
             ['ingredient_type_name' => 'เครื่องเทศ', 'ingredient_type_detail' => 'กระเทียม, หอมแดง, ตะไคร้, ใบมะกรูด, ข่า, ขิง'],
             ['ingredient_type_name' => 'พริกแกง', 'ingredient_type_detail' => 'พริกแกงเขียวหวาน, พริกแกงแดง, พริกแกงส้ม, พริกแกงมัสมั่น'],

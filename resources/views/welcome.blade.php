@@ -1,32 +1,43 @@
-<!-- resources/views/welcome.blade.php -->
-<!DOCTYPE html>
-<html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ยินดีต้อนรับสู่ FastBite</title>
-    @vite('resources/css/app.css')
-</head>
-<body class="bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 min-h-screen flex flex-col items-center justify-center text-white">
-    <header class="text-center mb-12">
-        <h1 class="text-6xl font-bold mb-4">ยินดีต้อนรับสู่ FastBite</h1>
-        <p class="text-2xl">อร่อยเร็ว อิ่มไว ในราคาสบายกระเป๋า</p>
-    </header>
+@extends('layouts.guest')
 
-    <div class="flex flex-wrap justify-center gap-8 mb-12">
-        @foreach(['เบอร์เกอร์', 'พิซซ่า', 'เฟรนช์ฟรายส์'] as $item)
-            <div class="bg-white rounded-lg p-6 shadow-lg text-center">
-                <img src="{{ asset('images/' . strtolower($item) . '.svg') }}" alt="{{ $item }}" class="w-24 h-24 mx-auto mb-4">
-                <h2 class="text-xl font-semibold text-gray-800">{{ $item }}</h2>
+@section('title', 'ยินดีต้อนรับ KAOKANG')
+
+@section('content')
+    <div class="container mx-auto px-4">
+        <header class="mb-12">
+            <img src="images/banner-a.png" alt="" class="max-w-3xl w-full h-auto mx-auto mb-0">
+        </header>
+
+        <div class="mb-15">
+            <h2 class="text-4xl font-bold mb-6 text-center text-white-500">เลือกปุ่มทำรายการ</h2>
+            <div class="text-center">
+                <a href="#"
+                    class="bg-white text-red-500 font-bold py-3 px-8 rounded-full text-xl hover:bg-red-100 transition duration-300 mb-4 inline-block">
+                    แนะนำเมนูตามความชอบ!
+                </a>
+                <br>
+                <a href="{{ route('menu-today') }}"
+                    class="bg-white text-red-500 font-bold py-3 px-8 rounded-full text-xl hover:bg-red-100 transition duration-300 inline-block">
+                    ดูเมนูวันนี้!
+                </a>
             </div>
-        @endforeach
-    </div>
+            <h2 class="text-4xl font-bold mb-6 text-center mt-10">เมนูวันนี้</h2>
+            @if ($menus->isEmpty())
+                <p class="text-xl text-center">ขออภัย ไม่มีเมนูสำหรับวันนี้</p>
+            @else
+                <div class="flex flex-wrap justify-center gap-8">
+                    @foreach ($menus as $menu)
+                        <div class="bg-white rounded-lg p-6 shadow-lg text-center w-64">
+                            <img src="{{ asset('storage/' . $menu->menu_image) }}" alt="{{ $menu->name }}"
+                                class="w-full h-40 object-cover rounded-lg mb-4">
+                            <h2 class="text-xl font-semibold text-gray-800">{{ $menu->menu_name }}</h2>
+                            <p class="text-lg text-black">{{ $menu->menu_price }} บาท</p>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+        </div>
 
-    <a href="#" class="bg-white text-red-500 font-bold py-3 px-8 rounded-full text-xl hover:bg-red-100 transition duration-300">
-        สั่งอาหารเลย!
-        <a href="login" class="bg-white text-red-500 font-bold py-3 px-8 rounded-full text-xl hover:bg-red-100 transition duration-300">
-          เฉพาะพนักงาน!
-      </a>
-    </a>
-</body>
-</html>
+
+    </div>
+@endsection

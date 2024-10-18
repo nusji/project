@@ -7,15 +7,33 @@ use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
 {
-    protected $fillable = ['order_date', 'order_detail', 'order_receipt', 'employee_id'];
+    protected $table = 'orders';
+    protected $primaryKey = 'id';
+    protected $fillable = [
+        'order_date',
+        'order_detail',
+        'order_receipt',
+        'employee_id'
+    ];
+
+    protected $casts = [
+        'order_date' => 'datetime',
+    ];
+    
 
     public function orderDetails()
     {
         return $this->hasMany(OrderDetail::class);
     }
-
+    public function ingredients()
+    {
+        return $this->belongsToMany(Ingredient::class, 'order_details')
+            ->withPivot('quantity', 'price');
+    }
     public function employee()
     {
-        return $this->belongsTo(Employee::class);
+        return $this->belongsTo(Employee::class)->withTrashed();
     }
+
+
 }
