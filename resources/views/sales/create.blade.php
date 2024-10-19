@@ -114,7 +114,7 @@
         <div class="flex justify-between items-center mb-2">
             <div>
                 <span class="font-semibold">{name}</span>
-                <span class="text-sm text-gray-400">{price} บาท x {quantity}</span>
+                <span class="text-sm text-gray-400">{price} บาท x {quantity} ({deductedAmount})</span>
             </div>
             <div class="flex items-center">
                 <button onclick="decreaseQuantity({id})" class="px-2 py-1 bg-red-500 rounded-l">-</button>
@@ -125,13 +125,15 @@
     </template>
     <script>
         let currentMenus = @json($menus);
-
         function loadMenuByDate() {
-            const selectedDate = document.getElementById('date-picker').value;
+            const selectedDateInput = document.getElementById('date-picker');
+            const selectedDate = selectedDateInput ? selectedDateInput.value : '{{ $today->format('Y-m-d') }}';
+
             fetch(`/sales/menus-by-date?date=${selectedDate}`)
                 .then(response => response.json())
                 .then(data => {
                     currentMenus = data.menus;
+                    
                     document.getElementById('selected-date').textContent = new Date(data.date).toLocaleDateString(
                         'en-GB');
                     renderMenuItems();
@@ -141,7 +143,6 @@
                     alert('เกิดข้อผิดพลาดในการโหลดเมนู: ' + error.message);
                 });
         }
-
 
         function renderMenuItems() {
             console.log('Rendering menu items:', currentMenus); // ตรวจสอบว่ามีเมนูอะไรบ้าง
@@ -162,7 +163,7 @@
             <h3 class="font-semibold">${menu.menu_name}</h3>
             <p class="text-gray-600">${Number(menu.menu_price).toFixed(2)} บาท</p>
             <p class="text-gray-600">เหลือ: ${Number(menu.total_remaining_amount).toFixed(1)} กิโลกรัม</p>
-            ${soldOut ? '<p class="text-red-500 font-bold">สินค้าหมด</p>' : ''}
+            ${soldOut ? '<p class="text-red-500 font-bold">หมด</p>' : ''}
         `;
                 // Disable click if sold out
                 if (!soldOut) {
@@ -175,6 +176,11 @@
         }
 
         document.getElementById('load-menu-btn').addEventListener('click', loadMenuByDate);
+        document.addEventListener('DOMContentLoaded', () => {
+            loadMenuByDate(); // เรียกใช้เมนูเมื่อหน้าเว็บถูกโหลด
+            filterMenuItems('all'); // แสดงทุกรายการเมนูเริ่มต้น
+        });
+
 
         // เพิ่มฟังก์ชันสำหรับกรองรายการเมนูตามประเภท
         function filterMenuItems(categoryId) {
@@ -231,6 +237,7 @@
                 .replace('{name}', item.menu_name)
                 .replace('{price}', item.menu_price.toFixed(2))
                 .replace(/{quantity}/g, item.quantity) // แทนค่าจำนวนสินค้า
+                .replace('{deductedAmount}', (item.portion_size * item.quantity).toFixed(1))
             ).join('');
 
             document.getElementById('cart-total').textContent = cart.reduce((sum, item) => sum + item.menu_price * item
@@ -288,6 +295,7 @@
                         }).then(() => {
                             cart = [];
                             renderCart();
+                            loadMenuByDate(); // เพิ่มการเรียกฟังก์ชันนี้เพื่ออัปเดตเมนู
                         });
                     }
                 })
@@ -305,6 +313,7 @@
         function clearCart() {
             cart = []; // ล้างรายการในตะกร้า
             renderCart(); // อัปเดตการแสดงผล
+            loadMenuByDate(); // เพิ่มการเรียกฟังก์ชันนี้เพื่ออัปเดตเมนู
         }
     </script>
 @endsection
