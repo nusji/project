@@ -3,7 +3,7 @@
 @section('title', 'ยินดีต้อนรับ KAOKANG')
 
 @section('content')
-<div class="w-96 mx-auto mt-10 p-6 bg-white rounded-lg shadow-xl text-black">
+<div class="w-96 mx-auto mt-0 p-6 bg-white rounded-lg shadow-xl text-black">
     <div class="flex justify-between items-center mb-8">
         <div class="progress-step active">1</div>
         <div class="progress-line"></div>
@@ -16,28 +16,62 @@
 
     <form id="multi-step-form" method="POST" action="#" class="space-y-6 ">
         @csrf
-        <div id="step1" class="step active">
-            <h2 class="text-xl font-semibold mb-4 text-black">ปกติชอบทานรสไหนเป็นพิเศษฮะ</h2>
-            <img src="{{ asset('images/cat.png') }}" alt="Cat Chef" class="mx-auto mb-4" style="width: 150px;">
-            <select name="flavor_preference" class="w-full p-2 border rounded-md" required>
-                <option value="">เลือกรสชาติ</option>
-                <option value="spicy">เผ็ด</option>
-                <option value="sweet">หวาน</option>
-                <option value="sour">เปรี้ยว</option>
-                <option value="salty">เค็ม</option>
-            </select>
+        <div id="step1" class="step active ">
+            <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">ปกติชอบทานรสไหนเป็นพิเศษฮะ</h2>
+            <img src="{{ asset('images/cat.png') }}" alt="Cat Chef" class="mx-auto mb-6 w-32 h-32">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                <label class="block">
+                    <input type="radio" name="flavor_preference" value="เผ็ด" required class="hidden peer">
+                    <div class="p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition duration-300 cursor-pointer peer-checked:bg-red-100 peer-checked:ring-2 peer-checked:ring-red-500 h-full flex items-center justify-center">
+                        <span class="text-gray-700 font-medium">เผ็ด</span>
+                    </div>
+                </label>
+                <label class="block">
+                    <input type="radio" name="flavor_preference" value="หวาน" required class="hidden peer">
+                    <div class="p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition duration-300 cursor-pointer peer-checked:bg-pink-100 peer-checked:ring-2 peer-checked:ring-pink-500 h-full flex items-center justify-center">
+                        <span class="text-gray-700 font-medium">หวาน</span>
+                    </div>
+                </label>
+                <label class="block">
+                    <input type="radio" name="flavor_preference" value="เปรี้ยว" required class="hidden peer">
+                    <div class="p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition duration-300 cursor-pointer peer-checked:bg-yellow-100 peer-checked:ring-2 peer-checked:ring-yellow-500 h-full flex items-center justify-center">
+                        <span class="text-gray-700 font-medium">เปรี้ยว</span>
+                    </div>
+                </label>
+                <label class="block">
+                    <input type="radio" name="flavor_preference" value="เค็ม" required class="hidden peer">
+                    <div class="p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition duration-300 cursor-pointer peer-checked:bg-blue-100 peer-checked:ring-2 peer-checked:ring-blue-500 h-full flex items-center justify-center">
+                        <span class="text-gray-700 font-medium">เค็ม</span>
+                    </div>
+                </label>
+                <label class="block">
+                    <input type="radio" name="flavor_preference" value="เค็ม" required class="hidden peer">
+                    <div class="p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition duration-300 cursor-pointer peer-checked:bg-blue-100 peer-checked:ring-2 peer-checked:ring-blue-500 h-full flex items-center justify-center">
+                        <span class="text-gray-700 font-medium">จืด</span>
+                    </div>
+                </label>
+            </div>
         </div>
 
         <div id="step2" class="step">
-            <h2 class="text-xl font-semibold mb-4">ชอบกินเนื้อไหน</h2>
-            <img src="{{ asset('images/cat-chef.png') }}" alt="Cat Chef" class="mx-auto mb-4" style="width: 150px;">
-            <select name="meat_preference" class="w-full p-2 border rounded-md" required>
-                <option value="">เลือกเนื้อสัตว์</option>
+            <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">ชอบกินเนื้ออะไรเป็นพิเศษละ</h2>
+            <img src="{{ asset('images/cat-chef.png') }}" alt="Cat Chef" class="mx-auto mb-6 w-32 h-32 object-cover rounded-full shadow-md">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 @foreach($meats as $meat)
-                    <option value="{{ $meat->ingredient_name }}">{{ $meat->ingredient_name }}</option>
+                    <label class="block">
+                        <input type="radio" name="meat_preference" value="{{ $meat->ingredient_name }}" required class="hidden peer">
+                        <div class="p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition duration-300 cursor-pointer peer-checked:bg-green-100 peer-checked:ring-2 peer-checked:ring-green-500 h-full flex items-center justify-center">
+                            <span class="text-gray-700 font-medium">{{ $meat->ingredient_name }}</span>
+                        </div>
+                    </label>
                 @endforeach
-                <option value="none">ไม่กินเนื้อสัตว์</option>
-            </select>
+                <label class="block">
+                    <input type="radio" name="meat_preference" value="none" required class="hidden peer">
+                    <div class="p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition duration-300 cursor-pointer peer-checked:bg-purple-100 peer-checked:ring-2 peer-checked:ring-purple-500 h-full flex items-center justify-center">
+                        <span class="text-gray-700 font-medium">ไม่กินเนื้อสัตว์</span>
+                    </div>
+                </label>
+            </div>
         </div>
 
         <div id="step3" class="step">
@@ -120,11 +154,28 @@ document.addEventListener('DOMContentLoaded', function() {
         nextBtn.style.display = stepIndex < steps.length - 1 ? 'block' : 'none';
     }
 
+    function validateStep(stepIndex) {
+        // Get all required inputs in the current step
+        const inputs = steps[stepIndex].querySelectorAll('input[required]');
+        
+        // Check if at least one input is checked (for radio buttons)
+        for (const input of inputs) {
+            if (input.type === 'radio' && input.checked) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     nextBtn.addEventListener('click', function() {
-        console.log('Next button clicked');
-        if (currentStep < steps.length - 1) {
-            currentStep++;
-            showStep(currentStep);
+        // Validate the current step before moving forward
+        if (validateStep(currentStep)) {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                showStep(currentStep);
+            }
+        } else {
+            alert('กรุณาเลือกตัวเลือกก่อนที่จะไปขั้นตอนถัดไป');
         }
     });
 
