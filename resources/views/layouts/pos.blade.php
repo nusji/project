@@ -98,7 +98,6 @@
     </aside>
     <!-- Main Content -->
     <main class="ml-40">
-
         @if (session('errors'))
             <div class="text-red-500 text-sm">
                 <ul>
@@ -113,8 +112,10 @@
         @livewireScripts
 
     </main>
+    
     <!-- เรียกใช้ alert component -->
     <x-alert />
+
     <script>
         function showManageSoldOutModal() {
             document.getElementById('manageSoldOutModal').classList.remove('hidden');

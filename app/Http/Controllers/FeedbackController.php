@@ -2,45 +2,94 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Feedback;
+use App\Models\Production;
+use App\Models\ProductionDetail;
 use App\Models\Menu;
+use Illuminate\Http\Request;
+use Carbon\Carbon;
+
 
 class FeedbackController extends Controller
 {
-    // ฟังก์ชันสำหรับแสดงฟอร์มการส่ง Feedback
-    public function create()
-    {
-        $menus = Menu::all(); // ดึงเมนูทั้งหมดจากฐานข้อมูลเพื่อแสดงในฟอร์ม
-        return view('feedbacks.create', compact('menus'));
-    }
-
-    // ฟังก์ชันสำหรับบันทึก Feedback ลงฐานข้อมูล
-    public function store(Request $request)
-    {
-        // ตรวจสอบข้อมูลที่ส่งมา
-        $request->validate([
-            'menu_id' => 'required|exists:menus,id', // ตรวจสอบว่า menu_id มีอยู่ในตาราง menus
-            'rating' => 'required|integer|min:1|max:5', // ตรวจสอบว่าคะแนนเป็นตัวเลขระหว่าง 1 ถึง 5
-            'comment' => 'nullable|string', // คำติชมเป็น string และสามารถว่างได้
-        ]);
-
-        // สร้าง Feedback ใหม่และบันทึกลงฐานข้อมูล
-        Feedback::create([
-            'menu_id' => $request->menu_id,
-            'rating' => $request->rating,
-            'comment' => $request->comment,
-        ]);
-
-        // ส่งกลับไปยังหน้าเดิมพร้อมข้อความแจ้งเตือน
-        return redirect()->back()->with('success', 'Thank you for your feedback!');
-    }
-
-    // ฟังก์ชันสำหรับแสดงผล Feedback ใน Dashboard ของเจ้าของร้าน
     public function index()
     {
-        // ดึงข้อมูล Feedback ทั้งหมดพร้อมข้อมูลเมนูที่เกี่ยวข้อง
-        $feedbacks = Feedback::with('menu')->get();
-        return view('home', compact('feedbacks'));
+        $today = Carbon::today();
+
+        // ดึงรายการ menu_id จาก production_details ที่มี production_date ตรงกับวันนี้
+        $productionMenuIds = ProductionDetail::whereHas('production', function ($query) use ($today) {
+            $query->whereDate('production_date', $today);
+        })->pluck('menu_id');
+
+        $feedbacks = Feedback::with('menu')
+            ->whereIn('menu_id', $productionMenuIds)
+            ->get();
+
+        $groupedFeedbacks = $feedbacks->groupBy('menu_id');
+
+        $averageRatings = $groupedFeedbacks->map(function ($menuFeedbacks) {
+            return [
+                'menu' => $menuFeedbacks->first()->menu,
+                'average_rating' => $menuFeedbacks->avg('rating'),
+                'feedbacks' => $menuFeedbacks
+            ];
+        });
+
+        return view('feedbacks.index', compact('averageRatings'));
+    }
+
+
+
+    public function create(Request $request)
+    {
+        $query = $request->input('query');
+        $today = Carbon::today();
+    
+        // ปรับปรุงการค้นหาโดยใช้ whereHas กับความสัมพันธ์ 'production'
+        $productionDetailsQuery = ProductionDetail::with('menu')
+            ->whereHas('production', function ($q) use ($today) {
+                $q->whereDate('production_date', $today);
+            });
+    
+        if ($query) {
+            $productionDetailsQuery->whereHas('menu', function ($q) use ($query) {
+                $q->where('menu_name', 'like', '%' . $query . '%');
+            });
+        }
+    
+        $productionDetails = $productionDetailsQuery->get();
+    
+        if ($productionDetails->isEmpty()) {
+            return redirect()->back()->with('error', 'ไม่พบเมนูที่ค้นหา');
+        }
+    
+        $menus = $productionDetails->pluck('menu')->unique('id');
+    
+        return view('feedbacks.create', compact('menus', 'query'));
+    }
+    
+
+
+
+    public function review(Request $request)
+    {
+        $menu_id = $request->input('menu_id');
+        $menu = Menu::findOrFail($menu_id);
+
+        return view('feedbacks.review', compact('menu'));
+    }
+
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'menu_id' => 'required|exists:menus,id',
+            'rating' => 'required|integer|min:1|max:5',
+            'comment' => 'nullable|string',
+        ]);
+
+        Feedback::create($request->only('menu_id', 'rating', 'comment'));
+
+        return redirect()->route('feedbacks.index')->with('success', 'ขอบคุณสำหรับคำติชม!');
     }
 }

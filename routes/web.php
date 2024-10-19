@@ -17,6 +17,7 @@ use App\Http\Controllers\SaleController;
 use App\Http\Controllers\MenuAllocationController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\FeedbackController;
 
 Route::get('/no-access', function () {
     return view('no-access');
@@ -25,8 +26,18 @@ Route::get('/no-access', function () {
 Route::controller(HomeController::class)->group(function () {
     Route::get('/', 'showWelcomePage')->name('welcome');
     Route::get('/home', 'showWelcomePage')->name('home');
+    Route::get('/about', 'showAboutPage')->name('about');
     Route::get('/survey-suggest', 'showSurvey')->name('survey-suggest');
+    Route::post('/survey-suggest/query-menus', 'queryMenus')->name('survey-suggest.queryMenus');
+    Route::get('menu-today', 'showMenu')->name('menu-today');
     
+});
+
+Route::controller(FeedbackController::class)->group(function () {
+    Route::get('/feedbacks','index')->name('feedbacks.index');
+    Route::get('/feedbacks/create', 'create')->name('feedbacks.create');
+    Route::post('/feedbacks', 'store')->name('feedbacks.store');
+    Route::get('/feedbacks/review', 'review')->name('feedbacks.review');
 });
 
 // สร้าง Route สำหรับการล็อกอินและล็อกเอาท์
@@ -37,9 +48,6 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // สร้าง Route สำหรับการลงทะเบียนและยืนยันการลงทะเบียน
 Route::get('/profile/complete', [ProfileController::class, 'showCompleteForm'])->name('employees.complete_profile')->middleware('auth');
 Route::post('/profile/complete', [ProfileController::class, 'completeProfile'])->name('employees.update_profile')->middleware('auth');
-
-//Route for Guest
-Route::get('/menu-today', [ProductionController::class, 'showMenuToday'])->name('menu-today');
 
 //สิทธิ์เฉพาะสำหรับพนักงานเท่านั้น
 Route::middleware(['auth', 'role:employee', 'check.profile'])->group(function () {
@@ -65,14 +73,8 @@ Route::post('/profile/{id}/change-password', [ProfileController::class, 'updateP
 Route::get('/password/reset-custom', [ProfileController::class, 'showCustomPasswordResetForm'])->name('profile.reset_custom');
 Route::post('/password/reset-custom', [ProfileController::class, 'resetPasswordWithVerification'])->name('profile.reset_custom.post');
 
-use App\Http\Controllers\FeedbackController;
-
-Route::resource('feedbacks', FeedbackController::class);
-
 use App\Http\Controllers\ReportController;
-
 Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
-
 Route::get('/sales/menus-by-date', [SaleController::class, 'getMenusByDate'])->name('sales.menusByDate');
 
 //สิทธิ์เฉพาะสำหรับเจ้าของร้านและพนักงานเท่านั้น

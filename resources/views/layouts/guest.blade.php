@@ -17,9 +17,13 @@
         }
     </style>
     @stack('styles')
+    <!-- SweetAlert CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css">
+    <!-- SweetAlert JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
 </head>
 
-<body class="bg-gradient-to-r from-rose-400 to-red-500 min-h-screen flex flex-col">
+<body class="bg-orange-50 min-h-screen flex flex-col">
 
     <!-- Navigation Bar -->
     <nav class="bg-white shadow-md fixed w-full z-10 transition-all duration-300 ease-in-out">
@@ -32,7 +36,7 @@
                     <path
                         d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
-                KAOKANG
+                ข้าวแกงบังเฮม
             </a>
             <!-- Burger Menu Button (for mobile) -->
             <button id="burgerMenu"
@@ -72,12 +76,29 @@
                     </svg>
                     <span class="relative overflow-hidden">
                         <span
-                            class="inline-block transform transition-transform duration-300 group-hover:-translate-y-full">เมนู</span>
+                            class="inline-block transform transition-transform duration-300 group-hover:-translate-y-full">เมนูประจำวัน</span>
                         <span
-                            class="inline-block absolute top-0 left-0 transform translate-y-full transition-transform duration-300 group-hover:-translate-y-0">เมนู</span>
+                            class="inline-block absolute top-0 left-0 transform translate-y-full transition-transform duration-300 group-hover:-translate-y-0">เมนูประจำวัน</span>
                     </span>
                 </a>
-                <a href="#"
+                <a href="{{ route('feedbacks.index') }}"
+                    class="text-gray-800 hover:text-red-500 transition duration-300 flex items-center group">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                        class="h-5 w-5 mr-1 transform group-hover:scale-110 transition-transform duration-300"
+                        viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                        <path fill-rule="evenodd"
+                            d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    <span class="relative overflow-hidden">
+                        <span
+                            class="inline-block transform transition-transform duration-300 group-hover:-translate-y-full">รีวิวเมนู</span>
+                        <span
+                            class="inline-block absolute top-0 left-0 transform translate-y-full transition-transform duration-300 group-hover:-translate-y-0">เมนูประจำวัน</span>
+                    </span>
+                </a>
+                <a href="{{route('about')}}"
                     class="text-gray-800 hover:text-red-500 transition duration-300 flex items-center group">
                     <svg xmlns="http://www.w3.org/2000/svg"
                         class="h-5 w-5 mr-1 transform group-hover:scale-110 transition-transform duration-300"
@@ -129,9 +150,19 @@
                         d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z"
                         clip-rule="evenodd" />
                 </svg>
-                เมนู
+                เมนูประจำวัน
             </a>
-            <a href="#"
+            <a href="{{ route('feedbacks.index') }}"
+            class="text-gray-800 hover:text-red-500 transition duration-300 flex items-center transform hover:translate-x-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                <path fill-rule="evenodd"
+                    d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z"
+                    clip-rule="evenodd" />
+            </svg>
+            รีวิวเมนู
+        </a>
+            <a href="{{route('about')}}"
                 class="text-gray-800 hover:text-red-500 transition duration-300 flex items-center transform hover:translate-x-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
@@ -150,6 +181,8 @@
             </a>
         </div>
     </nav>
+    <!-- เรียกใช้ alert component -->
+    <x-alert />
     <script>
         // Toggle the mobile menu visibility with animation
         document.getElementById('burgerMenu').addEventListener('click', function() {
