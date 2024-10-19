@@ -11,25 +11,28 @@
 
         <div class="text-sm font-md text-gray-800 mb-2">
             <form method="GET" action="{{ route('payrolls.index') }}" class="text-right">
-                <label for="month" class="font-medium text-gray-700" >เดือน</label>
+                <label for="month" class="font-medium text-gray-700">เดือน</label>
                 <select name="month">
-                    @for($i = 1; $i <= 12; $i++)
-                        <option value="{{ $i }}" {{ $i == $currentMonth ? 'selected' : '' }}>{{ $i }}</option>
+                    @for ($i = 1; $i <= 12; $i++)
+                        <option value="{{ $i }}" {{ $i == $currentMonth ? 'selected' : '' }}>{{ $i }}
+                        </option>
                     @endfor
                 </select>
-            
+
                 <label for="year" class="font-medium text-gray-700">ปี</label>
                 <select name="year">
-                    @for($year = now()->year - 5; $year <= now()->year; $year++)
-                        <option value="{{ $year }}" {{ $year == $currentYear ? 'selected' : '' }}>{{ $year }}</option>
+                    @for ($year = now()->year - 5; $year <= now()->year; $year++)
+                        <option value="{{ $year }}" {{ $year == $currentYear ? 'selected' : '' }}>
+                            {{ $year }}</option>
                     @endfor
                 </select>
-            
-                <button type="submit" class="px-4 py-1 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">ค้นหา</button>
+
+                <button type="submit"
+                    class="px-4 py-1 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">ค้นหา</button>
             </form>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            
+
             <!-- จำนวนพนักงานทั้งหมด -->
             <div class="bg-white p-6 rounded-lg shadow-lg">
                 <h2 class="text-lg font-semibold text-gray-700">พนักงานทั้งหมด</h2>
@@ -39,17 +42,17 @@
             <!-- จำนวนรายการจ่ายเงินเดือนทั้งหมด -->
             <div class="bg-white shadow rounded-lg p-6">
                 <h2 class="text-xl font-semibold mb-4">พนักงานที่ยังไม่ได้รับเงินเดือนเดือนนี้</h2>
-                @if($unpaidEmployees->isEmpty())
+                @if ($unpaidEmployees->isEmpty())
                     <p class="text-green-500">พนักงานทุกคนได้รับเงินเดือนแล้วในเดือนนี้</p>
                 @else
                     <ul class="list-disc pl-6 text-red-500">
-                        @foreach($unpaidEmployees as $employee)
+                        @foreach ($unpaidEmployees as $employee)
                             <li>{{ $employee->name }} - ตำแหน่ง: {{ $employee->employment_type }}</li>
                         @endforeach
                     </ul>
                 @endif
             </div>
-            
+
 
             <!-- ยอดจ่ายเงินเดือนทั้งหมด -->
             <div class="bg-white p-6 rounded-lg shadow-lg">
@@ -129,39 +132,91 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">
-                    @foreach ($payrolls as $payroll)
+                    @if ($payrolls->isEmpty())
                         <tr>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                {{ $payroll->payment_date }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                {{ $payroll->employee->name }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                {{ $payroll->employee->salary }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                {{ number_format($payroll->bonus, 2) }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                {{ $payroll->deductions }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                {{ $payroll->net_salary }}
-                            </td>
-                            <td>
-                                <a href="{{ route('payrolls.edit', $payroll) }}" class="btn btn-sm btn-warning">Edit</a>
-                                <a href="{{ route('payrolls.print-slip', $payroll) }}" class="btn btn-sm btn-info">Print
-                                    Slip</a>
-                                <form action="{{ route('payrolls.destroy', $payroll) }}" method="POST" class="d-inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger"
-                                        onclick="return confirm('Are you sure?')">Delete</button>
-                                </form>
+                            <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                                ไม่มีข้อมูลพนักงานในระบบ
                             </td>
                         </tr>
-                    @endforeach
+                    @else
+                        @foreach ($payrolls as $payroll)
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {{ $payroll->payment_date }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {{ $payroll->employee->name }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {{ $payroll->employee->salary }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {{ number_format($payroll->bonus, 2) }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {{ $payroll->deductions }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {{ $payroll->net_salary }}
+                                </td>
+                                <td>
+                                    @if (auth()->user()->role === 'owner')
+                                        <a href="{{ route('payrolls.edit', $payroll) }}"
+                                            class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                            <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                            แก้ไขข้อมูล
+                                        </a>
+                                        <form action="{{ route('payrolls.destroy', $payroll->id) }}" method="POST"
+                                            class="inline" id="delete-form-{{ $payroll->id }}">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="button" onclick="confirmDelete({{ $payroll->id }})"
+                                                class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                                <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg"
+                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                                ลบข้อมูล
+                                            </button>
+                                        </form>
+                                        <script>
+                                            function confirmDelete(payrollId) {
+                                                Swal.fire({
+                                                    title: 'คุณแน่ใจหรือไม่?',
+                                                    text: "กรุณาพิมพ์คำว่า 'ลบพนักงาน' เพื่อยืนยันการลบข้อมูล!",
+                                                    icon: 'warning',
+                                                    input: 'text',
+                                                    inputPlaceholder: 'พิมพ์ที่นี่...',
+                                                    showCancelButton: true,
+                                                    confirmButtonText: 'ใช่, ลบเลย!',
+                                                    cancelButtonText: 'ยกเลิก',
+                                                    customClass: {
+                                                        confirmButton: 'bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded',
+                                                        cancelButton: 'bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded'
+                                                    },
+                                                    preConfirm: (inputValue) => {
+                                                        if (inputValue !== 'ลบ') {
+                                                            Swal.showValidationMessage('คำที่พิมพ์ไม่ถูกต้อง! กรุณาพิมพ์ "ลบ".');
+                                                        }
+                                                        return inputValue;
+                                                    }
+                                                }).then((result) => {
+                                                    if (result.isConfirmed) {
+                                                        document.getElementById(`delete-form-${payrollId}`).submit();
+                                                    }
+                                                });
+                                            }
+                                        </script>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    @endif
                 </tbody>
             </table>
             {{ $payrolls->links() }}

@@ -30,7 +30,7 @@ class MenuController extends Controller
         // ดึงเมนู โดยค้นหาตามชื่อหากมีการส่งค่าการค้นหา
         $menus = Menu::with('menuType')
             ->when($search, function ($query, $search) {
-                return $query->where('name', 'like', "%{$search}%"); // ค้นหาจากชื่อเมนู
+                return $query->where('menu_name', 'like', "%{$search}%"); // ค้นหาจากชื่อเมนู
             })
             ->paginate(20);
 

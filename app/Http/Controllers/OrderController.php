@@ -13,28 +13,39 @@ use Carbon\Carbon;
 
 class OrderController extends Controller
 {
-    public function index()
-{
-    // ข้อมูลสรุปการสั่งซื้อ
-    $orderSummaries = Order::with(['orderDetails.ingredient', 'employee']) // โหลดข้อมูลที่เกี่ยวข้อง
-        ->get() // ดึงข้อมูลคำสั่งซื้อทั้งหมด
-        ->map(function ($order) {
-            return [
-                'order' => $order,
-                'ingredientCount' => $order->orderDetails->count('ingredient_id'), // จำนวนวัตถุดิบทั้งหมดในคำสั่งซื้อ
-                'totalPrice' => $order->orderDetails->sum(function ($detail) {
-                    return $detail->price; // คำนวณราคารวม
-                }),
-            ];
-        })
-        ->toArray(); // แปลงเป็น array เพื่อการเข้าถึงที่ง่ายขึ้นใน view
+    public function index(Request $request)
+    {
+        // Retrieve the search query from the request
+        $search = $request->input('search');
 
-    return view('orders.index', [
-        'orderSummaries' => $orderSummaries,
-    ]);
-}
+        // Start building the query with eager loading
+        $query = Order::with(['orderDetails.ingredient', 'employee']);
 
+        // If a search query is provided, add conditions to the query
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                // Search in the 'order_number' field
+                $q->where('id', 'like', '%' . $search . '%')
+                    // Or search in the employee's name
+                    ->orWhereHas('employee', function ($q) use ($search) {
+                        $q->where('name', 'like', '%' . $search . '%');
+                    })
+                    // Or search in the ingredient's name
+                    ->orWhereHas('orderDetails.ingredient', function ($q) use ($search) {
+                        $q->where('ingredient_name', 'like', '%' . $search . '%');
+                    });
+            });
+        }
 
+        // Paginate the results
+        $orders = $query->paginate(20);
+
+        // Return the view with the orders and the search query
+        return view('orders.index', [
+            'orders' => $orders,
+            'search' => $search,
+        ]);
+    }
 
 
     public function create()

@@ -13,18 +13,21 @@ class EmployeeController extends Controller
 
     public function index(Request $request)
     {
-        // Get search input from request
+        // Get the search query from the request
         $search = $request->input('search');
 
-        $employees = Employee::when($search, function ($query, $search) {
-            return $query->where('name', 'like', "%{$search}%")
-                ->orWhere('id_card_number', 'like', "%{$search}%")
-                ->orWhere('phone_number', 'like', "%{$search}%")
-                ->orWhere('employment_type', 'like', "%{$search}%")
-                ->orWhere('username', 'like', "%{$search}%");
-        })->paginate(10);
-
-        return view('employees.index', compact('employees', 'search'));
+        // If there's a search query, filter the results
+        if ($search) {
+            $employees = Employee::where('name', 'like', '%' . $search . '%')
+            ->orWhere('id_card_number', 'like', '%' . $search . '%')
+            ->orWhere('phone_number', 'like', '%' . $search . '%')
+            ->orWhere('employment_type', 'like', '%' . $search . '%')
+            ->paginate(20);
+        } else {
+            // If no search query, retrieve all records
+            $employees = Employee::paginate(20);
+        }
+        return view('employees.index', compact('employees'));
     }
 
     public function create()
