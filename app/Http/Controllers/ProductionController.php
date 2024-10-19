@@ -51,6 +51,8 @@ class ProductionController extends Controller
             ]
         );
 
+
+        
         DB::beginTransaction();
 
         try {
@@ -152,51 +154,5 @@ class ProductionController extends Controller
             Log::error('Production destroy error: ' . $e->getMessage());
             return redirect()->route('productions.index')->with('error', 'เกิดข้อผิดพลาดในการยกเลิกรายการผลิต: ' . $e->getMessage());
         }
-    }
-
-    // แสดงเมนูที่ผลิตในวันนี้ ในฝั่งของคนดู
-    public function showWelcomePage()
-    {
-        // กำหนดวันที่วันนี้
-        $today = now()->startOfDay();
-
-        // ดึงข้อมูลจากตาราง production โดยใช้ created_at จากตาราง production
-        $menus = Production::whereDate('created_at', $today)
-            ->with(['productionDetails.menu'])  // เชื่อมโยงกับ production_details และ menu
-            ->get()
-            ->pluck('productionDetails.*.menu')  // ดึงเฉพาะข้อมูลเมนู
-            ->flatten();  // แบนข้อมูลเพื่อให้อยู่ในรูปแบบที่ง่ายต่อการใช้งาน
-
-        // ตรวจสอบว่าเมนูมีค่าของ menu_image
-        foreach ($menus as $menu) {
-            if (empty($menu->menu_image)) {
-
-                Log::warning('Menu ' . $menu->name . ' does not have an image.');
-            }
-        }
-
-        return view('welcome', compact('menus'));
-    }
-    public function showMenuToday()
-    {
-        // กำหนดวันที่วันนี้
-        $today = now()->startOfDay();
-
-        // ดึงข้อมูลจากตาราง production โดยใช้ created_at จากตาราง production
-        $menus = Production::whereDate('created_at', $today)
-            ->with(['productionDetails.menu'])
-            ->get()
-            ->pluck('productionDetails.*.menu')
-            ->flatten();
-
-        // ตรวจสอบว่าเมนูมีค่าของ menu_image
-        foreach ($menus as $menu) {
-            if (empty($menu->menu_image)) {
-
-                Log::warning('Menu ' . $menu->name . ' does not have an image.');
-            }
-        }
-
-        return view('menu-today', compact('menus'));
     }
 }

@@ -16,6 +16,7 @@
             /* Ensure the nav is above other content */
         }
     </style>
+    @stack('styles')
 </head>
 
 <body class="bg-gradient-to-r from-rose-400 to-red-500 min-h-screen flex flex-col">

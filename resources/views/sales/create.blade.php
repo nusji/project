@@ -12,10 +12,10 @@
                                 <h2 class="text-2xl font-bold" id="menu-title">เมนูวันที่ <span
                                         id="selected-date">{{ $today->format('d/m/Y') }}</span></h2>
                                 <div class="flex items-center">
-                                    <input type="date" id="date-picker" class="border rounded px-2 py-1 mr-2"
+                                    <input type="date" id="date-picker" class="border rounded-full px-2 py-1 mr-2"
                                         value="{{ $today->format('Y-m-d') }}">
                                     <button id="load-menu-btn"
-                                        class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                                        class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-1 px-4 rounded-full">
                                         โหลดเมนู
                                     </button>
                                 </div>

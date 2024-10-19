@@ -16,12 +16,17 @@ use App\Http\Controllers\SalaryController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\MenuAllocationController;
 use App\Http\Controllers\FinanceController;
+use App\Http\Controllers\HomeController;
 
-Route::get('/', function () {
-    return view('welcome');
-});
 Route::get('/no-access', function () {
     return view('no-access');
+});
+
+Route::controller(HomeController::class)->group(function () {
+    Route::get('/', 'showWelcomePage')->name('welcome');
+    Route::get('/home', 'showWelcomePage')->name('home');
+    Route::get('/survey-suggest', 'showSurvey')->name('survey-suggest');
+    
 });
 
 // สร้าง Route สำหรับการล็อกอินและล็อกเอาท์
@@ -65,11 +70,8 @@ use App\Http\Controllers\FeedbackController;
 Route::resource('feedbacks', FeedbackController::class);
 
 use App\Http\Controllers\ReportController;
-use App\Models\Production;
 
 Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
-
-Route::get('/', [ProductionController::class, 'showWelcomePage'])->name('welcome');
 
 Route::get('/sales/menus-by-date', [SaleController::class, 'getMenusByDate'])->name('sales.menusByDate');
 

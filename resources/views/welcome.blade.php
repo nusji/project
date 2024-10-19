@@ -11,7 +11,7 @@
         <div class="mb-15">
             <h2 class="text-4xl font-bold mb-6 text-center text-white-500">เลือกปุ่มทำรายการ</h2>
             <div class="text-center">
-                <a href="#"
+                <a href="{{route('survey-suggest')}}"
                     class="bg-white text-red-500 font-bold py-3 px-8 rounded-full text-xl hover:bg-red-100 transition duration-300 mb-4 inline-block">
                     แนะนำเมนูตามความชอบ!
                 </a>
@@ -27,9 +27,19 @@
             @else
                 <div class="flex flex-wrap justify-center gap-8">
                     @foreach ($menus as $menu)
-                        <div class="bg-white rounded-lg p-6 shadow-lg text-center w-64">
-                            <img src="{{ asset('storage/' . $menu->menu_image) }}" alt="{{ $menu->name }}"
+                        <div class="relative bg-white rounded-lg p-6 shadow-lg text-center w-64">
+                            <img src="{{ asset('storage/' . $menu->menu_image) }}" alt="{{ $menu->menu_name }}"
                                 class="w-full h-40 object-cover rounded-lg mb-4">
+
+                            <!-- ตรวจสอบ is_sold_out ที่ถูกกำหนดจาก Controller -->
+                            @if ($menu->is_sold_out == 1)
+                                <!-- ลายน้ำ "หมด" -->
+                                <div
+                                    class="absolute inset-0 flex items-center justify-center bg-gray-500 bg-opacity-75 rounded-lg">
+                                    <span class="text-4xl font-bold text-white">หมด</span>
+                                </div>
+                            @endif
+
                             <h2 class="text-xl font-semibold text-gray-800">{{ $menu->menu_name }}</h2>
                             <p class="text-lg text-black">{{ $menu->menu_price }} บาท</p>
                         </div>

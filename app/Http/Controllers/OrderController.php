@@ -13,32 +13,27 @@ use Carbon\Carbon;
 
 class OrderController extends Controller
 {
-    protected function getOrderSummaries()
-    {
-        return Order::with(['orderDetails.ingredient', 'employee']) // Load the related models
-            ->get() // Get all orders
-            ->map(function ($order) {
-                return [
-                    'order' => $order,
-                    'ingredientCount' => $order->orderDetails->count('ingredient_id'), // Total quantity of ingredients in the order
-                    'totalPrice' => $order->orderDetails->sum(function ($detail) {
-                        return $detail->price; // Calculate total price
-                    }),
-                ];
-            })
-            ->toArray(); // Convert to array for easier access in the view
-    }
-
     public function index()
-    {
-        // ข้อมูลสรุปการสั่งซื้อ
-        $orderSummaries = $this->getOrderSummaries();
+{
+    // ข้อมูลสรุปการสั่งซื้อ
+    $orderSummaries = Order::with(['orderDetails.ingredient', 'employee']) // โหลดข้อมูลที่เกี่ยวข้อง
+        ->get() // ดึงข้อมูลคำสั่งซื้อทั้งหมด
+        ->map(function ($order) {
+            return [
+                'order' => $order,
+                'ingredientCount' => $order->orderDetails->count('ingredient_id'), // จำนวนวัตถุดิบทั้งหมดในคำสั่งซื้อ
+                'totalPrice' => $order->orderDetails->sum(function ($detail) {
+                    return $detail->price; // คำนวณราคารวม
+                }),
+            ];
+        })
+        ->toArray(); // แปลงเป็น array เพื่อการเข้าถึงที่ง่ายขึ้นใน view
 
-        return view('orders.index', [
-            'orderSummaries' => $orderSummaries,
+    return view('orders.index', [
+        'orderSummaries' => $orderSummaries,
+    ]);
+}
 
-        ]);
-    }
 
 
 
