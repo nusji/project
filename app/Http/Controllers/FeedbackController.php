@@ -19,20 +19,25 @@ class FeedbackController extends Controller
         // ดึงรายการ menu_id จาก production_details ที่มี production_date ตรงกับวันนี้
         $productionMenuIds = ProductionDetail::whereHas('production', function ($query) use ($today) {
             $query->whereDate('production_date', $today);
-        })->pluck('menu_id');
+        })->pluck('menu_id')->unique();
 
+        // ดึง feedbacks พร้อมกับ menu ที่เกี่ยวข้อง
         $feedbacks = Feedback::with('menu')
             ->whereIn('menu_id', $productionMenuIds)
             ->get();
 
+        // จัดกลุ่ม feedbacks ตาม menu_id
         $groupedFeedbacks = $feedbacks->groupBy('menu_id');
 
+        // แปลงกลุ่ม feedbacks เป็น averageRatings พร้อมกรองรายการที่ menu เป็น null
         $averageRatings = $groupedFeedbacks->map(function ($menuFeedbacks) {
             return [
                 'menu' => $menuFeedbacks->first()->menu,
                 'average_rating' => $menuFeedbacks->avg('rating'),
                 'feedbacks' => $menuFeedbacks
             ];
+        })->filter(function ($menuData) {
+            return $menuData['menu'] !== null;
         });
 
         return view('feedbacks.index', compact('averageRatings'));

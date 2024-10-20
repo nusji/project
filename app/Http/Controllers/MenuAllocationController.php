@@ -16,7 +16,7 @@ class MenuAllocationController extends Controller
     public function index()
     {
         $allocations = MenuAllocation::with('allocationDetails.menu')
-            ->orderBy('allocation_date', 'desc')
+            ->orderBy('id', 'desc')
             ->paginate(10);
 
         return view('allocations.index', compact('allocations'));
@@ -133,37 +133,37 @@ class MenuAllocationController extends Controller
     {
         // โหลดข้อมูลที่เกี่ยวข้องทั้งหมด
         $allocation->load('allocationDetails.menu.recipes.ingredient');
-    
+
         $ingredientUsage = [];
         $remainingIngredients = [];
         $missingIngredients = [];
-    
+
         // รับข้อมูลจำนวนการผลิตจากผู้ใช้
         $productionQuantities = $request->input('productionQuantities', []);
-    
+
         // เริ่มต้นด้วยการกำหนดปริมาณวัตถุดิบคงเหลือเท่ากับสต็อกปัจจุบัน
         $ingredients = Ingredient::all();
         foreach ($ingredients as $ingredient) {
             $remainingIngredients[$ingredient->id] = $ingredient->ingredient_stock;
         }
-    
+
         // วนลูปผ่านทุกรายการในการจัดสรร
         foreach ($allocation->allocationDetails as $detail) {
             $menuId = $detail->menu->id;
             $productionQuantity = isset($productionQuantities[$menuId]) ? (int)$productionQuantities[$menuId] : 1;
-    
+
             $ingredientUsage[$menuId] = [];
             $missingIngredients[$menuId] = [];
-    
+
             // คำนวณการใช้วัตถุดิบสำหรับแต่ละเมนู
             foreach ($detail->menu->recipes as $recipe) {
                 $ingredientId = $recipe->ingredient->id;
                 $requiredAmount = $recipe->amount * $productionQuantity;
-    
+
                 $availableAmount = $remainingIngredients[$ingredientId];
                 $usedAmount = min($requiredAmount, $availableAmount);
                 $missingAmount = max(0, $requiredAmount - $usedAmount);
-    
+
                 // บันทึกข้อมูลการใช้วัตถุดิบ
                 $ingredientUsage[$menuId][] = [
                     'ingredient_name' => $recipe->ingredient->ingredient_name,
@@ -173,7 +173,7 @@ class MenuAllocationController extends Controller
                     'used_amount' => $usedAmount,
                     'missing_amount' => $missingAmount,
                 ];
-    
+
                 // บันทึกข้อมูลวัตถุดิบที่ขาด (ถ้ามี)
                 if ($missingAmount > 0) {
                     $missingIngredients[$menuId][] = [
@@ -182,12 +182,12 @@ class MenuAllocationController extends Controller
                         'missing_amount' => $missingAmount,
                     ];
                 }
-    
+
                 // อัปเดตปริมาณวัตถุดิบที่เหลือ
                 $remainingIngredients[$ingredientId] -= $usedAmount;
             }
         }
-    
+
         // คำนวณวัตถุดิบที่ขาดทั้งหมด
         $totalMissingIngredients = [];
         foreach ($missingIngredients as $menuMissing) {
@@ -202,7 +202,7 @@ class MenuAllocationController extends Controller
                 $totalMissingIngredients[$ingredientName]['missing_amount'] += $missing['missing_amount'];
             }
         }
-    
+
         // ส่งข้อมูลไปยัง view
         return view('allocations.show', compact('allocation', 'ingredientUsage', 'missingIngredients', 'totalMissingIngredients', 'productionQuantities'));
     }

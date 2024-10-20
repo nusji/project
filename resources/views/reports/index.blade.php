@@ -133,7 +133,7 @@
             labels: {!! json_encode($dailySales->pluck('date')) !!},
             datasets: [{
                 label: 'Total Sales',
-                data: {!! json_encode($dailySales->pluck('daily_sales')) !!},
+                data: {!! json_encode($dailySales->pluck('total_revenue')) !!},
                 backgroundColor: 'rgba(139, 92, 246, 0.5)', // Tailwind purple-500 with opacity
                 borderColor: 'rgb(139, 92, 246)', // Tailwind purple-500
                 borderWidth: 2,
