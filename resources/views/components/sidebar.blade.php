@@ -72,7 +72,6 @@
                 </svg>
                 การผลิต
             </a>
-
             <!-- Employee Management -->
             @if ($userRole === 'owner')
                 <a href="{{ route('employees.index') }}"
@@ -93,25 +92,27 @@
                     </svg>
                     เงินเดือน
                 </a>
-                <a href="{{ route('reports.index') }}"
-                    class="py-2.5 px-4 text-lg font-medium text-[#F1F5F9] rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center {{ request()->routeIs('reports.*') ? 'bg-[#E2725B] text-white' : '' }}">
-                    <svg class="w-5 h-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                        stroke-width="1.5" stroke="currentColor" class="size-6">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
-                    </svg>
-                    รายงานและสถิติ
-                </a>
-                <a href="{{ route('allocations.index') }}"
-                    class="py-2.5 px-4 text-lg font-medium text-[#F1F5F9] rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center {{ request()->routeIs('allocations.*') ? 'bg-[#E2725B] text-white' : '' }}">
-                    <svg class="w-5 h-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                        stroke-width="1.5" stroke="currentColor" class="size-6">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
-                    </svg>
-                    ระบบช่วยเหลือจัดเมนู
-                </a>
             @endif
+            <a href="{{ route('reports.index') }}"
+                class="py-2.5 px-4 text-lg font-medium text-[#F1F5F9] rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center {{ request()->routeIs('reports.*') ? 'bg-[#E2725B] text-white' : '' }}">
+                <svg class="w-5 h-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke-width="1.5" stroke="currentColor" class="size-6">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
+                </svg>
+                รายงานและสถิติ
+            </a>
+            <a href="{{ route('allocations.index') }}"
+                class="py-2.5 px-4 text-lg font-medium text-[#F1F5F9] rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center {{ request()->routeIs('allocations.*') ? 'bg-[#E2725B] text-white' : '' }}">
+                <svg class="w-5 h-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke-width="1.5" stroke="currentColor" class="size-6">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
+                </svg>
+                ระบบช่วยเหลือจัดเมนู
+            </a>
+            <hr>
+            <!-- Profile -->
             @if ($userRole === 'employee')
                 <a href="{{ route('employees.showProfile') }}"
                     class="py-2.5 px-4 text-lg font-medium text-[#F1F5F9] rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center {{ request()->routeIs('employees.*') ? 'bg-[#E2725B] text-white' : '' }}">
@@ -121,6 +122,15 @@
                             d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                     </svg>
                     ข้อมูลตัวเอง
+                </a>
+                <a href="{{ route('payrolls.index') }}"
+                    class="py-2.5 px-4 text-lg font-medium text-[#F1F5F9] rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center {{ request()->routeIs('payrolls.*') ? 'bg-[#E2725B] text-white' : '' }}">
+                    <svg class="w-5 h-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke-width="1.5" stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                    </svg>
+                    ประวัติจ่ายเงินเดือน
                 </a>
             @endif
         </div>
