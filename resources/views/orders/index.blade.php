@@ -5,17 +5,38 @@
         <!-- เรียกใช้ breadcrumb component -->
         <x-breadcrumb :paths="[['label' => 'ระบบสั่งซื้อวัตถุดิบ', 'url' => route('orders.index')], ['label' => '']]" />
         <h2 class="text-2xl font-bold text-gray-800 mb-4">ระบบสั่งซื้อวัตถุดิบ</h2>
-        <div class="bg-white shadow-lg rounded-lg p-6 flex flex-col h-full">
-            <div style="display: flex;">
-                <!-- ส่วนของกราฟและตัวเลือก -->
-                <div>
-                    <select id="timePeriod" onchange="updateChart()">
-                        <option value="monthly">รายเดือน</option>
-                        <option value="weekly">รายสัปดาห์</option>
-                        <option value="yearly">รายปี</option>
-                    </select>
+        <div class="bg-white shadow-lg rounded-lg p-6 flex flex-col space-y-4 h-full mb-10">
+            <!-- เพิ่ม dropdown สำหรับเลือกจำนวนวัตถุดิบที่จะแสดง -->
+            <div class="mb-3">
+                <label for="topLimit" class="form-label">จำนวนวัตถุดิบที่จะแสดง</label>
+                <select id="topLimit" onchange="fetchTopIngredients()" class="form-control w-full md:w-1/3">
+                    <option value="5" selected>5 อันดับแรก</option>
+                    <option value="10">10 อันดับแรก</option>
+                    <option value="15">15 อันดับแรก</option>
+                </select>
+            </div>
+            
+            <!-- ส่วนของกราฟในรูปแบบ 2 คอลัมน์ -->
+            <div class="flex flex-wrap -mx-2">
+                <!-- กราฟที่ 1: วัตถุดิบที่ถูกสั่งซื้อบ่อยที่สุด (จำนวนครั้ง) -->
+                <div class="w-full md:w-1/2 px-2 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">วัตถุดิบที่ถูกสั่งซื้อบ่อยที่สุด</h5>
+                            <canvas id="topIngredientsChart" width="100%" height="50"></canvas>
+                        </div>
+                    </div>
                 </div>
-                <canvas id="orderChart" width="400" height="200"></canvas>
+                
+                <!-- กราฟที่ 2: วัตถุดิบที่ถูกสั่งซื้อในปริมาณมากที่สุด -->
+                <div class="w-full md:w-1/2 px-2 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">วัตถุดิบที่ถูกสั่งซื้อในปริมาณมากที่สุด</h5>
+                            <canvas id="topIngredientsChartByQuantity" width="100%" height="50"></canvas>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0 md:space-x-4">
@@ -140,8 +161,8 @@
                                             <button type="button"
                                                 class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                                                 onclick="confirmDelete({{ $order->id }})">
-                                                <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                    viewBox="0 0 24 24" stroke="currentColor">
+                                                <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg"
+                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                 </svg>
@@ -172,7 +193,7 @@
                                 </td>
                             </tr>
                         @endforeach
-                        @endif
+                    @endif
                 </tbody>
             </table>
 
@@ -184,53 +205,109 @@
         </div>
     </div>
 
-    <script>
-        let chart;
+   <!-- เพิ่ม JavaScript สำหรับกราฟ -->
+   <script>
+    let topIngredientsChart;
+    let topIngredientsChartByQuantity;
 
-        // ฟังก์ชันสำหรับโหลดข้อมูลเริ่มต้น
-        window.onload = function() {
-            fetchChartData('monthly');
-        };
+    window.onload = function() {
+        fetchTopIngredients();
+    };
 
-        // ฟังก์ชันสำหรับอัพเดตกราฟ
-        function updateChart() {
-            const period = document.getElementById('timePeriod').value;
-            fetchChartData(period);
-        }
+    function fetchTopIngredients() {
+        const limit = document.getElementById('topLimit').value;
 
-        // ฟังก์ชันสำหรับดึงข้อมูลจากเซิร์ฟเวอร์
-        function fetchChartData(period) {
-            fetch(`/api/order-data?period=${period}`)
-                .then(response => response.json())
-                .then(data => {
-                    const ctx = document.getElementById('orderChart').getContext('2d');
+        // ดึงข้อมูลวัตถุดิบที่ถูกสั่งซื้อบ่อยที่สุด (จำนวนครั้ง)
+        fetch(`/orders/top-ingredients/count?limit=${limit}`)
+            .then(response => response.json())
+            .then(data => {
+                const ctx = document.getElementById('topIngredientsChart').getContext('2d');
 
-                    // ถ้ามีกราฟอยู่แล้ว ให้ทำลายก่อน
-                    if (chart) {
-                        chart.destroy();
-                    }
+                if (topIngredientsChart) {
+                    topIngredientsChart.destroy();
+                }
 
-                    chart = new Chart(ctx, {
-                        type: 'bar',
-                        data: {
-                            labels: data.labels,
-                            datasets: [{
-                                label: 'ยอดการสั่งซื้อ',
-                                data: data.totals,
-                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                                borderColor: 'rgba(75, 192, 192, 1)',
-                                borderWidth: 1
-                            }]
-                        },
-                        options: {
-                            scales: {
-                                y: {
-                                    beginAtZero: true
+                topIngredientsChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.map(item => item.ingredient_name),
+                        datasets: [{
+                            label: 'จำนวนครั้งที่สั่งซื้อ',
+                            data: data.map(item => item.order_count),
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'จำนวนครั้งที่สั่งซื้อ'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'วัตถุดิบ'
                                 }
                             }
                         }
-                    });
+                    }
                 });
-        }
-    </script>
+            })
+            .catch(error => {
+                console.error('Error fetching top ingredients by count:', error);
+            });
+
+        // ดึงข้อมูลวัตถุดิบที่ถูกสั่งซื้อในปริมาณมากที่สุด (ปริมาณ)
+        fetch(`/orders/top-ingredients/quantity?limit=${limit}`)
+            .then(response => response.json())
+            .then(data => {
+                const ctx = document.getElementById('topIngredientsChartByQuantity').getContext('2d');
+
+                if (topIngredientsChartByQuantity) {
+                    topIngredientsChartByQuantity.destroy();
+                }
+
+                topIngredientsChartByQuantity = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.map(item => item.ingredient_name),
+                        datasets: [{
+                            label: 'ปริมาณที่สั่งซื้อ',
+                            data: data.map(item => item.total_quantity),
+                            backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                            borderColor: 'rgba(255, 206, 86, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'ปริมาณที่สั่งซื้อ'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'วัตถุดิบ'
+                                }
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching top ingredients by quantity:', error);
+            });
+    }
+</script>
 @endsection

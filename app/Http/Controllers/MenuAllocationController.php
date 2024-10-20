@@ -43,9 +43,13 @@ class MenuAllocationController extends Controller
             // ดึงเมนูขายดีตามจำนวนที่ผู้ใช้กำหนด
             $bestSellingMenus = $this->getBestSellingMenus($bestSellingCount);
 
-            // สุ่มเมนูที่เหลือ โดยหลีกเลี่ยงเมนูที่ถูกจัดไปในวันก่อนหน้า
+            // ตรวจสอบและหมุนเวียนเมนู
             $remainingMenusCount = $totalMenus - $bestSellingCount;
-            $randomMenus = $this->getRandomMenus($bestSellingMenus->pluck('menu_id')->toArray(), $remainingMenusCount, $recentlyAllocatedMenus);
+            $randomMenus = $this->getRandomMenusWithRotation(
+                $bestSellingMenus->pluck('menu_id')->toArray(),
+                $remainingMenusCount,
+                $recentlyAllocatedMenus
+            );
 
             // บันทึกการจัดสรรใหม่สำหรับวันปัจจุบัน
             $menuAllocation = MenuAllocation::create([
@@ -69,11 +73,39 @@ class MenuAllocationController extends Controller
             }
 
             // อัปเดตเมนูที่ถูกสุ่มในวันนี้ เพื่อไม่ให้ซ้ำในวันถัดไป
-            $recentlyAllocatedMenus = $randomMenus->pluck('id')->toArray();
+            $recentlyAllocatedMenus = array_merge(
+                $recentlyAllocatedMenus,
+                $randomMenus->pluck('id')->toArray()
+            );
         }
 
         return redirect()->route('allocations.index')->with('success', 'การจัดสรรเมนูสำเร็จ');
     }
+
+    // ดึงเมนูที่เหลือและหมุนเวียนโดยตรวจสอบให้ไม่ซ้ำกับวันก่อนหน้า
+    public function getRandomMenusWithRotation($excludedMenus = [], $limit = 5, $recentlyAllocatedMenus = [])
+    {
+        // พยายามสุ่มเมนูที่ไม่ถูกจัดในวันก่อนหน้า
+        $randomMenus = Menu::whereNotIn('id', $excludedMenus)
+            ->whereNotIn('id', $recentlyAllocatedMenus)  // ตรวจสอบว่าเมนูไม่ถูกจัดไปในวันก่อนหน้า
+            ->inRandomOrder()
+            ->take($limit)
+            ->get();
+
+        // ถ้าจำนวนเมนูไม่พอ สามารถเลือกเมนูซ้ำจากวันก่อนหน้าได้ แต่ต้องไม่ซ้ำในวันติดกัน
+        if ($randomMenus->count() < $limit) {
+            $additionalMenus = Menu::whereNotIn('id', $excludedMenus)
+                ->whereIn('id', $recentlyAllocatedMenus)  // อนุญาตให้สุ่มเมนูซ้ำ แต่ต้องไม่ใช่เมนูในวันติดกัน
+                ->inRandomOrder()
+                ->take($limit - $randomMenus->count())
+                ->get();
+
+            $randomMenus = $randomMenus->merge($additionalMenus);
+        }
+
+        return $randomMenus;
+    }
+
 
     // ดึงเมนูขายดี
     public function getBestSellingMenus($limit = 10)
@@ -97,35 +129,50 @@ class MenuAllocationController extends Controller
             ->get();
     }
 
-    public function show(MenuAllocation $allocation)
-    {
-        // โหลดรายละเอียดการจัดสรรเมนูพร้อมเมนูที่เกี่ยวข้อง
-        $allocation->load('allocationDetails.menu');
+    public function show(Request $request, MenuAllocation $allocation)
+{
+    // Load allocation details with related menus and their recipes
+    $allocation->load('allocationDetails.menu.recipes.ingredient');
 
-        $missingIngredients = [];  // เก็บข้อมูลวัตถุดิบที่ขาด
+    $missingIngredients = [];  // Array to store missing ingredients per menu
+    $totalMissingIngredients = [];  // Array to store total missing ingredients
 
-        // ตรวจสอบวัตถุดิบของแต่ละเมนู
-        foreach ($allocation->allocationDetails as $detail) {
-            foreach ($detail->menu->recipes as $recipe) {
-                $ingredient = $recipe->ingredient;
-                $requiredAmount = $recipe->amount * 1;  // ปริมาณที่ต้องใช้ตามสูตร
+    // รับข้อมูลจำนวนการผลิตจากผู้ใช้ (เช่น 2 กิโลกรัม, 3 กิโลกรัม)
+    $productionQuantities = $request->input('productionQuantities', []);  // ค่าที่ระบุโดยผู้ใช้
+    
+    // Check ingredients for each menu
+    foreach ($allocation->allocationDetails as $detail) {
+        $menuId = $detail->menu->id;
+        $productionQuantity = isset($productionQuantities[$menuId]) ? $productionQuantities[$menuId] : 1;  // Default = 1 kg
 
-                // ตรวจสอบว่าวัตถุดิบเพียงพอหรือไม่
-                if ($ingredient->ingredient_stock < $requiredAmount) {
-                    $missingAmount = $requiredAmount - $ingredient->ingredient_stock;
+        foreach ($detail->menu->recipes as $recipe) {
+            $ingredient = $recipe->ingredient;
+            $requiredAmount = $recipe->amount * $productionQuantity;  // คำนวณจากจำนวนที่ผู้ใช้ระบุ
 
-                    // เก็บข้อมูลวัตถุดิบที่ขาด
-                    $missingIngredients[] = [
-                        'menu_name' => $detail->menu->menu_name,
-                        'ingredient_name' => $ingredient->ingredient_name,
-                        'missing_amount' => $missingAmount,
-                        'required_amount' => $requiredAmount,
-                    ];
+            // Check if the ingredient stock is sufficient
+            if ($ingredient->ingredient_stock < $requiredAmount) {
+                $missingAmount = $requiredAmount - $ingredient->ingredient_stock;
+
+                // Store missing ingredient data under the menu ID
+                $missingIngredients[$menuId][] = [
+                    'ingredient_name' => $ingredient->ingredient_name,
+                    'ingredient_unit' => $ingredient->ingredient_unit,
+                    'missing_amount' => $missingAmount,
+                    'required_amount' => $requiredAmount,
+                ];
+
+                // Accumulate the total missing ingredients
+                if (isset($totalMissingIngredients[$ingredient->ingredient_name])) {
+                    $totalMissingIngredients[$ingredient->ingredient_name] += $missingAmount;
+                } else {
+                    $totalMissingIngredients[$ingredient->ingredient_name] = $missingAmount;
                 }
             }
         }
-
-        // ส่งข้อมูลไปยัง View
-        return view('allocations.show', compact('allocation', 'missingIngredients'));
     }
+
+    // Pass the data to the view
+    return view('allocations.show', compact('allocation', 'missingIngredients', 'totalMissingIngredients'));
+}
+
 }

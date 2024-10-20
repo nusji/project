@@ -21,7 +21,7 @@ class SaleController extends Controller
     {
         // รับค่าการค้นหาและการเรียงลำดับจากคำขอ
         $search = $request->input('search');
-        $sortBy = $request->input('sort_by', 'sale_date'); // ค่าเริ่มต้นคือ 'sale_date'
+        $sortBy = $request->input('sort_by', 'id'); // ค่าเริ่มต้นคือ 'id'
         $sortOrder = $request->input('sort_order', 'desc'); // ค่าเริ่มต้นคือ 'desc'
 
         // ดึงข้อมูลจากฐานข้อมูลพร้อมกับเงื่อนไขการค้นหาและการเรียงลำดับ
@@ -37,7 +37,8 @@ class SaleController extends Controller
                 });
             })
             ->orderBy($sortBy, $sortOrder)
-            ->paginate(10);
+            ->paginate(20);
+
 
         $todaySalesData = DB::table('sale_details')
             ->join('menus', 'sale_details.menu_id', '=', 'menus.id') // เชื่อมกับตาราง menus
@@ -119,22 +120,20 @@ class SaleController extends Controller
         $productions = $this->getProductionWithMenus($today); // ฟังก์ชันสำหรับดึงการผลิตเมนูของวันนี้
         $menus = $this->getMenusFromProduction($productions); // ดึงข้อมูลเมนูที่ถูกผลิตในวันนี้
         $categories = $menus->pluck('menuType')->unique(); // ดึงประเภทเมนู
-    
+
         // คำนวณยอดคงเหลือสำหรับแต่ละเมนู
         foreach ($menus as $menu) {
             $menu->total_remaining_amount = $menu->productionDetails->sum('remaining_amount');
             $menu->is_sold_out = $menu->total_remaining_amount <= 0; // ตรวจสอบว่าหมดหรือไม่
         }
-    
+
         // ส่งข้อมูลไปยัง view
         return view('sales.create', compact('menus', 'categories', 'today'));
     }
-    
 
 
     public function store(Request $request)
     {
-        // Validate the received data
         $validatedData = $request->validate([
             'items' => 'required|array',
             'items.*.id' => 'required|exists:menus,id',
@@ -145,81 +144,62 @@ class SaleController extends Controller
         try {
             DB::beginTransaction();
 
-            // Create the sale
+            // สร้างการขาย
             $sale = Sale::create([
                 'payment_type' => $request->input('payment_type'),
                 'sale_date' => now(),
                 'employee_id' => Auth::user()->id,
             ]);
 
-            // For each item in the sale
             foreach ($request->input('items') as $item) {
-                // Create sale detail
+                // สร้างรายละเอียดการขาย
                 SaleDetail::create([
                     'sale_id' => $sale->id,
                     'menu_id' => $item['id'],
                     'quantity' => $item['quantity'],
                 ]);
 
-                // Get the menu item
                 $menu = Menu::find($item['id']);
 
-                // Get portion_size
-                $portionSize = $menu->portion_size;
-
-                // Calculate total amount to subtract
-                $amountToSubtract = $portionSize * $item['quantity'];
-
-                // Get the production detail(s) for this menu item
+                // ตรวจสอบว่า remaining_amount เป็น 0 แต่ยังทำการขายต่อไปได้
                 $productionDetails = ProductionDetail::where('menu_id', $menu->id)
                     ->where('remaining_amount', '>', 0)
-                    ->orderBy('created_at') // Adjust ordering if necessary
+                    ->orderBy('created_at')
                     ->get();
 
-                // Calculate total available amount
                 $totalAvailableAmount = $productionDetails->sum('remaining_amount');
+                $remainingToSubtract = $menu->portion_size * $item['quantity'];
 
-                if ($totalAvailableAmount <= 0) {
-                    // No stock available at all
-                    throw new \Exception('ไม่มีสินค้าเหลือสำหรับเมนู: ' . $menu->menu_name);
+                if ($totalAvailableAmount <= 0 && $request->has('force_sale')) {
+                    // อนุญาตให้ขายต่อได้ถ้ากด force sale
+                    foreach ($productionDetails as $productionDetail) {
+                        $productionDetail->is_sold_out = false;
+                        $productionDetail->save();
+                    }
+                    continue; // ไม่หักสต็อกและข้ามการคำนวณหักสต็อก
                 }
 
-                $remainingToSubtract = $amountToSubtract;
-
+                // ดำเนินการหักสต็อกตามปกติหากไม่ใช่ force sale
                 foreach ($productionDetails as $productionDetail) {
                     if ($remainingToSubtract <= 0) {
                         break;
                     }
-
-                    // Available amount in this production detail
                     $availableAmount = $productionDetail->remaining_amount;
-
                     if ($availableAmount >= $remainingToSubtract) {
-                        // Subtract the required amount
                         $productionDetail->remaining_amount -= $remainingToSubtract;
                         $remainingToSubtract = 0;
-
-                        // If remaining_amount is zero or less, set is_sold_out to true
                         if ($productionDetail->remaining_amount <= 0) {
                             $productionDetail->remaining_amount = 0;
                             $productionDetail->is_sold_out = true;
                         }
-
                         $productionDetail->save();
                     } else {
-                        // Subtract all available amount and continue to next production detail
                         $remainingToSubtract -= $availableAmount;
                         $productionDetail->remaining_amount = 0;
                         $productionDetail->is_sold_out = true;
                         $productionDetail->save();
                     }
                 }
-
-                // At this point, $remainingToSubtract may be greater than zero
-                // If totalAvailableAmount was less than amountToSubtract, we proceed anyway
-                // and set remaining amounts to zero
-
-                // Optionally, you can log or notify that the stock was insufficient but sale proceeded
             }
 
             DB::commit();
@@ -230,6 +210,7 @@ class SaleController extends Controller
             return response()->json(['success' => false, 'message' => 'เกิดข้อผิดพลาดในการขาย: ' . $e->getMessage()], 500);
         }
     }
+
 
     public function show($id)
     {
@@ -245,5 +226,4 @@ class SaleController extends Controller
         $sale->delete();
         return redirect()->route('sales.index')->with('success', 'ลบรายการขายเรียบร้อยแล้ว');
     }
-
 }

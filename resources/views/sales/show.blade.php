@@ -1,121 +1,82 @@
 @extends('layouts.pos')
 @section('content')
-<div class="container mx-auto px-4 py-8">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-gray-800">Sale Details</h1>
-        <a href="{{ route('sales.index') }}" 
-           class="inline-flex items-center px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
-            </svg>
-            Back to Sales
-        </a>
-    </div>
-
-    <div class="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
-        <div class="bg-gradient-to-r from-blue-50 to-white px-6 py-4 border-b">
-            <div class="flex items-center">
-                <div class="p-2 bg-blue-100 rounded-lg mr-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+    <div class="container mx-auto px-4 py-8 ml-5">
+        <!-- เรียกใช้ breadcrumb component -->
+        <x-breadcrumb :paths="[['label' => 'ระบบจัดการขาย', 'url' => route('sales.index')], ['label' => 'แสดงรายการ']]" />
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">รายละเอียดการขาย</h2>
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg m-5">
+            <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
+                <div>
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">รายละเอียดการขาย</h3>
+                    <p class="mt-1 max-w-2xl text-sm text-gray-500">รหัสการขาย: #{{ $sale->id }}</p>
+                </div>
+                <a href="{{ route('sales.index') }}"
+                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+                            clip-rule="evenodd" />
                     </svg>
-                </div>
-                <h2 class="text-xl font-semibold text-gray-700">Sale ID: <span class="text-blue-600">{{ $sale->id }}</span></h2>
+                    กลับไปหน้ารายการขาย
+                </a>
             </div>
-        </div>
-        <div class="p-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-gray-50 rounded-lg p-4">
-                    <div class="flex flex-col">
-                        <span class="text-sm font-medium text-gray-500 mb-1">Sale Date</span>
-                        <span class="text-gray-900 font-semibold">{{ \Carbon\Carbon::parse($sale->sale_date)->format('F j, Y') }}</span>
+            <div class="border-t border-gray-200">
+                <dl>
+                    <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">วันที่ขาย</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                            {{ \Carbon\Carbon::parse($sale->sale_date)->format('d/m/Y H:i') }}</dd>
                     </div>
-                </div>
-                <div class="bg-gray-50 rounded-lg p-4">
-                    <div class="flex flex-col">
-                        <span class="text-sm font-medium text-gray-500 mb-1">Payment Type</span>
-                        <span class="text-gray-900 font-semibold">
-                            <span class="inline-flex items-center">
-                                @if(strtolower($sale->payment_type) == 'cash')
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-green-500" viewBox="0 0 20 20" fill="currentColor">
-                                        <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
-                                        <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd" />
-                                    </svg>
-                                @else
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
-                                        <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
-                                        <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd" />
-                                    </svg>
-                                @endif
-                                {{ $sale->payment_type }}
-                            </span>
-                        </span>
+                    <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">ชำระด้วย</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ $sale->payment_type }}</dd>
                     </div>
-                </div>
-                <div class="bg-gray-50 rounded-lg p-4">
-                    <div class="flex flex-col">
-                        <span class="text-sm font-medium text-gray-500 mb-1">Employee</span>
-                        <span class="text-gray-900 font-semibold flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                            </svg>
-                            {{ $sale->employee->name }}
-                        </span>
+                    <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">พนักงานทำรายการขาย</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ $sale->employee->name }}</dd>
                     </div>
-                </div>
+                    <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">รายการสินค้า</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                            <ul class="border border-gray-200 rounded-md divide-y divide-gray-200">
+                                @forelse($sale->saleDetails as $detail)
+                                    <li class="pl-3 pr-4 py-3 flex items-center justify-between text-sm">
+                                        <div class="w-0 flex-1 flex items-center">
+                                            <span class="ml-2 flex-1 w-0 truncate">
+                                                @if ($detail->menu)
+                                                    {{ $detail->menu->menu_name }}
+                                                @else
+                                                    <span class="text-red-500">รายการไม่พร้อมใช้งาน</span>
+                                                @endif
+                                            </span>
+                                        </div>
+                                        <div class="ml-4 flex-shrink-0 flex space-x-4">
+                                            <span class="text-gray-500">จำนวน: {{ $detail->quantity }}</span>
+                                            <span class="text-gray-900 font-medium">
+                                                @if ($detail->menu)
+                                                    {{ number_format($detail->menu->menu_price * $detail->quantity, 2) }}
+                                                    บาท
+                                                @else
+                                                    N/A
+                                                @endif
+                                            </span>
+                                        </div>
+                                    </li>
+                                @empty
+                                    <li class="pl-3 pr-4 py-3 text-sm text-gray-500">ไม่พบรายการสินค้า</li>
+                                @endforelse
+                            </ul>
+                        </dd>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">ยอดรวมทั้งหมด</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2 font-bold">
+                            {{ number_format($sale->saleDetails->sum(function ($detail) {return $detail->menu ? $detail->menu->menu_price * $detail->quantity : 0;}),2) }}
+                            บาท
+                        </dd>
+                    </div>
+                </dl>
             </div>
         </div>
     </div>
-
-    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-        <div class="bg-gradient-to-r from-blue-50 to-white px-6 py-4 border-b">
-            <h3 class="text-xl font-semibold text-gray-700 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-                Items
-            </h3>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Menu Name
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Quantity
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    @forelse($sale->saleDetails as $detail)
-                        <tr class="hover:bg-gray-50 transition-colors duration-150">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
-                                    @if($detail->menu)
-                                        <span class="text-sm font-medium text-gray-900">{{ $detail->menu->menu_name }}</span>
-                                    @else
-                                        <span class="text-sm font-medium text-red-500">Menu not available</span>
-                                    @endif
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                    {{ $detail->quantity }}
-                                </span>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="2" class="px-6 py-4 text-center text-sm text-gray-500">
-                                No items found in this sale.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
 @endsection

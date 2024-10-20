@@ -125,6 +125,7 @@
     </template>
     <script>
         let currentMenus = @json($menus);
+
         function loadMenuByDate() {
             const selectedDateInput = document.getElementById('date-picker');
             const selectedDate = selectedDateInput ? selectedDateInput.value : '{{ $today->format('Y-m-d') }}';
@@ -133,7 +134,7 @@
                 .then(response => response.json())
                 .then(data => {
                     currentMenus = data.menus;
-                    
+
                     document.getElementById('selected-date').textContent = new Date(data.date).toLocaleDateString(
                         'en-GB');
                     renderMenuItems();
@@ -145,7 +146,7 @@
         }
 
         function renderMenuItems() {
-            console.log('Rendering menu items:', currentMenus); // ตรวจสอบว่ามีเมนูอะไรบ้าง
+            console.log('Rendering menu items:', currentMenus);
             const container = document.getElementById('menu-items-container');
             container.innerHTML = '';
 
@@ -155,7 +156,7 @@
                     'bg-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-200 transition menu-item';
                 menuItem.dataset.category = menu.menu_type_id;
 
-                // Check if the item is sold out
+                // เช็คว่าหมดหรือไม่
                 let soldOut = menu.total_remaining_amount <= 0;
 
                 menuItem.innerHTML = `
@@ -165,15 +166,19 @@
             <p class="text-gray-600">เหลือ: ${Number(menu.total_remaining_amount).toFixed(1)} กิโลกรัม</p>
             ${soldOut ? '<p class="text-red-500 font-bold">หมด</p>' : ''}
         `;
-                // Disable click if sold out
-                if (!soldOut) {
-                    menuItem.onclick = () => addToCart(menu.id);
-                } else {
-                    menuItem.classList.add('opacity-50', 'cursor-not-allowed');
+
+                // ถ้า sold out แต่เราสามารถทำการขายต่อได้ให้ยังสามารถคลิกได้
+                menuItem.onclick = () => addToCart(menu.id);
+
+                // กรณีหมดสต็อก
+                if (soldOut) {
+                    menuItem.classList.add('opacity-50'); // ลดความเด่นของเมนูที่หมด
                 }
+
                 container.appendChild(menuItem);
             });
         }
+
 
         document.getElementById('load-menu-btn').addEventListener('click', loadMenuByDate);
         document.addEventListener('DOMContentLoaded', () => {
@@ -266,7 +271,6 @@
 
         // ฟังก์ชันสำหรับชำระเงิน
         function checkout() {
-
             const paymentType = document.querySelector('input[name="payment_type"]:checked').value;
 
             if (cart.length === 0) {
@@ -278,12 +282,50 @@
                 return;
             }
 
-            // Log ข้อมูลที่ส่งไปยัง backend
+            // ตรวจสอบว่าสินค้ามีสต็อกพอหรือไม่
+            let outOfStock = false;
+
+            cart.forEach(item => {
+                const menuItem = currentMenus.find(menu => menu.id === item.id);
+                if (menuItem.total_remaining_amount <= 0) {
+                    outOfStock = true; // ถ้าพบเมนูที่สต็อกหมด ให้ตั้งค่าเป็น true
+                }
+            });
+
+            // ถ้าสต็อกหมดให้ถามว่าต้องการทำการขายต่อหรือไม่
+            if (outOfStock) {
+                Swal.fire({
+                    title: 'สินค้านี้สต็อกหมดแล้ว',
+                    text: 'คุณต้องการบังคับทำการขายหรือไม่?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'ใช่, บังคับขาย',
+                    cancelButtonText: 'ยกเลิก',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // ถ้าผู้ใช้กดยืนยันให้บังคับขาย
+                        processSale(paymentType, true);
+                    } else if (result.dismiss === Swal.DismissReason.cancel) {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'ยกเลิกการทำรายการ',
+                            text: 'การขายถูกยกเลิก',
+                        });
+                    }
+                });
+            } else {
+                // ถ้าไม่มีสินค้าที่สต็อกหมดให้ทำการขายตามปกติ
+                processSale(paymentType, false);
+            }
+        }
+
+        // ฟังก์ชันสำหรับทำการขาย
+        function processSale(paymentType, forceSale) {
             const dataToSend = {
                 items: cart,
                 payment_type: paymentType,
+                force_sale: forceSale ? 1 : 0,
             };
-            console.log('Sending data to backend:', dataToSend);
 
             axios.post('{{ route('sales.store') }}', dataToSend)
                 .then(response => {
@@ -295,12 +337,11 @@
                         }).then(() => {
                             cart = [];
                             renderCart();
-                            loadMenuByDate(); // เพิ่มการเรียกฟังก์ชันนี้เพื่ออัปเดตเมนู
+                            loadMenuByDate();
                         });
                     }
                 })
                 .catch(error => {
-                    console.error(error.response); // ตรวจสอบ response
                     Swal.fire({
                         icon: 'error',
                         title: 'เกิดข้อผิดพลาด',
@@ -308,6 +349,7 @@
                     });
                 });
         }
+
 
         // ฟังก์ชันสำหรับเคลียร์ตะกร้า
         function clearCart() {

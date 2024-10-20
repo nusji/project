@@ -25,7 +25,7 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
     @livewireStyles
 
 </head>
@@ -38,6 +38,7 @@
             <span class="text-white">คุณ {{ Auth::user()->name }}</span>
             <hr>
             <h2 class="text-center font-italic text-white">จัดการขาย</h2>
+            @if (Route::is('sales.index'))
             <a href="{{ Auth::user()->role === 'owner' ? route('dashboard.owner') : route('dashboard.employee') }}"
                 class="border-1 py-2.5 px-4 text-lg font-medium text-[#F1F5F9] text-center border-2 bg-orange-500 rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center {{ request()->routeIs('dashboard.owner') || request()->routeIs('dashboard.employee') ? 'bg-[#E2725B] text-white' : '' }}">
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -48,6 +49,7 @@
                 </svg>
                 ออก POS
             </a>
+            @endif
             @if (Route::is('sales.create'))
                 <a href="{{ route('sales.index') }}"
                     class="border-1 py-2.5 px-4 text-sm font-regular text-[#F1F5F9] text-center border-2 rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center">
@@ -69,31 +71,22 @@
                     ย้อนกลับ
                 </a>
             @endif
-            <a href="#" onclick="event.preventDefault(); showManageSoldOutModal();"
-                class="border-1 py-2.5 px-4 text-sm font-regular text-[#F1F5F9] text-center border-2 rounded-lg transition duration-300 ease-in-out hover:bg-[#E2725B] hover:shadow-md flex items-center">
-                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M19 13l-7 7-7-7m14-8l-7 7-7-7"></path>
-                </svg>
-                จัดการ<br>เมนูเหลือ
-            </a>
 
-            <!-- Include modal component -->
-            @include('components.manage-sold-out-modal')
+            
             <hr>
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit"
-                    class="bg-[#E2725B] text-white hover:bg-[#c55a45] border border-[#E2725B] hover:border-[#c55a45] py-2 px-3 rounded-lg flex items-center space-x-2 transition duration-300 mr-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="w-5 h-5">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
-                    </svg>
-                    <span>ออกจากระบบ</span>
-                </button>
-            </form>
+            <!-- ปุ่มออกจากระบบ ฟิกซ์ที่ด้านล่างสุด -->
+        <form method="POST" action="{{ route('logout') }}" class="absolute bottom-0 left-0 w-full p-4">
+            @csrf
+            <button type="submit"
+                class="bg-[#E2725B] text-white hover:bg-[#c55a45] border border-[#E2725B] hover:border-[#c55a45] border-2 border-gray-100 py-2 px-3 rounded-lg flex items-center space-x-2 transition duration-300 w-full justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
+                </svg>
+                <span>ออกจากระบบ</span>
+            </button>
+        </form>
         </div>
     </aside>
     <!-- Main Content -->

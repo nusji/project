@@ -13,13 +13,15 @@ use Carbon\Carbon;
 
 class OrderController extends Controller
 {
+
     public function index(Request $request)
     {
         // Retrieve the search query from the request
         $search = $request->input('search');
 
         // Start building the query with eager loading
-        $query = Order::with(['orderDetails.ingredient', 'employee']);
+        $query = Order::with(['orderDetails.ingredient', 'employee'])
+            ->orderByDesc('order_date');
 
         // If a search query is provided, add conditions to the query
         if ($search) {
@@ -227,4 +229,139 @@ class OrderController extends Controller
 
         return redirect()->route('orders.index')->with('success', 'รายการสั่งซื้อถูกลบเรียบร้อยแล้ว');
     }
+    /**
+     * ดึงข้อมูลวัตถุดิบที่ถูกสั่งซื้อบ่อยที่สุด (จำนวนครั้ง)
+     */
+    public function getTopIngredientsByCount(Request $request)
+    {
+        // จำนวนวัตถุดิบที่ต้องการแสดง (เช่น 5 อันดับแรก)
+        $limit = $request->input('limit', 5);
+
+        $data = OrderDetail::select(
+                'ingredients.ingredient_name',
+                DB::raw('COUNT(order_details.id) as order_count') // นับจำนวนครั้งที่สั่งซื้อ
+            )
+            ->join('ingredients', 'order_details.ingredient_id', '=', 'ingredients.id')
+            ->groupBy('ingredients.ingredient_name')
+            ->orderByDesc('order_count') // เรียงจากมากไปน้อยตามจำนวนครั้งที่สั่ง
+            ->limit($limit)
+            ->get();
+
+        return response()->json($data);
+    }
+
+    /**
+     * ดึงข้อมูลวัตถุดิบที่ถูกสั่งซื้อในปริมาณมากที่สุด (ปริมาณ)
+     */
+    public function getTopIngredientsByQuantity(Request $request)
+    {
+        // จำนวนวัตถุดิบที่ต้องการแสดง (เช่น 5 อันดับแรก)
+        $limit = $request->input('limit', 5);
+
+        $data = OrderDetail::select(
+                'ingredients.ingredient_name',
+                DB::raw('SUM(order_details.quantity) as total_quantity') // รวมปริมาณที่สั่งซื้อ
+            )
+            ->join('ingredients', 'order_details.ingredient_id', '=', 'ingredients.id')
+            ->groupBy('ingredients.ingredient_name')
+            ->orderByDesc('total_quantity') // เรียงจากมากไปน้อยตามปริมาณที่สั่ง
+            ->limit($limit)
+            ->get();
+
+        return response()->json($data);
+    }
+
+    /**
+     * ดึงข้อมูลกราฟสรุปการสั่งซื้อตามช่วงเวลา
+     */
+    public function getChartData(Request $request)
+    {
+        $period = $request->input('period', 'monthly');
+
+        switch ($period) {
+            case 'weekly':
+                $data = $this->getWeeklyData();
+                break;
+            case 'yearly':
+                $data = $this->getYearlyData();
+                break;
+            case 'monthly':
+            default:
+                $data = $this->getMonthlyData();
+                break;
+        }
+
+        return response()->json($data);
+    }
+
+    /**
+     * ดึงข้อมูลสรุปการสั่งซื้อรายเดือน
+     */
+    private function getMonthlyData()
+    {
+        $data = Order::select(
+                DB::raw('DATE_FORMAT(order_date, "%Y-%m") as month'),
+                DB::raw('COUNT(*) as count'),
+                DB::raw('SUM(order_details.price * order_details.quantity) as total')
+            )
+            ->join('order_details', 'orders.id', '=', 'order_details.order_id')
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+
+        return $this->formatChartData($data, 'month');
+    }
+
+    /**
+     * ดึงข้อมูลสรุปการสั่งซื้อรายสัปดาห์
+     */
+    private function getWeeklyData()
+    {
+        $data = Order::select(
+                DB::raw('YEARWEEK(order_date, 1) as week'),
+                DB::raw('COUNT(*) as count'),
+                DB::raw('SUM(order_details.price * order_details.quantity) as total')
+            )
+            ->join('order_details', 'orders.id', '=', 'order_details.order_id')
+            ->groupBy('week')
+            ->orderBy('week')
+            ->get();
+
+        return $this->formatChartData($data, 'week');
+    }
+
+    /**
+     * ดึงข้อมูลสรุปการสั่งซื้อรายปี
+     */
+    private function getYearlyData()
+    {
+        $data = Order::select(
+                DB::raw('YEAR(order_date) as year'),
+                DB::raw('COUNT(*) as count'),
+                DB::raw('SUM(order_details.price * order_details.quantity) as total')
+            )
+            ->join('order_details', 'orders.id', '=', 'order_details.order_id')
+            ->groupBy('year')
+            ->orderBy('year')
+            ->get();
+
+        return $this->formatChartData($data, 'year');
+    }
+
+    /**
+     * ฟอร์แมตข้อมูลสำหรับกราฟ
+     */
+    private function formatChartData($data, $labelKey)
+    {
+        $labels = $data->pluck($labelKey);
+        $counts = $data->pluck('count');
+        $totals = $data->pluck('total');
+
+        return [
+            'labels' => $labels,
+            'counts' => $counts,
+            'totals' => $totals
+        ];
+    }
 }
+

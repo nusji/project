@@ -14,7 +14,15 @@ class Production extends Model
         'production_date',
         'production_detail',
     ];
-
+    protected $casts = [
+        'production_date' => 'date',
+        // ฟิลด์อื่นๆ ที่ต้องการแปลง
+    ];
+ // ความสัมพันธ์กับ MenuType ผ่าน Menu
+ public function menuType()
+ {
+     return $this->hasOneThrough(MenuType::class, Menu::class);
+ }
     public function menus()
     {
         // กำหนดให้เชื่อมโยงผ่าน pivot table ที่ชื่อ 'menu_production' หรือใช้ชื่อ Pivot Table ที่คุณใช้

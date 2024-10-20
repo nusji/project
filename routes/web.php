@@ -18,6 +18,8 @@ use App\Http\Controllers\MenuAllocationController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\ReportController;
+
 
 Route::get('/no-access', function () {
     return view('no-access');
@@ -71,9 +73,15 @@ Route::get('/profile/{id}/change-password', [ProfileController::class, 'changePa
 Route::post('/profile/{id}/change-password', [ProfileController::class, 'updatePassword'])->name('profile.update_password')->middleware('auth');
 Route::get('/password/reset-custom', [ProfileController::class, 'showCustomPasswordResetForm'])->name('profile.reset_custom');
 Route::post('/password/reset-custom', [ProfileController::class, 'resetPasswordWithVerification'])->name('profile.reset_custom.post');
+Route::get('/sales/manage-sold-out', [SaleController::class, 'manageSoldOut'])->name('sales.manageSoldOut');
+Route::post('/sales/reset-sold-out/{id}', [SaleController::class, 'resetSoldOut'])->name('sales.resetSoldOut');
 
-use App\Http\Controllers\ReportController;
-
+// เส้นทางสำหรับดึงข้อมูลวัตถุดิบที่ถูกสั่งซื้อบ่อยที่สุด
+Route::get('/orders/top-ingredients/count', [OrderController::class, 'getTopIngredientsByCount'])->name('orders.top-ingredients.count');
+// เส้นทางสำหรับดึงข้อมูลวัตถุดิบที่ถูกสั่งซื้อในปริมาณมากที่สุด
+Route::get('/orders/top-ingredients/quantity', [OrderController::class, 'getTopIngredientsByQuantity'])->name('orders.top-ingredients.quantity');
+// เส้นทางสำหรับดึงข้อมูลกราฟสรุปการสั่งซื้อตามช่วงเวลา
+Route::get('/orders/chart-data', [OrderController::class, 'getChartData'])->name('orders.chart-data');
 Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
 Route::get('/sales/menus-by-date', [SaleController::class, 'getMenusByDate'])->name('sales.menusByDate');
 
@@ -108,6 +116,7 @@ Route::middleware(['auth', 'check.profile'])->group(function () {
     route::resource('sales', SaleController::class);
     Route::get('sales/menus-by-date', [SaleController::class, 'getMenusByDate'])->name('sales.menus-by-date');
     Route::get('sales/update-sold-out-status', [SaleController::class, 'updateSoldOutStatus'])->name('sales.update-sold-out-status');
+
 
     // สำหรับการดึงรายละเอียดเมนู
     Route::post('menus/details', [MenuController::class, 'getMenuDetails'])->name('menus.details');
