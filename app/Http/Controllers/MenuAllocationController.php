@@ -7,6 +7,7 @@ use App\Models\Menu;
 use App\Models\MenuAllocation;
 use App\Models\MenuAllocationDetail;
 use App\Models\SaleDetail;
+use App\Models\Ingredient;
 use Illuminate\Support\Facades\DB;
 
 class MenuAllocationController extends Controller
@@ -106,7 +107,6 @@ class MenuAllocationController extends Controller
         return $randomMenus;
     }
 
-
     // ดึงเมนูขายดี
     public function getBestSellingMenus($limit = 10)
     {
@@ -130,49 +130,78 @@ class MenuAllocationController extends Controller
     }
 
     public function show(Request $request, MenuAllocation $allocation)
-{
-    // Load allocation details with related menus and their recipes
-    $allocation->load('allocationDetails.menu.recipes.ingredient');
+    {
+        // โหลดรายละเอียดการจัดสรรพร้อมเมนูที่เกี่ยวข้องและสูตรอาหารของพวกเขา
+        $allocation->load('allocationDetails.menu.recipes.ingredient');
 
-    $missingIngredients = [];  // Array to store missing ingredients per menu
-    $totalMissingIngredients = [];  // Array to store total missing ingredients
+        $missingIngredients = [];        // เก็บวัตถุดิบที่ขาดในแต่ละเมนู
+        $totalMissingIngredients = [];   // เก็บวัตถุดิบที่ขาดทั้งหมด
 
-    // รับข้อมูลจำนวนการผลิตจากผู้ใช้ (เช่น 2 กิโลกรัม, 3 กิโลกรัม)
-    $productionQuantities = $request->input('productionQuantities', []);  // ค่าที่ระบุโดยผู้ใช้
-    
-    // Check ingredients for each menu
-    foreach ($allocation->allocationDetails as $detail) {
-        $menuId = $detail->menu->id;
-        $productionQuantity = isset($productionQuantities[$menuId]) ? $productionQuantities[$menuId] : 1;  // Default = 1 kg
+        // รับข้อมูลจำนวนการผลิตจากผู้ใช้
+        $productionQuantities = $request->input('productionQuantities', []);
 
-        foreach ($detail->menu->recipes as $recipe) {
-            $ingredient = $recipe->ingredient;
-            $requiredAmount = $recipe->amount * $productionQuantity;  // คำนวณจากจำนวนที่ผู้ใช้ระบุ
+        // สะสมความต้องการวัตถุดิบทั้งหมด
+        $totalRequiredIngredients = [];
 
-            // Check if the ingredient stock is sufficient
+        foreach ($allocation->allocationDetails as $detail) {
+            $menuId = $detail->menu->id;
+            // ใช้ค่าที่ผู้ใช้ป้อนถ้ามี มิฉะนั้นใช้ค่าเริ่มต้นเป็น 1
+            $productionQuantity = isset($productionQuantities[$menuId]) ? (int)$productionQuantities[$menuId] : 1;
+
+            foreach ($detail->menu->recipes as $recipe) {
+                $ingredientId = $recipe->ingredient->id;
+                $requiredAmount = $recipe->amount * $productionQuantity;
+
+                if (!isset($totalRequiredIngredients[$ingredientId])) {
+                    $totalRequiredIngredients[$ingredientId] = 0;
+                }
+
+                $totalRequiredIngredients[$ingredientId] += $requiredAmount;
+            }
+        }
+
+        // ตรวจสอบว่าวัตถุดิบเพียงพอ
+        foreach ($totalRequiredIngredients as $ingredientId => $requiredAmount) {
+            $ingredient = Ingredient::findOrFail($ingredientId);
+
             if ($ingredient->ingredient_stock < $requiredAmount) {
                 $missingAmount = $requiredAmount - $ingredient->ingredient_stock;
+                $unit = $ingredient->ingredient_unit;
 
-                // Store missing ingredient data under the menu ID
-                $missingIngredients[$menuId][] = [
-                    'ingredient_name' => $ingredient->ingredient_name,
-                    'ingredient_unit' => $ingredient->ingredient_unit,
-                    'missing_amount' => $missingAmount,
-                    'required_amount' => $requiredAmount,
-                ];
-
-                // Accumulate the total missing ingredients
+                // เก็บข้อมูลวัตถุดิบที่ขาดทั้งหมด
                 if (isset($totalMissingIngredients[$ingredient->ingredient_name])) {
                     $totalMissingIngredients[$ingredient->ingredient_name] += $missingAmount;
                 } else {
                     $totalMissingIngredients[$ingredient->ingredient_name] = $missingAmount;
                 }
+
+                // เก็บข้อมูลวัตถุดิบที่ขาดในแต่ละเมนูที่ใช้วัตถุดิบนี้
+                foreach ($allocation->allocationDetails as $detail) {
+                    $menu = $detail->menu;
+                    $menuId = $menu->id;
+                    $productionQuantity = isset($productionQuantities[$menuId]) ? (int)$productionQuantities[$menuId] : 1;
+
+                    // ตรวจสอบว่าเมนูนี้ใช้วัตถุดิบที่ขาดหรือไม่
+                    $recipe = $menu->recipes->firstWhere('ingredient_id', $ingredientId);
+                    if ($recipe) {
+                        $requiredForMenu = $recipe->amount * $productionQuantity;
+                        $available = min($ingredient->ingredient_stock, $requiredForMenu);
+                        $missingForMenu = $requiredForMenu - $available;
+
+                        if ($missingForMenu > 0) {
+                            $missingIngredients[$menuId][] = [
+                                'ingredient_name' => $ingredient->ingredient_name,
+                                'ingredient_unit' => $ingredient->ingredient_unit,
+                                'missing_amount' => $missingForMenu,
+                                'required_amount' => $requiredForMenu,
+                            ];
+                        }
+                    }
+                }
             }
         }
+
+        // ส่งข้อมูลไปยัง view
+        return view('allocations.show', compact('allocation', 'missingIngredients', 'totalMissingIngredients', 'productionQuantities'));
     }
-
-    // Pass the data to the view
-    return view('allocations.show', compact('allocation', 'missingIngredients', 'totalMissingIngredients'));
-}
-
 }

@@ -1,10 +1,12 @@
 @extends('layouts.app')
 @section('content')
-    <div class="container mx-auto px-4 py-8">
+    <div class="container mx-auto px-4 py-0">
+        <!-- เรียกใช้ breadcrumb component -->
+        <x-breadcrumb :paths="[['label' => 'ระบบช่วยเหลือจัดสรรเมนู', 'url' => route('allocations.index')], ['label' => '']]" />
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-800">การจัดสรรเมนู</h2>
-            <a href="{{ route('allocations.create') }}" 
-               class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition duration-200">
+            <a href="{{ route('allocations.create') }}"
+                class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition duration-200">
                 เพิ่มการจัดสรร
             </a>
         </div>
@@ -28,22 +30,20 @@
                                 {{ $allocation->allocation_date }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                                <a href="{{ route('allocations.show', $allocation->id) }}" 
-                                   class="text-blue-600 hover:text-blue-800">
+                                <a href="{{ route('allocations.show', $allocation->id) }}"
+                                    class="text-blue-600 hover:text-blue-800">
                                     ดูรายละเอียด
                                 </a>
-                                <a href="{{ route('allocations.edit', $allocation->id) }}" 
-                                   class="text-yellow-600 hover:text-yellow-800">
+                                <a href="{{ route('allocations.edit', $allocation->id) }}"
+                                    class="text-yellow-600 hover:text-yellow-800">
                                     แก้ไข
                                 </a>
-                                <form action="{{ route('allocations.destroy', $allocation->id) }}" 
-                                      method="POST" 
-                                      class="inline">
+                                <form action="{{ route('allocations.destroy', $allocation->id) }}" method="POST"
+                                    class="inline">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" 
-                                            class="text-red-600 hover:text-red-800"
-                                            onclick="return confirm('คุณแน่ใจหรือไม่ที่จะลบรายการนี้?')">
+                                    <button type="submit" class="text-red-600 hover:text-red-800"
+                                        onclick="return confirm('คุณแน่ใจหรือไม่ที่จะลบรายการนี้?')">
                                         ลบ
                                     </button>
                                 </form>
@@ -52,6 +52,11 @@
                     @endforeach
                 </tbody>
             </table>
+                    <!-- Pagination Links -->
+        <div class="mt-4">
+            {{ $allocations->links() }}
         </div>
+        </div>
+
     </div>
 @endsection

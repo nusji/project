@@ -51,30 +51,55 @@ class ProductionController extends Controller
             ]
         );
 
-
-        
         DB::beginTransaction();
 
         try {
             $insufficientIngredients = [];
+            $totalRequiredIngredients = [];
 
+            // สะสมจำนวนวัตถุดิบที่ต้องการทั้งหมด
             foreach ($validatedData['menus'] as $menuData) {
-                $menu = Menu::findOrFail($menuData['id']);
+                $menu = Menu::with('recipes.ingredient')->findOrFail($menuData['id']);
                 $quantityToProduce = $menuData['quantity'];
 
-                // ตรวจสอบวัตถุดิบในสูตรของเมนู (menu_recipes)
                 foreach ($menu->recipes as $recipe) {
-                    $ingredient = $recipe->ingredient;
-                    $totalRequired = $recipe->amount * $quantityToProduce;
+                    $ingredientId = $recipe->ingredient->id;
+                    $requiredAmount = $recipe->amount * $quantityToProduce;
 
-                    if ($ingredient->ingredient_stock < $totalRequired) {
-                        $insufficientIngredients[] = [
-                            'menu_name' => $menu->menu_name,
-                            'ingredient_name' => $ingredient->ingredient_name,
-                            'required' => $totalRequired,
-                            'available' => $ingredient->ingredient_stock,
-                            'unit' => $ingredient->ingredient_unit,
-                        ];
+                    if (!isset($totalRequiredIngredients[$ingredientId])) {
+                        $totalRequiredIngredients[$ingredientId] = 0;
+                    }
+
+                    $totalRequiredIngredients[$ingredientId] += $requiredAmount;
+                }
+            }
+
+            // ตรวจสอบว่าวัตถุดิบเพียงพอ
+            foreach ($totalRequiredIngredients as $ingredientId => $requiredAmount) {
+                $ingredient = Ingredient::findOrFail($ingredientId);
+
+                if ($ingredient->ingredient_stock < $requiredAmount) {
+                    // หาเมนูที่ต้องใช้วัตถุดิบนี้
+                    $affectedMenus = collect($validatedData['menus'])->filter(function ($menuData) use ($ingredientId) {
+                        $menu = Menu::with('recipes')->find($menuData['id']);
+                        return $menu->recipes->contains(function ($recipe) use ($ingredientId) {
+                            return $recipe->ingredient_id == $ingredientId;
+                        });
+                    });
+
+                    foreach ($affectedMenus as $menuData) {
+                        $menu = Menu::with('recipes.ingredient')->findOrFail($menuData['id']);
+                        foreach ($menu->recipes as $recipe) {
+                            if ($recipe->ingredient_id == $ingredientId) {
+                                $insufficientIngredients[] = [
+                                    'menu_name' => $menu->menu_name,
+                                    'ingredient_name' => $ingredient->ingredient_name,
+                                    'required' => $recipe->amount * $menuData['quantity'],
+                                    'available' => $ingredient->ingredient_stock,
+                                    'unit' => $ingredient->ingredient_unit,
+                                ];
+                            }
+                        }
                     }
                 }
             }
@@ -94,6 +119,7 @@ class ProductionController extends Controller
             $production->save();
 
             foreach ($validatedData['menus'] as $menuData) {
+                $menu = Menu::with('recipes.ingredient')->findOrFail($menuData['id']);
                 $production->menus()->attach($menuData['id'], [
                     'quantity' => $menuData['quantity'],
                     'remaining_amount' => $menuData['quantity'], // จำนวนที่เหลือ
@@ -103,6 +129,10 @@ class ProductionController extends Controller
                 foreach ($menu->recipes as $recipe) {
                     $ingredient = $recipe->ingredient;
                     $deductAmount = $recipe->amount * $menuData['quantity'];
+                    // ตรวจสอบอีกครั้งก่อนหักสต็อก
+                    if ($ingredient->ingredient_stock < $deductAmount) {
+                        throw new \Exception("สต็อกวัตถุดิบ {$ingredient->ingredient_name} ไม่เพียงพอสำหรับการหักลบ");
+                    }
                     $ingredient->decrement('ingredient_stock', $deductAmount);
                 }
             }
@@ -115,6 +145,7 @@ class ProductionController extends Controller
             return redirect()->back()->with('error', 'เกิดข้อผิดพลาดในการบันทึกรายการผลิต: ' . $e->getMessage())->withInput();
         }
     }
+
 
     public function show(Production $production)
     {
