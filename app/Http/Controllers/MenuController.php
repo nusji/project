@@ -51,7 +51,6 @@ class MenuController extends Controller
                 'menu_detail' => 'nullable|string',
                 'menu_type_id' => 'required|exists:menu_types,id',
                 'menu_price' => 'required|numeric|min:0',
-                'menu_status' => 'required|boolean',
                 'menu_taste' => 'required|string',
                 'portion_size' => 'required|numeric|min:0.01',
                 'menu_image' => 'nullable|image',
@@ -135,7 +134,6 @@ class MenuController extends Controller
             'menu_type_id' => 'required|exists:menu_types,id',
             'menu_taste' => 'nullable|string',
             'menu_price' => 'required|numeric|min:0',
-            'menu_status' => 'required|boolean',
             'menu_image' => 'nullable|image',
             'ingredients' => 'required|array',
             'ingredients.*.id' => 'required|exists:ingredients,id',
@@ -150,7 +148,6 @@ class MenuController extends Controller
             'menu_detail' => $validatedData['menu_detail'],
             'menu_type_id' => $validatedData['menu_type_id'],
             'menu_price' => $validatedData['menu_price'],
-            'menu_status' => $validatedData['menu_status'],
             'menu_taste' => $validatedData['menu_taste'],
         ]);
 

@@ -76,9 +76,6 @@
                                 ราคา
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                สถานะขาย
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 รูปเมนู
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -104,12 +101,6 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         {{ number_format($menu->menu_price, 2) }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span
-                                            class="@if ($menu->menu_status) bg-green-200 text-green-600 @else bg-red-200 text-red-600 @endif py-1 px-3 rounded-full text-xs">
-                                            {{ $menu->menu_status ? 'พร้อมขาย' : 'ไม่พร้อมขาย' }}
-                                        </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @if ($menu->menu_image)

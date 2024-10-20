@@ -30,7 +30,7 @@
                             @enderror
                         </div>
 
-                        <div class="mb-4 grid grid-cols-2 gap-4">
+                        <div class="mb-4 grid grid-cols-3 gap-4">
                             <div>
                                 <label for="menu_type_id" class="block text-sm font-medium text-gray-700">ประเภทเมนู</label>
                                 <select name="menu_type_id" id="menu_type_id"
@@ -65,6 +65,13 @@
                                     @endforeach
                                 </div>
                             </div>
+                            <div>
+                                <label for="portion_size" class="block text-sm font-medium text-gray-700"><span class="text-sm italic">ปริมาณต่อ 1 ทัพพี (หน่วยเป็นกิโล 0.00 )</span></label>
+                                    <input type="number" name="portion_size" id="portion_size" step="0.01"
+                                        class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                        placeholder="ปริมาณ ( เช่น 0.2 )" value="{{ old('portion_size', $menu->portion_size) }}">
+                                </label>
+                            </div>
                         </div>
 
                         <div class="flex space-x-4">
@@ -74,21 +81,6 @@
                                     class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                                     value="{{ old('menu_price', $menu->menu_price) }}">
                                 @error('menu_price')
-                                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                                @enderror
-                            </div>
-
-                            <div class="w-1/3">
-                                <label for="menu_status" class="block text-sm font-medium text-gray-700">สถานะขาย</label>
-                                <select name="menu_status" id="menu_status"
-                                    class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                                    <option value="1"
-                                        {{ old('menu_status', $menu->menu_status) == '1' ? 'selected' : '' }}>ขาย</option>
-                                    <option value="0"
-                                        {{ old('menu_status', $menu->menu_status) == '0' ? 'selected' : '' }}>ไม่ขาย
-                                    </option>
-                                </select>
-                                @error('menu_status')
                                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                                 @enderror
                             </div>

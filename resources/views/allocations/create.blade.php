@@ -1,36 +1,23 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container mx-auto">
-        <h1 class="text-2xl font-bold mb-4">Create Menu Allocation</h1>
+<h2>เพิ่มการจัดสรรเมนู</h2>
 
-        <!-- ฟอร์มสำหรับการจัดสรรเมนู -->
-        <form action="{{ route('allocations.store') }}" method="POST">
-            @csrf
+<form action="{{ route('allocations.store') }}" method="POST">
+    @csrf
+    <label for="allocation_date">วันที่เริ่มต้น</label>
+    <input type="date" name="allocation_date" required>
 
-            <!-- จำนวนวันที่ต้องการสุ่มเมนู -->
-            <div class="mb-4">
-                <label for="days" class="block text-sm font-medium text-gray-700">Number of Days</label>
-                <input type="number" name="days" id="days" class="mt-1 block w-full" placeholder="Enter number of days" value="3" min="1" class="rounded-md border-gray-300">
-            </div>
+    <label for="days">จำนวนวัน (สูงสุด 7 วัน)</label>
+    <input type="number" name="days" min="1" max="7" required>
 
-            <!-- จำนวนเมนูที่ต้องการจัดสรรในแต่ละวัน -->
-            <div class="mb-4">
-                <label for="menu_count" class="block text-sm font-medium text-gray-700">Total Menus Per Day</label>
-                <input type="number" name="menu_count" id="menu_count" class="mt-1 block w-full" placeholder="Enter number of menus per day" value="5" min="1" class="rounded-md border-gray-300">
-            </div>
+    <label for="best_selling_count">จำนวนเมนูขายดีที่ต้องการคงไว้</label>
+    <input type="number" name="best_selling_count" min="1" max="10" required>
 
-            <!-- จำนวนเมนูขายดีที่ต้องการตรึง -->
-            <div class="mb-4">
-                <label for="fixed_top_sellers" class="block text-sm font-medium text-gray-700">Number of Top Sellers to Fix</label>
-                <input type="number" name="fixed_top_sellers" id="fixed_top_sellers" class="mt-1 block w-full" placeholder="Enter number of top sellers to fix" value="1" min="0" class="rounded-md border-gray-300">
-            </div>
+    <label for="total_menus">จำนวนเมนูทั้งหมดที่ต้องการจัดสรรต่อวัน</label>
+    <input type="number" name="total_menus" min="1" required>
 
-            <!-- ปุ่มส่งฟอร์ม -->
-            <div>
-                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Allocate Menus</button>
-            </div>
+    <button type="submit">บันทึก</button>
+</form>
 
-        </form>
-    </div>
 @endsection

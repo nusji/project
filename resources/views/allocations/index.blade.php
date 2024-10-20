@@ -1,33 +1,31 @@
 @extends('layouts.app')
-
 @section('content')
-    <div class="container mx-auto">
-        <h1 class="text-2xl font-bold mb-4">Menu Allocations</h1>
+    <h2>การจัดสรรเมนู</h2>
+    <a href="{{ route('allocations.create') }}">เพิ่มการจัดสรร</a>
 
-        <a href="{{ route('allocations.create') }}" class="bg-blue-500 text-white px-4 py-2 rounded">Create New Allocation</a>
-
-        <table class="min-w-full mt-4">
-            <thead>
+    <table>
+        <thead>
+            <tr>
+                <th>วันที่จัดสรร</th>
+                <th>ดำเนินการ</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($allocations as $allocation)
                 <tr>
-                    <th>Allocation Date</th>
-                    <th>Menu</th>
-                    <th>Actions</th>
+                    <td>{{ $allocation->allocation_date }}</td>
+                    <td>
+                        <a href="{{ route('allocations.show', $allocation->id) }}">ดูรายละเอียด</a>
+                        <a href="{{ route('allocations.edit', $allocation->id) }}">แก้ไข</a>
+                        <form action="{{ route('allocations.destroy', $allocation->id) }}" method="POST"
+                            style="display:inline;">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit">ลบ</button>
+                        </form>
+                    </td>
                 </tr>
-            </thead>
-            <tbody>
-                @foreach($allocations as $allocation)
-                    <tr>
-                        <td>{{ $allocation->allocation_date }}</td>
-                        <td></td>
-                        <td>
-                            <!-- ปุ่มลิงก์ไปยังหน้าแสดงรายละเอียด -->
-                            <a href="{{ route('allocations.show', $allocation->id) }}" class="text-blue-500 hover:underline">
-                                View Details
-                            </a>
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
+            @endforeach
+        </tbody>
+    </table>
 @endsection

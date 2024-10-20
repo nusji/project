@@ -30,11 +30,10 @@ Route::controller(HomeController::class)->group(function () {
     Route::get('/survey-suggest', 'showSurvey')->name('survey-suggest');
     Route::post('/survey-suggest/query-menus', 'queryMenus')->name('survey-suggest.queryMenus');
     Route::get('menu-today', 'showMenu')->name('menu-today');
-    
 });
 
 Route::controller(FeedbackController::class)->group(function () {
-    Route::get('/feedbacks','index')->name('feedbacks.index');
+    Route::get('/feedbacks', 'index')->name('feedbacks.index');
     Route::get('/feedbacks/create', 'create')->name('feedbacks.create');
     Route::post('/feedbacks', 'store')->name('feedbacks.store');
     Route::get('/feedbacks/review', 'review')->name('feedbacks.review');
@@ -74,6 +73,7 @@ Route::get('/password/reset-custom', [ProfileController::class, 'showCustomPassw
 Route::post('/password/reset-custom', [ProfileController::class, 'resetPasswordWithVerification'])->name('profile.reset_custom.post');
 
 use App\Http\Controllers\ReportController;
+
 Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
 Route::get('/sales/menus-by-date', [SaleController::class, 'getMenusByDate'])->name('sales.menusByDate');
 
@@ -82,8 +82,6 @@ Route::middleware(['auth', 'check.profile'])->group(function () {
 
     //จัดการพนักงาน แบบ Resourceful Routes ประกอบด้วย index, create, store, show, edit, update, destroy
     Route::resource('employees', EmployeeController::class);
-
-
 
     //จัดการประเภทวัตถุดิบ แบบ Resourceful Routes ประกอบด้วย index, create, store, show, edit, update, destroy
     Route::resource('ingredient_types', IngredientTypeController::class);

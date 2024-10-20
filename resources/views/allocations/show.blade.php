@@ -1,23 +1,37 @@
 @extends('layouts.app')
-
 @section('content')
     <div class="container mx-auto">
         <h1 class="text-2xl font-bold mb-4">Menu Allocation Details</h1>
-
+ 
         <div class="mb-4">
             <h2 class="text-xl font-semibold">Date: {{ $allocation->allocation_date }}</h2>
         </div>
-
-        <!-- หากมีรายละเอียดเมนูเพิ่มเติม (เช่น menu_allocation_details) -->
+ 
         <div class="mb-4">
             <h3 class="text-lg font-semibold">Allocation Details</h3>
             <ul>
-                @foreach($allocationDetails as $detail)
-                    <li>{{ $detail->menu->menu_name }}: {{ $detail->quantity }}</li>
+                @foreach($allocation->allocationDetails as $detail)
+                    <li>{{ $detail->menu->menu_name }}</li>
                 @endforeach
             </ul>
         </div>
 
-        <a href="{{ route('allocations.index') }}" class="bg-blue-500 text-white px-4 py-2 rounded">Back to Allocations</a>
+        <!-- แสดงวัตถุดิบที่ขาด -->
+        @if (!empty($missingIngredients))
+            <div class="mb-4">
+                <h3 class="text-lg font-semibold text-red-600">วัตถุดิบที่ขาด</h3>
+                <ul>
+                    @foreach($missingIngredients as $ingredient)
+                        <li>
+                            {{ $ingredient['menu_name'] }}: วัตถุดิบ {{ $ingredient['ingredient_name'] }} ขาด {{ $ingredient['missing_amount'] }} หน่วย (ต้องการ {{ $ingredient['required_amount'] }} หน่วย)
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+        @else
+            <div class="mb-4">
+                <h3 class="text-lg font-semibold text-green-600">วัตถุดิบครบถ้วน</h3>
+            </div>
+        @endif
     </div>
 @endsection

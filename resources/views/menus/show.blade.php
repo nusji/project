@@ -77,13 +77,6 @@
                                     {{ $menu->menuType->menu_type_name }}</p>
                                 <p class="text-gray-700 mb-2"><span class="font-semibold">ราคาต่อทัพพี :</span>
                                     ฿{{ number_format($menu->menu_price, 2) }}</p>
-                                <p class="text-gray-700 mb-2">
-                                    <span class="font-semibold">สถานะขาย :</span>
-                                    <span
-                                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $menu->menu_status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                        {{ $menu->menu_status ? 'พร้อมขาย' : 'ไม่พร้อมขาย' }}
-                                    </span>
-                                </p>
                             </div>
                         </div>
                         <div>
