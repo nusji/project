@@ -131,77 +131,79 @@ class MenuAllocationController extends Controller
 
     public function show(Request $request, MenuAllocation $allocation)
     {
-        // โหลดรายละเอียดการจัดสรรพร้อมเมนูที่เกี่ยวข้องและสูตรอาหารของพวกเขา
+        // โหลดข้อมูลที่เกี่ยวข้องทั้งหมด
         $allocation->load('allocationDetails.menu.recipes.ingredient');
-
-        $missingIngredients = [];        // เก็บวัตถุดิบที่ขาดในแต่ละเมนู
-        $totalMissingIngredients = [];   // เก็บวัตถุดิบที่ขาดทั้งหมด
-
+    
+        $ingredientUsage = [];
+        $remainingIngredients = [];
+        $missingIngredients = [];
+    
         // รับข้อมูลจำนวนการผลิตจากผู้ใช้
         $productionQuantities = $request->input('productionQuantities', []);
-
-        // สะสมความต้องการวัตถุดิบทั้งหมด
-        $totalRequiredIngredients = [];
-
+    
+        // เริ่มต้นด้วยการกำหนดปริมาณวัตถุดิบคงเหลือเท่ากับสต็อกปัจจุบัน
+        $ingredients = Ingredient::all();
+        foreach ($ingredients as $ingredient) {
+            $remainingIngredients[$ingredient->id] = $ingredient->ingredient_stock;
+        }
+    
+        // วนลูปผ่านทุกรายการในการจัดสรร
         foreach ($allocation->allocationDetails as $detail) {
             $menuId = $detail->menu->id;
-            // ใช้ค่าที่ผู้ใช้ป้อนถ้ามี มิฉะนั้นใช้ค่าเริ่มต้นเป็น 1
             $productionQuantity = isset($productionQuantities[$menuId]) ? (int)$productionQuantities[$menuId] : 1;
-
+    
+            $ingredientUsage[$menuId] = [];
+            $missingIngredients[$menuId] = [];
+    
+            // คำนวณการใช้วัตถุดิบสำหรับแต่ละเมนู
             foreach ($detail->menu->recipes as $recipe) {
                 $ingredientId = $recipe->ingredient->id;
                 $requiredAmount = $recipe->amount * $productionQuantity;
-
-                if (!isset($totalRequiredIngredients[$ingredientId])) {
-                    $totalRequiredIngredients[$ingredientId] = 0;
+    
+                $availableAmount = $remainingIngredients[$ingredientId];
+                $usedAmount = min($requiredAmount, $availableAmount);
+                $missingAmount = max(0, $requiredAmount - $usedAmount);
+    
+                // บันทึกข้อมูลการใช้วัตถุดิบ
+                $ingredientUsage[$menuId][] = [
+                    'ingredient_name' => $recipe->ingredient->ingredient_name,
+                    'ingredient_unit' => $recipe->ingredient->ingredient_unit,
+                    'required_amount' => $requiredAmount,
+                    'available_amount' => $availableAmount,
+                    'used_amount' => $usedAmount,
+                    'missing_amount' => $missingAmount,
+                ];
+    
+                // บันทึกข้อมูลวัตถุดิบที่ขาด (ถ้ามี)
+                if ($missingAmount > 0) {
+                    $missingIngredients[$menuId][] = [
+                        'ingredient_name' => $recipe->ingredient->ingredient_name,
+                        'ingredient_unit' => $recipe->ingredient->ingredient_unit,
+                        'missing_amount' => $missingAmount,
+                    ];
                 }
-
-                $totalRequiredIngredients[$ingredientId] += $requiredAmount;
+    
+                // อัปเดตปริมาณวัตถุดิบที่เหลือ
+                $remainingIngredients[$ingredientId] -= $usedAmount;
             }
         }
-
-        // ตรวจสอบว่าวัตถุดิบเพียงพอ
-        foreach ($totalRequiredIngredients as $ingredientId => $requiredAmount) {
-            $ingredient = Ingredient::findOrFail($ingredientId);
-
-            if ($ingredient->ingredient_stock < $requiredAmount) {
-                $missingAmount = $requiredAmount - $ingredient->ingredient_stock;
-                $unit = $ingredient->ingredient_unit;
-
-                // เก็บข้อมูลวัตถุดิบที่ขาดทั้งหมด
-                if (isset($totalMissingIngredients[$ingredient->ingredient_name])) {
-                    $totalMissingIngredients[$ingredient->ingredient_name] += $missingAmount;
-                } else {
-                    $totalMissingIngredients[$ingredient->ingredient_name] = $missingAmount;
+    
+        // คำนวณวัตถุดิบที่ขาดทั้งหมด
+        $totalMissingIngredients = [];
+        foreach ($missingIngredients as $menuMissing) {
+            foreach ($menuMissing as $missing) {
+                $ingredientName = $missing['ingredient_name'];
+                if (!isset($totalMissingIngredients[$ingredientName])) {
+                    $totalMissingIngredients[$ingredientName] = [
+                        'missing_amount' => 0,
+                        'unit' => $missing['ingredient_unit'],
+                    ];
                 }
-
-                // เก็บข้อมูลวัตถุดิบที่ขาดในแต่ละเมนูที่ใช้วัตถุดิบนี้
-                foreach ($allocation->allocationDetails as $detail) {
-                    $menu = $detail->menu;
-                    $menuId = $menu->id;
-                    $productionQuantity = isset($productionQuantities[$menuId]) ? (int)$productionQuantities[$menuId] : 1;
-
-                    // ตรวจสอบว่าเมนูนี้ใช้วัตถุดิบที่ขาดหรือไม่
-                    $recipe = $menu->recipes->firstWhere('ingredient_id', $ingredientId);
-                    if ($recipe) {
-                        $requiredForMenu = $recipe->amount * $productionQuantity;
-                        $available = min($ingredient->ingredient_stock, $requiredForMenu);
-                        $missingForMenu = $requiredForMenu - $available;
-
-                        if ($missingForMenu > 0) {
-                            $missingIngredients[$menuId][] = [
-                                'ingredient_name' => $ingredient->ingredient_name,
-                                'ingredient_unit' => $ingredient->ingredient_unit,
-                                'missing_amount' => $missingForMenu,
-                                'required_amount' => $requiredForMenu,
-                            ];
-                        }
-                    }
-                }
+                $totalMissingIngredients[$ingredientName]['missing_amount'] += $missing['missing_amount'];
             }
         }
-
+    
         // ส่งข้อมูลไปยัง view
-        return view('allocations.show', compact('allocation', 'missingIngredients', 'totalMissingIngredients', 'productionQuantities'));
+        return view('allocations.show', compact('allocation', 'ingredientUsage', 'missingIngredients', 'totalMissingIngredients', 'productionQuantities'));
     }
 }
