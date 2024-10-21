@@ -1,5 +1,4 @@
 <?php
-
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
@@ -17,13 +16,16 @@ class SalesAndSaleDetailsTableSeeder extends Seeder
         $employeeIds = [1, 3, 6, 10, 11]; // ปรับตามที่คุณต้องการหรือมีอยู่ในตาราง employees
 
         // กำหนดไอดีเมนูที่มีอยู่ในตาราง 'menus'
-        $menuIds = range(1, 44); // สมมติว่ามีเมนู 50 รายการ ตั้งแต่ id 1 ถึง 50
+        $menuIds = range(1, 40); // สมมติว่ามีเมนู 40 รายการ ตั้งแต่ id 1 ถึง 40
 
         // สร้างข้อมูลสำหรับตาราง 'sales' จำนวน 100 รายการ
-        for ($i = 501; $i <= 1000; $i++) {
+        for ($i = 1085; $i <= 1500; $i++) {
+            // สุ่มเลือกวันที่เป็น วันนี้, เมื่อวาน, หรือภายใน 7 วันที่ผ่านมา
+            $randomDate = Carbon::now()->subDays(rand(0, 7)); // จำกัดวันที่ระหว่างวันนี้และ 7 วันก่อน
+
             $sales[] = [
                 'id' => $i,
-                'sale_date' => Carbon::now()->subDays(rand(0, 365)),
+                'sale_date' => $randomDate,
                 'employee_id' => $employeeIds[array_rand($employeeIds)],
                 'payment_type' => ['เงินสด', 'โอนเงิน'][array_rand(['เงินสด', 'โอนเงิน'])],
                 'created_at' => Carbon::now(),

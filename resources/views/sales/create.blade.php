@@ -6,7 +6,7 @@
             <div class="bg-white overflow-hidden">
                 <div class="flex">
                     <!-- ซ้าย: รายการเมนู -->
-                    <div class="w-2/3 p-4 min-h-screen pb-24">
+                    <div class="w-2/3 p-4 min-h-screen">
                         <div class="mb-4">
                             <div class="flex justify-between items-center mb-2">
                                 <h2 class="text-2xl font-bold" id="menu-title">เมนูวันที่ <span
@@ -21,13 +21,14 @@
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-5 gap-4" id="menu-items-container">
+                            <!-- ปรับเปลี่ยนส่วนนี้ให้มีความสูงและสามารถเลื่อนแนวตั้งได้ -->
+                            <div class="grid grid-cols-5 gap-4 h-96 overflow-y-auto" id="menu-items-container">
                                 @foreach ($menus as $menu)
                                     <div class="bg-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-200 transition menu-item"
                                         data-category="{{ $menu->menu_type_id }}" onclick="addToCart({{ $menu->id }})">
                                         @if ($menu->menu_image)
                                             <img src="{{ Storage::url($menu->menu_image) }}" alt="{{ $menu->menu_name }}"
-                                                class="menu-image h-10 w-10 rounded-md">
+                                                class="menu-image h-10 w-10 rounded-md mb-2">
                                         @endif
                                         <h3 class="font-semibold">{{ $menu->menu_name }}</h3>
                                         <p class="text-gray-600">{{ number_format($menu->menu_price, 2) }} บาท</p>
@@ -160,7 +161,7 @@
                 let soldOut = menu.total_remaining_amount <= 0;
 
                 menuItem.innerHTML = `
-            ${menu.menu_image ? `<img src="${menu.menu_image}" alt="${menu.menu_name}" class="menu-image h-10 w-10">` : ''}
+            ${menu.menu_image ? `<img src="${menu.menu_image}" alt="${menu.menu_name}" class="menu-image h-10 w-10 rounded-md mb-2">` : ''}
             <h3 class="font-semibold">${menu.menu_name}</h3>
             <p class="text-gray-600">${Number(menu.menu_price).toFixed(2)} บาท</p>
             <p class="text-gray-600">เหลือ: ${Number(menu.total_remaining_amount).toFixed(1)} กิโลกรัม</p>

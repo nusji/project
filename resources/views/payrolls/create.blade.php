@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container mx-auto px-4 py-8">
+    <div class="container mx-auto px-4 py-0">
         <x-breadcrumb :paths="[['label' => 'ระบบเงินเดือน', 'url' => route('payrolls.index')], ['label' => 'จ่ายเงินเดือน']]" />
 
         <h2 class="text-3xl font-semibold text-gray-800 mb-6">เพิ่มรายการจ่ายเงินเดือน</h2>
@@ -90,7 +90,7 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                     <div>
-                        <label for="slip" class="block text-sm font-medium text-gray-700 mb-2">แนบสลิปโอนเงิน</label>
+                        <label for="slip_image" class="block text-sm font-medium text-gray-700 mb-2">แนบสลิปโอนเงิน</label>
                         <div
                             class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md relative">
                             <div class="space-y-1 text-center">
@@ -104,7 +104,7 @@
                                     <label for="file-upload"
                                         class="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
                                         <span>อัปโหลดไฟล์</span>
-                                        <input id="file-upload" name="slip" type="file" class="sr-only"
+                                        <input id="file-upload" name="slip_image" type="file" class="sr-only"
                                             accept="image/*,application/pdf">
                                     </label>
                                     <p class="pl-1">หรือลากและวางที่นี่</p>
@@ -118,13 +118,13 @@
                         <div id="file-name" class="mt-2 text-sm text-gray-600"></div>
                     </div>
                     <div>
-                        <label for="payment_channel"
+                        <label for="payment_method"
                             class="block text-sm font-medium text-gray-700 mb-2">ช่องทางการจ่ายเงินเดือน</label>
-                        <select name="payment_channel" id="payment_channel"
+                        <select name="payment_method" id="payment_method"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200"
                             required>
-                            <option value="bank_transfer">โอนผ่านธนาคาร</option>
-                            <option value="cash">เงินสด</option>
+                            <option value="โอนผ่านธนาคาร">โอนผ่านธนาคาร</option>
+                            <option value="เงินสด">เงินสด</option>
                         </select>
                     </div>
                 </div>

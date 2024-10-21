@@ -26,7 +26,7 @@ class ReportController extends Controller
     }
 
     // เมนูที่ขายดีที่สุด
-    protected function getTopSellingMenus()
+    public function getTopSellingMenus()
     {
         return SaleDetail::select('menu_id', DB::raw('SUM(quantity) as total_sold'))
             ->groupBy('menu_id')

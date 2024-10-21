@@ -60,7 +60,7 @@ Route::middleware(['auth', 'role:employee', 'check.profile'])->group(function ()
 
 //สิทธิ์เฉพาะสำหรับเจ้าของร้านเท่านั้น
 Route::middleware(['auth', 'role:owner', 'check.profile'])->group(function () {
-    Route::get('/owner', [DashboardController::class, 'owner'])->name('dashboard.owner');
+    Route::get('/owner', [DashboardController::class, 'dashboard'])->name('dashboard.owner');
     Route::resource('finance', FinanceController::class);
 });
 
@@ -75,6 +75,8 @@ Route::get('/password/reset-custom', [ProfileController::class, 'showCustomPassw
 Route::post('/password/reset-custom', [ProfileController::class, 'resetPasswordWithVerification'])->name('profile.reset_custom.post');
 Route::get('/sales/manage-sold-out', [SaleController::class, 'manageSoldOut'])->name('sales.manageSoldOut');
 Route::post('/sales/reset-sold-out/{id}', [SaleController::class, 'resetSoldOut'])->name('sales.resetSoldOut');
+Route::get('/owner', [DashboardController::class, 'dashboard'])->name('dashboard.owner');
+Route::get('/employee', [DashboardController::class, 'dashboard'])->name('dashboard.employee');
 
 // เส้นทางสำหรับดึงข้อมูลวัตถุดิบที่ถูกสั่งซื้อบ่อยที่สุด
 Route::get('/orders/top-ingredients/count', [OrderController::class, 'getTopIngredientsByCount'])->name('orders.top-ingredients.count');
@@ -84,6 +86,9 @@ Route::get('/orders/top-ingredients/quantity', [OrderController::class, 'getTopI
 Route::get('/orders/chart-data', [OrderController::class, 'getChartData'])->name('orders.chart-data');
 Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
 Route::get('/sales/menus-by-date', [SaleController::class, 'getMenusByDate'])->name('sales.menusByDate');
+
+Route::get('sales/export', [SaleController::class, 'exportCsv'])->name('sales.export');
+Route::get('sales/export-pdf', [SaleController::class, 'exportPdf'])->name('sales.export-pdf');
 
 //สิทธิ์เฉพาะสำหรับเจ้าของร้านและพนักงานเท่านั้น
 Route::middleware(['auth', 'check.profile'])->group(function () {

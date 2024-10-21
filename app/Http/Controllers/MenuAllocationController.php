@@ -206,4 +206,16 @@ class MenuAllocationController extends Controller
         // ส่งข้อมูลไปยัง view
         return view('allocations.show', compact('allocation', 'ingredientUsage', 'missingIngredients', 'totalMissingIngredients', 'productionQuantities'));
     }
+
+    public function destroy($id)
+    {
+        // Find the allocation by ID
+        $allocation = MenuAllocation::findOrFail($id);
+
+        // Delete the allocation
+        $allocation->delete();
+
+        // Redirect or return a response
+        return redirect()->route('allocations.index')->with('success', 'ลบการจัดสรรเมนูสำเร็จ');
+    }
 }

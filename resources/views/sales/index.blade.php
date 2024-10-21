@@ -52,31 +52,24 @@
     <!-- Sales History Section -->
     <div class="p-6">
         <h1 class="text-xl font-bold text-gray-800 mb-4">ประวัติการขาย</h1>
-        
-        <!-- Sorting Form -->
-        <form method="GET" action="{{ route('sales.index') }}" class="mb-4">
-            <div class="flex items-center space-x-4">
-                <div>
-                    <label for="sort_by" class="block text-sm font-medium text-gray-700">เรียงลำดับตาม</label>
-                    <select name="sort_by" id="sort_by" class="mt-1 block w-full border-gray-300 rounded-md">
-                        <option value="sale_date" {{ request('sort_by') == 'sale_date' ? 'selected' : '' }}>วันที่ขาย</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="sort_order" class="block text-sm font-medium text-gray-700">ทิศทางการเรียงลำดับ</label>
-                    <select name="sort_order" id="sort_order" class="mt-1 block w-full border-gray-300 rounded-md">
-                        <option value="asc" {{ request('sort_order') == 'asc' ? 'selected' : '' }}>น้อยไปมาก</option>
-                        <option value="desc" {{ request('sort_order') == 'desc' ? 'selected' : '' }}>มากไปน้อย</option>
-                    </select>
-                </div>
-                <div class="flex items-end">
-                    <button type="submit" class="mt-1 px-4 py-2 bg-blue-500 text-white rounded-md">เรียงลำดับ</button>
-                </div>
+
+        <form action="#" method="GET" class="flex-grow md:max-w-md">
+            <div class="relative">
+                <input type="text" name="search" placeholder="ค้นหา..." value="{{ request('search') }}"
+                    class="w-full px-4 py-2 rounded-md border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <button type="submit"
+                    class="absolute inset-y-0 right-0 flex items-center px-4 text-gray-700 bg-white-800 border-l border-gray-300 rounded-r-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-300 ease-in-out">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </button>
             </div>
         </form>
 
         <!-- Sales Table -->
-        <div class="bg-white shadow rounded-lg overflow-hidden">
+        <div class="bg-white shadow rounded-lg overflow-hidden mt-4">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>

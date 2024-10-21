@@ -22,5 +22,7 @@ class MenuAllocation extends Model
     {
         return $this->hasMany(MenuAllocationDetail::class);
     }
+
+    
     
 }
