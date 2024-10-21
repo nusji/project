@@ -16,26 +16,36 @@ class MenuController extends Controller
         $menuTypes = Menu::select('menu_type_id')
             ->selectRaw('count(*) as count')
             ->groupBy('menu_type_id')
-            ->with('menuType') // เพิ่ม eager loading สำหรับ ingredient type
+            ->with('menuType') // เพิ่ม eager loading สำหรับ menu type
             ->get()
             ->map(function ($item) {
                 return [
-                    'type' => $item->menuType->menu_type_name, // สมมติว่า ingredient type มี column 'ingredient_type_name'
+                    'type' => $item->menuType->menu_type_name,
                     'count' => $item->count
                 ];
             });
+
         // รับค่าการค้นหาจาก request
         $search = $request->input('search');
 
         // ดึงเมนู โดยค้นหาตามชื่อหากมีการส่งค่าการค้นหา
-        $menus = Menu::with('menuType')
+        $menus = Menu::with(['menuType', 'saleDetails']) // เพิ่มการโหลด saleDetails
             ->when($search, function ($query, $search) {
                 return $query->where('menu_name', 'like', "%{$search}%"); // ค้นหาจากชื่อเมนู
             })
             ->paginate(20);
 
-        return view('menus.index', compact('menus', 'search', 'menuTypes'));
+        // ดึงเมนูที่มีคะแนนเฉลี่ยต่ำ โดยไม่นับเมนูที่ไม่มีการให้คะแนน
+        $lowRatedMenus = Menu::with('feedbacks')
+            ->whereHas('feedbacks') // กรองเฉพาะเมนูที่มีการให้คะแนน
+            ->withAvg('feedbacks', 'rating') // คำนวณคะแนนเฉลี่ย
+            ->orderBy('feedbacks_avg_rating', 'asc') // เรียงจากคะแนนต่ำไปสูง
+            ->take(5) // นำมาแสดง 5 รายการ
+            ->get();
+        return view('menus.index', compact('menus', 'search', 'menuTypes', 'lowRatedMenus'));
     }
+
+
     public function create()
     {
         $menuTypes = MenuType::all();
@@ -114,9 +124,17 @@ class MenuController extends Controller
 
     public function show(Menu $menu)
     {
-        $menu->load('menuType', 'recipes.ingredient')->withTrashed();
-        return view('menus.show', compact('menu'));
+        $menu->load('menuType', 'recipes.ingredient', 'feedbacks', 'saleDetails')->withTrashed();
+
+        // คำนวณคะแนนเฉลี่ยจาก feedbacks
+        $averageRating = $menu->feedbacks()->avg('rating');
+        $comments = $menu->feedbacks()->whereNotNull('comment')->get();
+        // นับจำนวนการขายจาก sale_details
+        $totalSales = $menu->saleDetails()->sum('quantity');
+
+        return view('menus.show', compact('menu', 'averageRating', 'totalSales', 'comments'));
     }
+
 
     public function edit($id)
     {

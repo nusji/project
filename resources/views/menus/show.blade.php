@@ -3,7 +3,10 @@
 @section('content')
     <div class="container mx-auto px-4 py-0">
         <!-- เรียกใช้ breadcrumb component -->
-        <x-breadcrumb :paths="[['label' => 'ระบบเมนูข้าวแกง', 'url' => route('menus.index')], ['label' => 'แสดงเมนูรายการที่ ' . $menu->id]]" />
+        <x-breadcrumb :paths="[
+            ['label' => 'ระบบเมนูข้าวแกง', 'url' => route('menus.index')],
+            ['label' => 'แสดงเมนูรายการที่ ' . $menu->id],
+        ]" />
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
@@ -102,10 +105,103 @@
 
                             <div>
                                 <h2 class="text-2xl font-semibold">รีวิวเมนู</h2>
-                                
+
+                                @if ($averageRating)
+                                    <div class="mb-4">
+                                        <p class="text-gray-700">คะแนนรีวิวเฉลี่ย: {{ number_format($averageRating, 1) }} /
+                                            5</p>
+                                        <div class="flex items-center">
+                                            @for ($i = 1; $i <= 5; $i++)
+                                                @if ($i <= $averageRating)
+                                                    <svg class="w-5 h-5 text-yellow-400" fill="currentColor"
+                                                        viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                        <path
+                                                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
+                                                        </path>
+                                                    </svg>
+                                                @else
+                                                    <svg class="w-5 h-5 text-gray-300" fill="currentColor"
+                                                        viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                        <path
+                                                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
+                                                        </path>
+                                                    </svg>
+                                                @endif
+                                            @endfor
+                                        </div>
+                                    </div>
+                                @else
+                                    <p class="text-gray-700 mb-4">ยังไม่มีรีวิวสำหรับเมนูนี้</p>
+                                @endif
+
+                                @if (count($comments) > 0)
+                                    <div class="mb-4">
+                                        <h3 class="text-lg font-semibold mb-2">ความคิดเห็นล่าสุด</h3>
+                                        @foreach ($comments->take(2) as $comment)
+                                            <div class="bg-gray-100 p-3 rounded mb-2">
+
+                                                <p>{{ $comment->comment }}</p>
+                                            </div>
+                                        @endforeach
+                                        @if (count($comments) > 2)
+                                            <button onclick="openCommentsModal()" class="text-blue-600 hover:text-blue-800">
+                                                ดูความคิดเห็นทั้งหมด ({{ count($comments) }})
+                                            </button>
+                                        @endif
+                                    </div>
+
+                                    <!-- Modal -->
+                                    <div id="commentsModal" class="fixed z-10 inset-0 overflow-y-auto hidden"
+                                        aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                                        <div
+                                            class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                                            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+                                                aria-hidden="true"></div>
+                                            <span class="hidden sm:inline-block sm:align-middle sm:h-screen"
+                                                aria-hidden="true">&#8203;</span>
+                                            <div
+                                                class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                                                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                                    <h3 class="text-lg leading-6 font-medium text-gray-900"
+                                                        id="modal-title">
+                                                        ความคิดเห็นทั้งหมด
+                                                    </h3>
+                                                    <div class="mt-2 max-h-96 overflow-y-auto">
+                                                        @foreach ($comments as $comment)
+                                                            <div class="bg-gray-100 p-3 rounded mb-2">
+                                                                <p>{{ $comment->comment }}</p>
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                                                    <button type="button" onclick="closeCommentsModal()"
+                                                        class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                                                        ปิด
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <script>
+                                        function openCommentsModal() {
+                                            document.getElementById('commentsModal').classList.remove('hidden');
+                                        }
+
+                                        function closeCommentsModal() {
+                                            document.getElementById('commentsModal').classList.add('hidden');
+                                        }
+                                    </script>
+                                @endif
+
+                                <h2 class="text-2xl font-semibold">จำนวนการขาย</h2>
+                                <p class="text-gray-700 mb-4">จำนวนขาย: {{ $totalSales }} ทัพพี</p>
+
+
                             </div>
                         </div>
-                        
+
                     </div>
 
                     <div class="mt-8 right">
