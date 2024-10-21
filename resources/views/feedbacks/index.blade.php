@@ -1,44 +1,44 @@
-<!-- resources/views/feedbacks/index.blade.php -->
 @extends('layouts.guest')
 
 @section('content')
-    <div class="container mx-auto px-4">
-        <h1 class="text-4xl font-bold text-center text-gray-800 mb-12">รีวิวอาหารประจำวัน</h1>
-        <a href="{{ route('feedbacks.create') }}"
-            class="bg-blue-600 text-white px-4 py-2 rounded-md mb-8 inline-block">รีวิวเมนู</a>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <div class="container mx-auto px-4 py-12">
+        <h1 class="text-5xl font-bold text-center text-orange-800 mb-12 tracking-tight">รีวิวอาหารประจำวัน</h1>
+
+        <!-- ปุ่มรีวิวเมนู -->
+        <div class="text-center mb-12">
+            <a href="{{ route('feedbacks.create') }}" class="inline-block bg-gradient-to-r from-orange-800 to-orange-900 border-4 hover:from-blue-700 hover:to-blue-800 text-white text-lg px-8 py-4 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-110">
+                กดเพื่อรีวิวเมนูเลย!!
+            </a>
+        </div>
+
+        <!-- กริดเมนู -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
             @foreach ($averageRatings as $menuData)
-                <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-                    <div class="bg-blue-600 px-6 py-4">
-                        <h2 class="text-xl font-semibold text-white">{{ $menuData['menu']->menu_name }}</h2>
-                        <p class="text-sm text-white">{{ $menuData['menu']->menu_description }}</p>
-                        <img src="{{ asset('storage/' . $menuData['menu']->menu_image) }}"
-                            alt="{{ $menuData['menu']->menu_name }}" class="w-32 h-32 rounded-md mt-4">
+                <div class="bg-white rounded-2xl shadow-xl hover:shadow-2xl overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out">
+                    <div class="bg-white p-6">
+                        <h2 class="text-2xl font-semibold text-black">{{ $menuData['menu']->menu_name }}</h2>
+                        <p class="text-sm text-gray-700 mt-2">{{ $menuData['menu']->menu_description }}</p>
+                        <img src="{{ asset('storage/' . $menuData['menu']->menu_image) }}" alt="{{ $menuData['menu']->menu_name }}" class="w-40 h-40 rounded-lg mt-6 mx-auto object-cover">
                     </div>
 
                     <div class="p-6">
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="text-lg font-medium text-gray-700">คะแนนเฉลี่ย</span>
-                            <div class="flex items-center">
-                                <div class="star-rating" data-rating="{{ number_format($menuData['average_rating'], 1) }}">
-                                </div>
-                                <span class="ml-2 text-lg font-bold text-gray-800">
-                                    {{ number_format($menuData['average_rating'], 1) }}
-                                </span>
-                            </div>
+                        <div class="flex align-items-center">
+                            <h3 class="text-lg font-semibold text-gray-800 mr-4">คะแนนเฉลี่ย </h3>
+                            <div class="star-rating flex" data-rating="{{ number_format($menuData['average_rating'], 1) }}"></div>
+                            <span class="ml-2 text-lg font-bold text-gray-800">{{ number_format($menuData['average_rating'], 1) }}</span>
                         </div>
+                        
 
                         <h3 class="text-lg font-semibold text-gray-800 mb-3">รีวิวจากลูกค้า</h3>
-                        <div class="space-y-4 max-h-64 overflow-y-auto">
+                        <div class="space-y-4 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
                             @php
                                 $feedbacks = $menuData['feedbacks']->sortByDesc('created_at');
                             @endphp
                             @foreach ($feedbacks as $feedback)
-                                <div class="bg-gray-50 rounded-md p-4">
+                                <div class="bg-gray-50 rounded-lg p-4 border border-gray-100 shadow-sm">
                                     <div class="flex justify-between items-center mb-2">
-                                        <div class="star-rating" data-rating="{{ $feedback->rating }}"></div>
-                                        <span
-                                            class="text-sm text-gray-500">{{ $feedback->created_at->format('d/m/Y H:i') }}</span>
+                                        <div class="star-rating flex" data-rating="{{ $feedback->rating }}"></div>
+                                        <span class="text-sm text-gray-500">{{ $feedback->created_at->format('d/m/Y H:i') }}</span>
                                     </div>
                                     <p class="text-gray-700">{{ $feedback->comment ?: 'ไม่มีความคิดเห็น' }}</p>
                                 </div>

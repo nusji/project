@@ -19,8 +19,22 @@ class ProductionController extends Controller
         $productions = Production::with('productionDetails.menu')
             ->orderBy('id', 'desc')
             ->paginate(20);
-        return view('productions.index', compact('productions'));
+
+        // ดึงข้อมูลการผลิตรวมต่อเมนู
+        $menuProductionCounts = ProductionDetail::select('menu_id', DB::raw('SUM(quantity) as total_produced'))
+            ->groupBy('menu_id')
+            ->orderBy('total_produced', 'desc')
+            ->take(10) // แสดงเฉพาะ 10 เมนูที่ผลิตมากที่สุด
+            ->with('menu')
+            ->get();
+
+        // เตรียมข้อมูลสำหรับกราฟ
+        $chartLabels = $menuProductionCounts->pluck('menu.menu_name')->toArray();
+        $chartData = $menuProductionCounts->pluck('total_produced')->toArray();
+
+        return view('productions.index', compact('productions', 'chartLabels', 'chartData'));
     }
+
 
     public function create()
     {

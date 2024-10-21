@@ -135,7 +135,6 @@
         document.addEventListener('DOMContentLoaded', function() {
             const selectedMenusContainer = document.getElementById('selected-menus');
             let selectedMenus = new Set(@json(array_keys(old('menus', [])))); // เก็บรายการเมนูที่เลือกแล้ว
-
             // จัดการการแสดงเมนูตามประเภท
             const categoryButtons = document.querySelectorAll('.category-button');
             const menuButtons = document.querySelectorAll('.menu-button');
@@ -151,7 +150,7 @@
                     });
                     this.classList.remove('bg-gray-200', 'text-gray-800');
                     this.classList.add('bg-blue-500', 'text-white');
-                    
+
                     // แสดง/ซ่อนเมนูตามประเภทที่เลือก
                     menuButtons.forEach(menuButton => {
                         const menuTypeId = menuButton.getAttribute('data-menu-type-id');

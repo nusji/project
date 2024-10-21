@@ -9,7 +9,11 @@ class MenuAllocationDetail extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['menu_allocation_id', 'menu_id'];
+    protected $fillable = ['menu_allocation_id', 'menu_id', 'production_quantity'];
+
+    protected $attributes = [
+        'production_quantity' => 1,
+    ];
 
     public function menuAllocation()
     {
@@ -19,5 +23,9 @@ class MenuAllocationDetail extends Model
     public function menu()
     {
         return $this->belongsTo(Menu::class);
+    }
+
+    public function productionDetails() {
+        return $this->hasMany(ProductionDetail::class, 'menu_id', 'menu_id');
     }
 }

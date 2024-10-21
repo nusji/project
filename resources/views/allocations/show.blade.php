@@ -9,11 +9,11 @@
 
         <h1 class="text-3xl font-bold mb-8 text-gray-800">รายละเอียดการจัดสรรของวันที่ {{ $allocation->allocation_date }}
         </h1>
-
+        @if (auth()->user()->role === 'owner')
         <!-- Container สำหรับคำอธิบายและปุ่ม -->
         <div class="flex items-center justify-end space-x-4 mb-6">
             <!-- คำอธิบาย -->
-            <span class="text-sm text-gray-700">ถ้าอยากผลิตเยอะ ให้กดตรงนี้:</span>
+            <span class="text-sm text-gray-700">ถ้าอยากผลิตเยอะ ให้กดตรงนี้ :</span>
 
             <!-- ปุ่มเปิด Modal -->
             <button type="button" onclick="openProductionModal()"
@@ -24,6 +24,7 @@
                 ระบุจำนวนการผลิต
             </button>
         </div>
+        @endif
 
         <!-- Modal -->
         <div id="productionModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 hidden">
@@ -46,7 +47,9 @@
 
                     <!-- Modal Body -->
                     <div class="px-6 py-4">
-                        <form action="{{ route('allocations.show', $allocation) }}" method="GET">
+                        <form action="{{ route('allocations.updateProduction', $allocation) }}" method="POST">
+                            @csrf
+                            @method('PUT')
                             <div class="grid gap-4 max-h-96 overflow-y-auto">
                                 @foreach ($allocation->allocationDetails as $detail)
                                     <div class="flex items-center justify-between">
@@ -56,7 +59,8 @@
                                         </label>
                                         <input type="number" id="production_{{ $detail->menu->id }}"
                                             name="productionQuantities[{{ $detail->menu->id }}]"
-                                            value="{{ $productionQuantities[$detail->menu->id] ?? 1 }}" min="1"
+                                            value="{{ old('productionQuantities.' . $detail->menu->id, $detail->production_quantity ?? 1) }}"
+                                            min="1"
                                             class="w-32 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300 rounded-md">
                                     </div>
                                 @endforeach
@@ -70,7 +74,7 @@
                                 </button>
                                 <button type="submit"
                                     class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                    คำนวณใหม่
+                                    อัปเดตจำนวนการผลิต
                                 </button>
                             </div>
                         </form>
@@ -78,8 +82,6 @@
                 </div>
             </div>
         </div>
-
-
         <script>
             function openProductionModal() {
                 document.getElementById('productionModal').classList.remove('hidden');
@@ -98,7 +100,7 @@
                 }
             });
         </script>
-
+  
         <!-- วัตถุดิบที่ขาดรวม -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-8">
             <h3 class="text-xl font-semibold text-red-600 mb-4 flex items-center">
@@ -120,7 +122,8 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
                             </svg>
                             <div>
-                                <span class="block font-medium">{{ $ingredientName }} : ขาด {{ $missingInfo['missing_amount'] }} {{ $missingInfo['unit'] }} </span>
+                                <span class="block font-medium">{{ $ingredientName }} : ขาด
+                                    {{ $missingInfo['missing_amount'] }} {{ $missingInfo['unit'] }} </span>
                             </div>
                         </li>
                     @endforeach
@@ -134,6 +137,33 @@
                     <p class="font-medium">วัตถุดิบครบถ้วน ไม่ต้องสั่งซื้อเพิ่มเติม</p>
                 </div>
             @endif
+        </div>
+
+        <!-- รายละเอียดเมนูทั้งหมดที่ผลิต -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+                    </path>
+                </svg>
+                รายละเอียดการผลิตเมนู
+            </h3>
+            <ul class="space-y-6">
+                @foreach ($allocation->allocationDetails as $detail)
+                    <li class=" border-gray-200 last:pb-0">
+                        <div class="font-regular text-md ">
+                            {{ $detail->menu->menu_name }}
+                            <span
+                                class="text-black
+                                bg-green-200 px-2 rounded-lg border-2 border-green-500 ">
+                                จำนวนที่ผลิต: {{ $productionQuantities[$detail->menu->id] ?? 1 }} กิโลกรัม
+                            </span>
+                        </div>
+                    </li>
+                @endforeach
+            </ul>
         </div>
 
 

@@ -10,6 +10,16 @@
             เพิ่มการจัดสรรเมนู
         </h2>
 
+        @if ($errors->any())
+            <div class="mb-4">
+                <ul class="list-disc list-inside text-red-600">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <form action="{{ route('allocations.store') }}" method="POST" class="space-y-6">
             @csrf
             
@@ -44,17 +54,35 @@
                 </div>
             </div>
 
-            <!-- จำนวนเมนูขายดี -->
+            <!-- เมนูขายดี -->
             <div class="space-y-2">
-                <label for="best_selling_count" class="block text-sm font-medium text-gray-700">
-                    จำนวนเมนูขายดีที่ต้องการคงไว้
+                <label for="best_selling_menus" class="block text-sm font-medium text-gray-700">
+                    เลือกเมนูขายดีที่ต้องการคงไว้
+                </label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    @foreach($bestSellingMenus as $menu)
+                        <div class="flex items-center">
+                            <input id="menu_{{ $menu->id }}" name="best_selling_menus[]" type="checkbox" value="{{ $menu->id }}" class="h-4 w-4 text-blue-600 border-gray-300 rounded">
+                            <label for="menu_{{ $menu->id }}" class="ml-2 block text-sm text-gray-700">
+                                {{ $menu->menu_name }} (ขายดี: {{ $menu->total_sold }} ชิ้น)
+                            </label>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <!-- จำนวนเมนูสุ่มที่เหลือ -->
+            <div class="space-y-2">
+                <label for="random_menus_count" class="block text-sm font-medium text-gray-700">
+                    จำนวนเมนูสุ่มที่ต้องการเพิ่ม
                 </label>
                 <div class="relative">
                     <input type="number" 
-                           name="best_selling_count" 
-                           id="best_selling_count"
-                           min="1" 
+                           name="random_menus_count" 
+                           id="random_menus_count"
+                           min="0" 
                            max="10" 
+                           value="0"
                            required
                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
                     <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">

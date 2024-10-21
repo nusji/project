@@ -78,13 +78,6 @@
                             </div>
                         </label>
                     @endforeach
-                    <label class="block">
-                        <input type="radio" name="meat_preference" value="none" required class="hidden peer">
-                        <div
-                            class="p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition duration-300 cursor-pointer peer-checked:bg-purple-100 peer-checked:ring-2 peer-checked:ring-purple-500 h-full flex items-center justify-center">
-                            <span class="text-gray-700 font-medium">ไม่กินเนื้อสัตว์</span>
-                        </div>
-                    </label>
                 </div>
             </div>
 
@@ -101,6 +94,14 @@
                             </div>
                         </label>
                     @endforeach
+
+                    <label class="block">
+                        <input type="radio" name="food_type_preference" value="ทั้งหมด" required class="hidden peer">
+                        <div
+                            class="p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition duration-300 cursor-pointer peer-checked:bg-blue-100 peer-checked:ring-2 peer-checked:ring-blue-500 h-full flex items-center justify-center">
+                            <span class="text-gray-700 font-medium">ทั้งหมด</span>
+                        </div>
+                    </label>
                 </div>
             </div>
             

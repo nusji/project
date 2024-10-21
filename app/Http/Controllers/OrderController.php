@@ -26,13 +26,10 @@ class OrderController extends Controller
         // If a search query is provided, add conditions to the query
         if ($search) {
             $query->where(function ($q) use ($search) {
-                // Search in the 'order_number' field
                 $q->where('id', 'like', '%' . $search . '%')
-                    // Or search in the employee's name
                     ->orWhereHas('employee', function ($q) use ($search) {
                         $q->where('name', 'like', '%' . $search . '%');
                     })
-                    // Or search in the ingredient's name
                     ->orWhereHas('orderDetails.ingredient', function ($q) use ($search) {
                         $q->where('ingredient_name', 'like', '%' . $search . '%');
                     });
@@ -42,10 +39,63 @@ class OrderController extends Controller
         // Paginate the results
         $orders = $query->paginate(20);
 
-        // Return the view with the orders and the search query
+        // Get today's date
+        $today = Carbon::today();
+        $startOfWeek = Carbon::now()->startOfWeek();
+        $startOfMonth = Carbon::now()->startOfMonth();
+        $startOfPreviousWeek = Carbon::now()->subWeek()->startOfWeek();
+        $startOfPreviousMonth = Carbon::now()->subMonth()->startOfMonth();
+
+        // Get the end dates for previous periods
+        $endOfPreviousWeek = Carbon::now()->subWeek()->endOfWeek();
+        $endOfPreviousMonth = Carbon::now()->subMonth()->endOfMonth();
+
+        // Join order_details table to calculate total order amount
+        // Orders for today
+        $ordersToday = Order::join('order_details', 'orders.id', '=', 'order_details.order_id')
+            ->whereDate('order_date', $today)
+            ->sum(DB::raw('order_details.price'));
+
+        // Orders for this week
+        $ordersThisWeek = Order::join('order_details', 'orders.id', '=', 'order_details.order_id')
+            ->whereBetween('order_date', [$startOfWeek, $today])
+            ->sum(DB::raw('order_details.price'));
+
+        // Orders for this month
+        $ordersThisMonth = Order::join('order_details', 'orders.id', '=', 'order_details.order_id')
+            ->whereBetween('order_date', [$startOfMonth, $today])
+            ->sum(DB::raw('order_details.price'));
+
+        // Orders for previous day
+        $ordersPreviousDay = Order::join('order_details', 'orders.id', '=', 'order_details.order_id')
+            ->whereDate('order_date', $today->subDay())
+            ->sum(DB::raw('order_details.price'));
+
+        // Orders for previous week
+        $ordersPreviousWeek = Order::join('order_details', 'orders.id', '=', 'order_details.order_id')
+            ->whereBetween('order_date', [$startOfPreviousWeek, $endOfPreviousWeek])
+            ->sum(DB::raw('order_details.price'));
+
+        // Orders for previous month
+        $ordersPreviousMonth = Order::join('order_details', 'orders.id', '=', 'order_details.order_id')
+            ->whereBetween('order_date', [$startOfPreviousMonth, $endOfPreviousMonth])
+            ->sum(DB::raw('order_details.price'));
+
+        // Calculate differences
+        $dailyDifference = $ordersToday - $ordersPreviousDay;
+        $weeklyDifference = $ordersThisWeek - $ordersPreviousWeek;
+        $monthlyDifference = $ordersThisMonth - $ordersPreviousMonth;
+
+        // Return the view with the orders, statistics, and the search query
         return view('orders.index', [
             'orders' => $orders,
             'search' => $search,
+            'ordersToday' => $ordersToday,
+            'ordersThisWeek' => $ordersThisWeek,
+            'ordersThisMonth' => $ordersThisMonth,
+            'dailyDifference' => $dailyDifference,
+            'weeklyDifference' => $weeklyDifference,
+            'monthlyDifference' => $monthlyDifference
         ]);
     }
 
@@ -238,9 +288,9 @@ class OrderController extends Controller
         $limit = $request->input('limit', 5);
 
         $data = OrderDetail::select(
-                'ingredients.ingredient_name',
-                DB::raw('COUNT(order_details.id) as order_count') // นับจำนวนครั้งที่สั่งซื้อ
-            )
+            'ingredients.ingredient_name',
+            DB::raw('COUNT(order_details.id) as order_count') // นับจำนวนครั้งที่สั่งซื้อ
+        )
             ->join('ingredients', 'order_details.ingredient_id', '=', 'ingredients.id')
             ->groupBy('ingredients.ingredient_name')
             ->orderByDesc('order_count') // เรียงจากมากไปน้อยตามจำนวนครั้งที่สั่ง
@@ -259,9 +309,9 @@ class OrderController extends Controller
         $limit = $request->input('limit', 5);
 
         $data = OrderDetail::select(
-                'ingredients.ingredient_name',
-                DB::raw('SUM(order_details.quantity) as total_quantity') // รวมปริมาณที่สั่งซื้อ
-            )
+            'ingredients.ingredient_name',
+            DB::raw('SUM(order_details.quantity) as total_quantity') // รวมปริมาณที่สั่งซื้อ
+        )
             ->join('ingredients', 'order_details.ingredient_id', '=', 'ingredients.id')
             ->groupBy('ingredients.ingredient_name')
             ->orderByDesc('total_quantity') // เรียงจากมากไปน้อยตามปริมาณที่สั่ง
@@ -300,10 +350,10 @@ class OrderController extends Controller
     private function getMonthlyData()
     {
         $data = Order::select(
-                DB::raw('DATE_FORMAT(order_date, "%Y-%m") as month'),
-                DB::raw('COUNT(*) as count'),
-                DB::raw('SUM(order_details.price * order_details.quantity) as total')
-            )
+            DB::raw('DATE_FORMAT(order_date, "%Y-%m") as month'),
+            DB::raw('COUNT(*) as count'),
+            DB::raw('SUM(order_details.price * order_details.quantity) as total')
+        )
             ->join('order_details', 'orders.id', '=', 'order_details.order_id')
             ->groupBy('month')
             ->orderBy('month')
@@ -318,10 +368,10 @@ class OrderController extends Controller
     private function getWeeklyData()
     {
         $data = Order::select(
-                DB::raw('YEARWEEK(order_date, 1) as week'),
-                DB::raw('COUNT(*) as count'),
-                DB::raw('SUM(order_details.price * order_details.quantity) as total')
-            )
+            DB::raw('YEARWEEK(order_date, 1) as week'),
+            DB::raw('COUNT(*) as count'),
+            DB::raw('SUM(order_details.price * order_details.quantity) as total')
+        )
             ->join('order_details', 'orders.id', '=', 'order_details.order_id')
             ->groupBy('week')
             ->orderBy('week')
@@ -336,10 +386,10 @@ class OrderController extends Controller
     private function getYearlyData()
     {
         $data = Order::select(
-                DB::raw('YEAR(order_date) as year'),
-                DB::raw('COUNT(*) as count'),
-                DB::raw('SUM(order_details.price * order_details.quantity) as total')
-            )
+            DB::raw('YEAR(order_date) as year'),
+            DB::raw('COUNT(*) as count'),
+            DB::raw('SUM(order_details.price * order_details.quantity) as total')
+        )
             ->join('order_details', 'orders.id', '=', 'order_details.order_id')
             ->groupBy('year')
             ->orderBy('year')
@@ -364,4 +414,3 @@ class OrderController extends Controller
         ];
     }
 }
-

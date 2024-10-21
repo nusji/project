@@ -87,6 +87,9 @@ Route::get('/orders/chart-data', [OrderController::class, 'getChartData'])->name
 Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
 Route::get('/sales/menus-by-date', [SaleController::class, 'getMenusByDate'])->name('sales.menusByDate');
 
+Route::put('/allocations/{allocation}/update-production', [MenuAllocationController::class, 'updateProduction'])->name('allocations.updateProduction');
+Route::get('/reports/profit-analysis', [ReportController::class, 'getProfitAnalysisJson'])->name('reports.profitAnalysis');
+
 Route::get('sales/export', [SaleController::class, 'exportCsv'])->name('sales.export');
 Route::get('sales/export-pdf', [SaleController::class, 'exportPdf'])->name('sales.export-pdf');
 

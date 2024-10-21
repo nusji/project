@@ -24,16 +24,25 @@ class MenuAllocationController extends Controller
     // แสดงฟอร์มให้ผู้ใช้กรอกข้อมูลการจัดสรรเมนู
     public function create()
     {
-        return view('allocations.create');
+        // ดึงเมนูขายดี (สามารถปรับแต่งจำนวนได้ตามต้องการ)
+        $bestSellingMenus = $this->getBestSellingMenus(10);
+
+        return view('allocations.create', compact('bestSellingMenus'));
     }
 
-    // บันทึกการจัดสรรเมนู
+
     public function store(Request $request)
     {
         $allocationDate = $request->input('allocation_date');  // วันที่เริ่มต้น
         $days = $request->input('days');  // จำนวนวันในการจัดสรร
-        $bestSellingCount = $request->input('best_selling_count');  // จำนวนเมนูขายดีที่ต้องการคงไว้
+        $selectedBestSellingMenus = $request->input('best_selling_menus', []);  // รายการเมนูขายดีที่ผู้ใช้เลือก
+        $randomMenusCount = $request->input('random_menus_count', 0);  // จำนวนเมนูสุ่มที่ต้องการเพิ่ม
         $totalMenus = $request->input('total_menus');  // จำนวนเมนูทั้งหมดต่อวัน
+
+        // ตรวจสอบว่าจำนวนเมนูขายดีที่เลือกไม่เกินขีดจำกัดและรวมกับเมนูสุ่มไม่เกิน total_menus
+        if (count($selectedBestSellingMenus) + $randomMenusCount > $totalMenus) {
+            return back()->withErrors(['random_menus_count' => 'จำนวนเมนูสุ่มและเมนูขายดีรวมกันต้องไม่เกินจำนวนเมนูทั้งหมด']);
+        }
 
         $recentlyAllocatedMenus = [];  // เก็บรายการเมนูที่ถูกจัดสรรในวันก่อนหน้า
 
@@ -41,14 +50,13 @@ class MenuAllocationController extends Controller
             // คำนวณวันที่จัดสรรในแต่ละวัน
             $currentDate = date('Y-m-d', strtotime("$allocationDate +$i days"));
 
-            // ดึงเมนูขายดีตามจำนวนที่ผู้ใช้กำหนด
-            $bestSellingMenus = $this->getBestSellingMenus($bestSellingCount);
+            // ดึงเมนูขายดีที่ผู้ใช้เลือก
+            $bestSellingMenus = Menu::whereIn('id', $selectedBestSellingMenus)->get();
 
-            // ตรวจสอบและหมุนเวียนเมนู
-            $remainingMenusCount = $totalMenus - $bestSellingCount;
+            // ตรวจสอบและหมุนเวียนเมนูสุ่ม
             $randomMenus = $this->getRandomMenusWithRotation(
-                $bestSellingMenus->pluck('menu_id')->toArray(),
-                $remainingMenusCount,
+                $bestSellingMenus->pluck('id')->toArray(),
+                $randomMenusCount,
                 $recentlyAllocatedMenus
             );
 
@@ -61,7 +69,7 @@ class MenuAllocationController extends Controller
             foreach ($bestSellingMenus as $menu) {
                 MenuAllocationDetail::create([
                     'menu_allocation_id' => $menuAllocation->id,
-                    'menu_id' => $menu->menu_id,
+                    'menu_id' => $menu->id,
                 ]);
             }
 
@@ -82,6 +90,7 @@ class MenuAllocationController extends Controller
 
         return redirect()->route('allocations.index')->with('success', 'การจัดสรรเมนูสำเร็จ');
     }
+
 
     // ดึงเมนูที่เหลือและหมุนเวียนโดยตรวจสอบให้ไม่ซ้ำกับวันก่อนหน้า
     public function getRandomMenusWithRotation($excludedMenus = [], $limit = 5, $recentlyAllocatedMenus = [])
@@ -110,14 +119,24 @@ class MenuAllocationController extends Controller
     // ดึงเมนูขายดี
     public function getBestSellingMenus($limit = 10)
     {
-        // ดึงเมนูขายดีที่สามารถซ้ำได้บ่อยขึ้น
         return SaleDetail::select('menu_id', DB::raw('SUM(quantity) as total_sold'))
             ->groupBy('menu_id')
             ->orderBy('total_sold', 'desc')
             ->take($limit)
             ->with('menu')
-            ->get();
+            ->get()
+            ->map(function ($saleDetail) {
+                // ตรวจสอบว่าเมนูมีอยู่จริง
+                if ($saleDetail->menu) {
+                    // เพิ่ม property total_sold ให้กับ Menu model
+                    $saleDetail->menu->total_sold = $saleDetail->total_sold;
+                    return $saleDetail->menu;
+                }
+            })
+            ->filter(); // ลบค่า null ออกหากเมนูไม่พบ
     }
+
+
 
     // ดึงเมนูที่เหลือ โดยตรวจสอบให้ไม่ซ้ำกับวันก่อนหน้า
     public function getRandomMenus($excludedMenus = [], $limit = 5, $recentlyAllocatedMenus = [])
@@ -135,14 +154,22 @@ class MenuAllocationController extends Controller
         $allocation->load('allocationDetails.menu.recipes.ingredient');
 
         $ingredientUsage = [];
-        $remainingIngredients = [];
         $missingIngredients = [];
+        $totalMissingIngredients = [];
 
-        // รับข้อมูลจำนวนการผลิตจากผู้ใช้
+        // รับข้อมูลจำนวนการผลิตจาก request หรือจากฐานข้อมูล
         $productionQuantities = $request->input('productionQuantities', []);
+
+        // ถ้าไม่มีการส่งข้อมูลจาก request ให้ใช้ค่าจากฐานข้อมูล
+        if (!$productionQuantities) {
+            foreach ($allocation->allocationDetails as $detail) {
+                $productionQuantities[$detail->menu->id] = $detail->production_quantity ?? 1;
+            }
+        }
 
         // เริ่มต้นด้วยการกำหนดปริมาณวัตถุดิบคงเหลือเท่ากับสต็อกปัจจุบัน
         $ingredients = Ingredient::all();
+        $remainingIngredients = [];
         foreach ($ingredients as $ingredient) {
             $remainingIngredients[$ingredient->id] = $ingredient->ingredient_stock;
         }
@@ -189,7 +216,6 @@ class MenuAllocationController extends Controller
         }
 
         // คำนวณวัตถุดิบที่ขาดทั้งหมด
-        $totalMissingIngredients = [];
         foreach ($missingIngredients as $menuMissing) {
             foreach ($menuMissing as $missing) {
                 $ingredientName = $missing['ingredient_name'];
@@ -217,5 +243,37 @@ class MenuAllocationController extends Controller
 
         // Redirect or return a response
         return redirect()->route('allocations.index')->with('success', 'ลบการจัดสรรเมนูสำเร็จ');
+    }
+
+    public function updateProduction(Request $request, MenuAllocation $allocation)
+    {
+        // รับข้อมูล productionQuantities จาก request
+        $productionQuantities = $request->input('productionQuantities', []);
+
+        // เริ่มการทำธุรกรรมเพื่อความปลอดภัย
+        DB::beginTransaction();
+
+        try {
+            foreach ($allocation->allocationDetails as $detail) {
+                $menuId = $detail->menu_id;
+                if (isset($productionQuantities[$menuId])) {
+                    $quantity = (int)$productionQuantities[$menuId];
+                    // ตรวจสอบให้แน่ใจว่าจำนวนที่ระบุเป็นค่าบวก
+                    if ($quantity < 1) {
+                        throw new \Exception("Production quantity must be at least 1 for menu ID {$menuId}");
+                    }
+                    // อัปเดต production_quantity
+                    $detail->production_quantity = $quantity;
+                    $detail->save();
+                }
+            }
+
+            DB::commit();
+
+            return redirect()->route('allocations.show', $allocation)->with('success', 'อัปเดตจำนวนการผลิตสำเร็จ');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['update_error' => 'เกิดข้อผิดพลาดในการอัปเดตจำนวนการผลิต: ' . $e->getMessage()]);
+        }
     }
 }

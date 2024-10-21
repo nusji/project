@@ -26,5 +26,9 @@ class ProductionDetail extends Model
     {
         return $this->belongsTo(Menu::class)->withTrashed();
     }
+
+    public function menuAllocationDetail() {
+        return $this->belongsTo(MenuAllocationDetail::class, 'menu_id', 'menu_id');
+    }
     
 }

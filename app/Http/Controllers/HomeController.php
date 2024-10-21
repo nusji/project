@@ -46,31 +46,43 @@ class HomeController extends Controller
     }
 
     public function showMenu()
-    {
-        $today = now()->startOfDay();
+{
+    $today = now()->startOfDay();
     
-        // ดึงข้อมูล production พร้อมรายละเอียดและประเภทเมนู
-        $productions = Production::whereDate('created_at', $today)
-            ->with(['productionDetails.menu.menuType'])  // ดึงข้อมูลประเภทเมนู
-            ->get();
+    // ดึงข้อมูล production พร้อมรายละเอียดและประเภทเมนู
+    $productions = Production::whereDate('created_at', $today)
+        ->with(['productionDetails.menu.menuType'])  // ดึงข้อมูลประเภทเมนู
+        ->get();
     
-        $menus = $productions->map(function ($production) {
-            return $production->productionDetails->map(function ($detail) {
-                $menu = $detail->menu;
-                $menu->is_sold_out = $detail->is_sold_out;
-                $menu->ramaining_amount = $detail->remaining_amount;
-                return $menu;
-            });
-        })->flatten();
+    // ใช้ map() เพื่อจัดการเมนู
+    $menus = $productions->map(function ($production) {
+        return $production->productionDetails->map(function ($detail) {
+            $menu = $detail->menu;
+            $menu->is_sold_out = $detail->is_sold_out;
+            $menu->remaining_amount = $detail->remaining_amount;
+            return $menu;
+        });
+    })->flatten();
 
-        foreach ($menus as $menu) {
-            if (empty($menu->menu_image)) {
-                Log::warning('Menu ' . $menu->menu_name . ' does not have an image.');
-            }
+    // จัดกลุ่มเมนูตาม menu_id โดยใช้ groupBy()
+    $groupedMenus = $menus->groupBy('id');
+
+    // ใช้ map() เพื่อดึงแค่เมนูแรกในแต่ละกลุ่ม
+    $uniqueMenus = $groupedMenus->map(function ($group) {
+        return $group->first(); // ดึงแค่รายการแรกในแต่ละกลุ่ม
+    });
+
+    // ล็อกเมนูที่ไม่มีรูปภาพ
+    foreach ($uniqueMenus as $menu) {
+        if (empty($menu->menu_image)) {
+            Log::warning('Menu ' . $menu->menu_name . ' does not have an image.');
         }
-    
-        return view('menu-today', compact('menus'));
     }
+    
+    // ส่งเฉพาะเมนูที่ไม่ซ้ำกันไปยัง View
+    return view('menu-today', ['menus' => $uniqueMenus]);
+}
+
     
 
     public function showSurvey()
