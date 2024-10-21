@@ -60,4 +60,9 @@ class Menu extends Model
         return $this->hasMany(Feedback::class, 'menu_id'); // ความสัมพันธ์แบบ One-to-Many
     }
 
+    public function sales()
+    {
+        return $this->hasMany(Sale::class, 'menu_id', 'id');
+    }
+
 }

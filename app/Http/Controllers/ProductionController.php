@@ -24,10 +24,31 @@ class ProductionController extends Controller
 
     public function create()
     {
-        $menus = Menu::all(); // Assuming you have a Menu model
-        $menuCategories = MenuType::all(); // MenuCategory เป็นโมเดลของตารางประเภทเมนู
-        return view('productions.create', compact('menus', 'menuCategories'));
+        // ดึงเมนูที่ขายดีที่สุด โดยนับจำนวนยอดขายในตาราง sale_details
+        $bestSellingMenus = Menu::withCount('saleDetails') // ใช้ 'saleDetails' แทน 'sales'
+            ->orderBy('sale_details_count', 'desc') // เรียงจากยอดขายสูงสุด
+            ->take(10) // ดึงเฉพาะเมนูที่ขายดีที่สุด 10 เมนู
+            ->get();
+
+        // ดึงเมนูที่ไม่ใช่เมนูที่ขายดีที่สุด
+        $regularMenus = Menu::whereNotIn('id', $bestSellingMenus->pluck('id'))
+            ->get();
+
+        // ดึงประเภทเมนูทั้งหมด
+        $menuTypes = MenuType::all();
+
+        // ดึงข้อมูลวัตถุดิบทั้งหมดจากฐานข้อมูล
+        $ingredients = Ingredient::all();
+
+        // ดึงข้อมูลสูตรเมนูจากตาราง menu_recipes
+        $menuRecipes = MenuRecipe::with('ingredient')->get(); // เชื่อมโยงกับวัตถุดิบ
+
+        // รวมเมนูทั้งหมดเพื่อใช้ในการแสดงผลในฟอร์ม
+        $menus = $bestSellingMenus->concat($regularMenus);
+
+        return view('productions.create', compact('bestSellingMenus', 'regularMenus', 'menuTypes', 'menus', 'ingredients', 'menuRecipes'));
     }
+
 
     public function store(Request $request)
     {

@@ -33,49 +33,71 @@
                             @enderror
                         </div>
 
+                        {{-- ปุ่มประเภทเมนู --}}
                         <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">รายการเมนูที่ผลิต</label>
-                            @error('menus')
-                                <p class="text-red-500 text-xs mb-2">{{ $message }}</p>
-                            @enderror
-                            <div class="flex space-x-2 mb-4">
-                                <input type="text" id="menu-search" placeholder="ค้นหาเมนู"
-                                    class="flex-grow mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                                    <button type="button" id="search-menu"
-                                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md">
-                                    ค้นหา
-                                </button>
-                            </div>
-                            <div class="flex space-x-2 mb-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">ประเภทเมนู :</label>
-
-                                <button type="button" id="show-all-categories"
-                                    class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-1 px-2 rounded mr-2">
-                                    แสดงทั้งหมด
-                                </button>
-                                @foreach ($menuCategories as $category)
+                            <h2 class="text-xl font-semibold mb-2">ประเภทเมนู</h2>
+                            <div class="flex gap-2 mb-4">
+                                <button type="button"
+                                    class="category-button bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 rounded"
+                                    data-category-id="all">แสดงทั้งหมด</button>
+                                @foreach ($menuTypes as $menuType)
                                     <button type="button"
-                                        class="category-button bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-1 px-2 rounded mr-2"
-                                        data-category-id="{{ $category->id }}">
-                                        {{ $category->menu_type_name }}
+                                        class="category-button bg-gray-200 hover:bg-gray-300 text-gray-800 py-1 px-2 rounded"
+                                        data-category-id="{{ $menuType->id }}">
+                                        {{ $menuType->menu_type_name }}
                                     </button>
                                 @endforeach
                             </div>
+                        </div>
 
-                            <div id="search-results" class="mb-4 flex flex-wrap gap-2"></div>
-                            <div id="menus-container" class="space-y-2">
+                        {{-- ส่วนแสดงปุ่มเลือกเมนู --}}
+                        <div class="mb-6">
+                            <h2 class="text-xl font-semibold mb-2">เมนูขายดี</h2>
+                            <div id="best-selling-menus" class="flex flex-wrap gap-2 mb-4">
+                                @foreach ($bestSellingMenus as $menu)
+                                    @if (!old('menus') || !array_key_exists($menu->id, old('menus')))
+                                        <button type="button"
+                                            class="menu-button bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-1 px-2 rounded"
+                                            data-menu-id="{{ $menu->id }}" data-menu-name="{{ $menu->menu_name }}"
+                                            data-menu-type-id="{{ $menu->menu_type_id }}">
+                                            {{ $menu->menu_name }}
+                                        </button>
+                                    @endif
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <div class="mb-6">
+                            <h2 class="text-xl font-semibold mb-2">เมนูทั่วไป</h2>
+                            <div id="regular-menus" class="flex flex-wrap gap-2 mb-4">
+                                @foreach ($regularMenus as $menu)
+                                    @if (!old('menus') || !array_key_exists($menu->id, old('menus')))
+                                        <button type="button"
+                                            class="menu-button bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-1 px-2 rounded"
+                                            data-menu-id="{{ $menu->id }}" data-menu-name="{{ $menu->menu_name }}"
+                                            data-menu-type-id="{{ $menu->menu_type_id }}">
+                                            {{ $menu->menu_name }}
+                                        </button>
+                                    @endif
+                                @endforeach
+                            </div>
+                        </div>
+
+                        {{-- แสดงเมนูที่เลือกและสามารถใส่จำนวนได้ --}}
+                        <div class="mb-6">
+                            <h2 class="text-xl font-semibold mb-2">รายการเมนูที่เลือก</h2>
+                            <div id="selected-menus" class="space-y-2">
                                 @if (old('menus'))
-                                    @foreach (old('menus') as $index => $menu)
+                                    @foreach (old('menus') as $menuId => $menu)
                                         <div class="menu-row flex items-center space-x-2 p-2 bg-gray-100 rounded">
-                                            <input type="hidden" name="menus[{{ $index }}][id]"
-                                                value="{{ $menu['id'] }}">
+                                            <input type="hidden" name="menus[{{ $menuId }}][id]"
+                                                value="{{ $menuId }}">
                                             <span
-                                                class="flex-grow">{{ $menus->firstWhere('id', $menu['id'])->menu_name }}</span>
+                                                class="flex-grow">{{ $menus->firstWhere('id', $menuId)->menu_name }}</span>
                                             <div class="flex items-center space-x-2">
-                                                <input type="number" name="menus[{{ $index }}][quantity]"
-                                                    placeholder="จำนวนที่ผลิต" value="{{ $menu['quantity'] }}"
-                                                    class="w-32 py-1 px-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                                                    required>
+                                                <input type="number" name="menus[{{ $menuId }}][quantity]"
+                                                    value="{{ $menu['quantity'] }}" placeholder="จำนวนที่ผลิต" required
+                                                    class="w-32 py-1 px-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                                                 <span class="text-sm text-gray-600">กิโลกรัม</span>
                                             </div>
                                             <button type="button" class="remove-menu text-red-500 hover:text-red-700">
@@ -111,148 +133,99 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            let menuIndex = {{ count(old('menus', [])) }};
-            const menus = @json($menus);
-            const menuCategories = @json($menuCategories);
-            const selectedMenus = new Set(
-                @json(old('menus', []))
-                .map(menu => parseInt(menu.id))
-            );
+            const selectedMenusContainer = document.getElementById('selected-menus');
+            let selectedMenus = new Set(@json(array_keys(old('menus', [])))); // เก็บรายการเมนูที่เลือกแล้ว
 
-            const searchInput = document.getElementById('menu-search');
-            const searchButton = document.getElementById('search-menu');
-            const searchResults = document.getElementById('search-results');
-            const menusContainer = document.getElementById('menus-container');
+            // จัดการการแสดงเมนูตามประเภท
+            const categoryButtons = document.querySelectorAll('.category-button');
+            const menuButtons = document.querySelectorAll('.menu-button');
 
-            function updateSearchResults(results) {
-                searchResults.innerHTML = '';
-                results.forEach(menu => {
-                    const button = document.createElement('button');
-                    button.type = 'button';
-                    button.className =
-                        'bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-1 px-2 rounded mr-2 mb-2';
-                    button.textContent = menu.menu_name;
-                    button.onclick = function() {
-                        addMenu(menu);
-                        // หลังจากเพิ่มเมนูแล้ว อัปเดตผลการค้นหาใหม่
-                        filterAndDisplayMenus();
-                    };
-                    searchResults.appendChild(button);
-                });
-            }
-
-            function filterAndDisplayMenus(categoryId = null) {
-                let results = menus.filter(menu => !selectedMenus.has(menu.id));
-                if (categoryId) {
-                    results = results.filter(menu => menu.menu_type_id == categoryId);
-                } else if (searchInput.value.trim() !== '') {
-                    const searchTerm = searchInput.value.toLowerCase();
-                    results = results.filter(menu => menu.menu_name.toLowerCase().includes(searchTerm));
-                }
-                updateSearchResults(results);
-            }
-
-            searchButton.addEventListener('click', function() {
-                // ลบคลาส active จากปุ่มประเภทเมนูทั้งหมด
-                document.querySelectorAll('.category-button').forEach(btn => {
-                    btn.classList.remove('bg-gray-700', 'text-white');
-                    btn.classList.add('bg-gray-200', 'text-gray-800');
-                });
-                // ลบคลาส active จากปุ่ม "แสดงทั้งหมด"
-                document.getElementById('show-all-categories')?.classList.remove('bg-gray-700',
-                    'text-white');
-                document.getElementById('show-all-categories')?.classList.add('bg-gray-200',
-                    'text-gray-800');
-                // กรองและแสดงผลตามคำค้นหา
-                filterAndDisplayMenus();
-            });
-
-            searchInput.addEventListener('keyup', function(event) {
-                if (event.key === 'Enter') {
-                    searchButton.click();
-                }
-            });
-
-            // จัดการกับการคลิกปุ่มประเภทเมนู
-            document.querySelectorAll('.category-button').forEach(button => {
+            categoryButtons.forEach(button => {
                 button.addEventListener('click', function() {
-                    // ลบคลาส active จากปุ่มประเภทเมนูทั้งหมด
-                    document.querySelectorAll('.category-button').forEach(btn => {
-                        btn.classList.remove('bg-gray-700', 'text-white');
+                    const categoryId = this.getAttribute('data-category-id');
+
+                    // เพิ่มคลาส active ให้กับปุ่มที่ถูกกด และลบจากปุ่มอื่น
+                    categoryButtons.forEach(btn => {
+                        btn.classList.remove('bg-blue-500', 'text-white');
                         btn.classList.add('bg-gray-200', 'text-gray-800');
                     });
-                    // ลบคลาส active จากปุ่ม "แสดงทั้งหมด"
-                    document.getElementById('show-all-categories')?.classList.remove('bg-gray-700',
-                        'text-white');
-                    document.getElementById('show-all-categories')?.classList.add('bg-gray-200',
-                        'text-gray-800');
-                    // เพิ่มคลาส active ให้กับปุ่มที่ถูกคลิก
                     this.classList.remove('bg-gray-200', 'text-gray-800');
-                    this.classList.add('bg-gray-700', 'text-white');
-
-                    const categoryId = this.getAttribute('data-category-id');
-                    // ล้างคำค้นหา
-                    searchInput.value = '';
-                    filterAndDisplayMenus(categoryId);
+                    this.classList.add('bg-blue-500', 'text-white');
+                    
+                    // แสดง/ซ่อนเมนูตามประเภทที่เลือก
+                    menuButtons.forEach(menuButton => {
+                        const menuTypeId = menuButton.getAttribute('data-menu-type-id');
+                        if (categoryId === 'all' || categoryId === menuTypeId) {
+                            menuButton.style.display = 'inline-block'; // แสดงเมนู
+                        } else {
+                            menuButton.style.display = 'none'; // ซ่อนเมนู
+                        }
+                    });
                 });
             });
 
-            // จัดการกับการคลิกปุ่ม "แสดงทั้งหมด"
-            document.getElementById('show-all-categories')?.addEventListener('click', function() {
-                // ลบคลาส active จากปุ่มประเภทเมนูทั้งหมด
-                document.querySelectorAll('.category-button').forEach(btn => {
-                    btn.classList.remove('bg-gray-700', 'text-white');
-                    btn.classList.add('bg-gray-200', 'text-gray-800');
+            // จัดการเมื่อคลิกที่ปุ่มเลือกเมนู
+            menuButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const menuId = this.getAttribute('data-menu-id');
+                    const menuName = this.getAttribute('data-menu-name');
+
+                    // ถ้าเมนูนี้ถูกเลือกแล้ว จะไม่ให้เลือกซ้ำ
+                    if (selectedMenus.has(menuId)) {
+                        alert('เมนูนี้ถูกเลือกแล้ว');
+                        return;
+                    }
+
+                    // เพิ่มเมนูเข้าไปในชุดที่เลือก
+                    selectedMenus.add(menuId);
+
+                    // ซ่อนปุ่มเมื่อเมนูถูกเลือกแล้ว
+                    this.style.display = 'none';
+
+                    // สร้างองค์ประกอบแสดงรายการเมนูที่เลือก
+                    const newRow = document.createElement('div');
+                    newRow.className =
+                        'menu-row flex items-center space-x-2 p-2 bg-gray-100 rounded';
+                    newRow.innerHTML = `
+                <input type="hidden" name="menus[${menuId}][id]" value="${menuId}">
+                <span class="flex-grow">${menuName}</span>
+                <div class="flex items-center space-x-2">
+                    <input type="number" name="menus[${menuId}][quantity]" placeholder="จำนวนที่ผลิต" required 
+                           class="w-32 py-1 px-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    <span class="text-sm text-gray-600">กิโลกรัม</span>
+                </div>
+                <button type="button" class="remove-menu text-red-500 hover:text-red-700">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round"
+                        stroke-linejoin="round" stroke-width="2"
+                        d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            `;
+
+                    // เพิ่มรายการใหม่เข้าไปใน DOM
+                    selectedMenusContainer.appendChild(newRow);
+
+                    // ผูก event listener สำหรับปุ่มลบ
+                    attachRemoveEvent(newRow.querySelector('.remove-menu'), menuId);
                 });
-                // เพิ่มคลาส active ให้กับปุ่ม "แสดงทั้งหมด"
-                this.classList.remove('bg-gray-200', 'text-gray-800');
-                this.classList.add('bg-gray-700', 'text-white');
-                // ล้างคำค้นหา
-                searchInput.value = '';
-                filterAndDisplayMenus();
             });
 
-            function addMenu(menu) {
-                if (selectedMenus.has(menu.id)) {
-                    alert('เมนูนี้ถูกเพิ่มไปแล้ว');
-                    return;
-                }
+            // ฟังก์ชันเพื่อจัดการการลบเมนู
+            function attachRemoveEvent(button, menuId) {
+                button.addEventListener('click', function() {
+                    selectedMenus.delete(menuId);
+                    button.closest('.menu-row').remove();
 
-                const newRow = document.createElement('div');
-                newRow.className = 'menu-row flex items-center space-x-2 p-2 bg-gray-100 rounded';
-                newRow.innerHTML = `
-            <input type="hidden" name="menus[${menuIndex}][id]" value="${menu.id}">
-            <span class="flex-grow">${menu.menu_name}</span>
-            <div class="flex items-center space-x-2">
-                <input type="number" name="menus[${menuIndex}][quantity]" placeholder="จำนวนที่ผลิต" required 
-                       class="w-32 py-1 px-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                <span class="text-sm text-gray-600">กิโลกรัม</span>
-            </div>
-            <button type="button" class="remove-menu text-red-500 hover:text-red-700">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round"
-                    stroke-linejoin="round" stroke-width="2"
-                    d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-        `;
-                menusContainer.appendChild(newRow);
-                selectedMenus.add(menu.id);
-                menuIndex++;
+                    // แสดงปุ่มเมนูกลับมา
+                    document.querySelector(`[data-menu-id="${menuId}"]`).style.display = 'inline-block';
+                });
             }
 
-            menusContainer.addEventListener('click', function(e) {
-                if (e.target.closest('.remove-menu')) {
-                    const row = e.target.closest('.menu-row');
-                    const menuId = parseInt(row.querySelector('input[type="hidden"]').value);
-                    selectedMenus.delete(menuId);
-                    row.remove();
-                    // อัปเดตผลการค้นหาใหม่
-                    filterAndDisplayMenus();
-                }
+            // แน่ใจว่าเมนูที่มีอยู่แล้วสามารถลบได้
+            document.querySelectorAll('.remove-menu').forEach(button => {
+                const menuId = button.closest('.menu-row').querySelector('input[type="hidden"]').value;
+                attachRemoveEvent(button, menuId);
             });
-
-            // อัปเดตผลการค้นหาเริ่มต้น
-            filterAndDisplayMenus();
         });
 
         // ตรวจสอบว่ามีข้อมูลใน session หรือไม่ ถ้ามีให้แสดง SweetAlert
