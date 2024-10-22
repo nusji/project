@@ -9,6 +9,9 @@ use App\Models\MenuAllocationDetail;
 use App\Models\SaleDetail;
 use App\Models\Ingredient;
 use Illuminate\Support\Facades\DB;
+use App\Models\Production;
+use App\Models\ProductionDetail;
+
 
 class MenuAllocationController extends Controller
 {
@@ -274,6 +277,123 @@ class MenuAllocationController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->withErrors(['update_error' => 'เกิดข้อผิดพลาดในการอัปเดตจำนวนการผลิต: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * สร้างบันทึกการผลิตจากการจัดสรรเมนู
+     */
+    public function createProduction(MenuAllocation $allocation)
+    {
+        // ดึงข้อมูลการจัดสรรและรายละเอียดของการจัดสรร
+        $allocation->load('allocationDetails.menu');
+
+        // เตรียมข้อมูลสำหรับแสดงในฟอร์มการผลิต
+        $productionQuantities = [];
+        foreach ($allocation->allocationDetails as $detail) {
+            $productionQuantities[$detail->menu->id] = $detail->production_quantity ?? 1;
+        }
+
+        return view('allocations.insert', compact('allocation', 'productionQuantities'));
+    }
+
+    /**
+     * บันทึกการผลิตจากการจัดสรรเมนู
+     */ public function storeProduction(Request $request, MenuAllocation $allocation)
+    {
+        // ตรวจสอบข้อมูล
+        $validatedData = $request->validate([
+            'production_date' => 'required|date',
+            'production_detail' => 'nullable|string',
+            'productionQuantities' => 'required|array',
+            'productionQuantities.*' => 'required|numeric|min:1',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            // ตรวจสอบว่า MenuAllocation ยังไม่ถูกใช้
+            if ($allocation->is_used) {
+                throw new \Exception("การจัดสรรเมนูนี้ถูกใช้ไปแล้ว");
+            }
+
+            $insufficientIngredients = [];
+            $totalRequiredIngredients = [];
+
+            // สะสมจำนวนวัตถุดิบที่ต้องการทั้งหมด
+            foreach ($validatedData['productionQuantities'] as $menuId => $quantity) {
+                $menu = Menu::with('recipes.ingredient')->findOrFail($menuId);
+
+                foreach ($menu->recipes as $recipe) {
+                    $ingredientId = $recipe->ingredient->id;
+                    $requiredAmount = $recipe->amount * $quantity;
+
+                    if (!isset($totalRequiredIngredients[$ingredientId])) {
+                        $totalRequiredIngredients[$ingredientId] = 0;
+                    }
+                    $totalRequiredIngredients[$ingredientId] += $requiredAmount;
+                }
+            }
+
+            // ตรวจสอบว่าวัตถุดิบเพียงพอ
+            foreach ($totalRequiredIngredients as $ingredientId => $requiredAmount) {
+                $ingredient = Ingredient::findOrFail($ingredientId);
+
+                if ($ingredient->ingredient_stock < $requiredAmount) {
+                    $insufficientIngredients[] = [
+                        'ingredient_name' => $ingredient->ingredient_name,
+                        'required' => $requiredAmount,
+                        'available' => $ingredient->ingredient_stock,
+                        'unit' => $ingredient->ingredient_unit,
+                    ];
+                }
+            }
+
+            // ถ้าวัตถุดิบไม่เพียงพอ ให้ยกเลิกการทำงาน
+            if (!empty($insufficientIngredients)) {
+                DB::rollBack();
+                return redirect()->back()->with([
+                    'error' => 'วัตถุดิบไม่เพียงพอสำหรับการผลิต',
+                    'insufficientIngredients' => $insufficientIngredients,
+                ])->withInput();
+            }
+
+            // บันทึกการผลิตใหม่
+            $production = Production::create([
+                'production_date' => $validatedData['production_date'],
+                'production_detail' => $validatedData['production_detail'],
+                'menu_allocation_id' => $allocation->id,
+            ]);
+
+            // บันทึกรายละเอียดการผลิต (Production Details)
+            foreach ($validatedData['productionQuantities'] as $menuId => $quantity) {
+                $menu = Menu::with('recipes.ingredient')->findOrFail($menuId);
+
+                ProductionDetail::create([
+                    'production_id' => $production->id,
+                    'menu_id' => $menuId,
+                    'quantity' => $quantity,
+                    'remaining_amount' => $quantity,
+                    'is_sold_out' => 0, // เริ่มต้นไม่ sold out
+                ]);
+
+                // หักลบสต็อกวัตถุดิบ
+                foreach ($menu->recipes as $recipe) {
+                    $ingredient = $recipe->ingredient;
+                    $deductAmount = $recipe->amount * $quantity;
+                    $ingredient->decrement('ingredient_stock', $deductAmount);
+                }
+            }
+
+            // อัปเดตสถานะ is_used ของการจัดสรรเมนู
+            $allocation->is_used = true;
+            $allocation->save();
+
+            DB::commit();
+            return redirect()->route('productions.index')->with('success', 'บันทึกการผลิตสำเร็จ');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'เกิดข้อผิดพลาดในการบันทึกการผลิต: ' . $e->getMessage())->withInput();
         }
     }
 }

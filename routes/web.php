@@ -90,6 +90,9 @@ Route::get('/sales/menus-by-date', [SaleController::class, 'getMenusByDate'])->n
 Route::put('/allocations/{allocation}/update-production', [MenuAllocationController::class, 'updateProduction'])->name('allocations.updateProduction');
 Route::get('/reports/profit-analysis', [ReportController::class, 'getProfitAnalysisJson'])->name('reports.profitAnalysis');
 
+Route::get('/allocations/{allocation}/productions/create', [MenuAllocationController::class, 'createProduction'])->name('alloproductions.create');
+Route::post('/allocations/{allocation}/productions', [MenuAllocationController::class, 'storeProduction'])->name('alloproductions.store');
+
 Route::get('sales/export', [SaleController::class, 'exportCsv'])->name('sales.export');
 Route::get('sales/export-pdf', [SaleController::class, 'exportPdf'])->name('sales.export-pdf');
 

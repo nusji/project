@@ -13,6 +13,7 @@ class Production extends Model
     protected $fillable = [
         'production_date',
         'production_detail',
+        'meni_allocation_id',
     ];
     protected $casts = [
         'production_date' => 'date',

@@ -24,6 +24,9 @@
                             วันที่จัดสรรและวันที่จะนำไปใช้
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            สถานะการใช้งาน
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             ดำเนินการ
                         </th>
                     </tr>
@@ -37,6 +40,14 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                 {{ $allocation->allocation_date }}
                             </td>
+                            <td>
+                                @if ($allocation->is_used)
+                                    <span class="text-green-600">ใช้งานแล้ว</span>
+                                @else
+                                    <span class="text-red-600">ยังไม่ได้ใช้งาน</span>
+                                @endif
+                            </td>
+                            
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                                 <a href="{{ route('allocations.show', $allocation->id) }}"
                                     class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-indigo-700 bg-white hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">

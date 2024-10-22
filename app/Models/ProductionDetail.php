@@ -14,6 +14,7 @@ class ProductionDetail extends Model
         'production_id',
         'menu_id',
         'quantity',
+        'remaining_amount',
         'is_sold_out', // Add this line
     ];
 

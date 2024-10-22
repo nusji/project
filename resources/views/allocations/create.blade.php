@@ -1,7 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto px-4 py-8 max-w-2xl">
+<div class="container mx-auto px-4 py-0">
+    <!-- เรียกใช้ breadcrumb component -->
+    <x-breadcrumb :paths="[['label' => 'ระบบช่วยเหลือจัดสรรเมนู', 'url' => route('allocations.index')], ['label' => 'สร้างรายการจัดสรร']]" />
     <div class="bg-white rounded-lg shadow-md p-8">
         <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
             <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

@@ -10,20 +10,21 @@
         <h1 class="text-3xl font-bold mb-8 text-gray-800">รายละเอียดการจัดสรรของวันที่ {{ $allocation->allocation_date }}
         </h1>
         @if (auth()->user()->role === 'owner')
-        <!-- Container สำหรับคำอธิบายและปุ่ม -->
-        <div class="flex items-center justify-end space-x-4 mb-6">
-            <!-- คำอธิบาย -->
-            <span class="text-sm text-gray-700">ถ้าอยากผลิตเยอะ ให้กดตรงนี้ :</span>
+            <!-- Container สำหรับคำอธิบายและปุ่ม -->
+            <div class="flex items-center justify-end space-x-4 mb-6">
+                <!-- คำอธิบาย -->
+                <span class="text-sm text-gray-700">ถ้าอยากผลิตเยอะ ให้กดตรงนี้ :</span>
 
-            <!-- ปุ่มเปิด Modal -->
-            <button type="button" onclick="openProductionModal()"
-                class="inline-flex items-center px-6 py-3 border border-transparent text-base font-semibold rounded-md text-white bg-green-500 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-400 shadow-lg transform hover:scale-105 transition-transform duration-200">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-                ระบุจำนวนการผลิต
-            </button>
-        </div>
+                <!-- ปุ่มเปิด Modal -->
+                <button type="button" onclick="openProductionModal()"
+                    class="inline-flex items-center px-6 py-3 border border-transparent text-base font-semibold rounded-md text-white bg-green-500 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-400 shadow-lg transform hover:scale-105 transition-transform duration-200">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    ระบุจำนวนการผลิต
+                </button>
+            </div>
         @endif
 
         <!-- Modal -->
@@ -100,7 +101,19 @@
                 }
             });
         </script>
-  
+        @if (auth()->user()->role === 'owner')
+            <!-- ปุ่มสำหรับสร้างการผลิต -->
+            <div class="flex items-center justify-end space-x-4 mb-6">
+                <a href="{{ route('alloproductions.create', $allocation->id) }}"
+                    class="inline-flex items-center px-6 py-3 border border-transparent text-base font-semibold rounded-md text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    สร้างการผลิต
+                </a>
+            </div>
+        @endif
         <!-- วัตถุดิบที่ขาดรวม -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-8">
             <h3 class="text-xl font-semibold text-red-600 mb-4 flex items-center">
