@@ -85,8 +85,8 @@
                 <ul class="space-y-2">
                     @foreach ($topSellingMenus as $menu)
                         <li class="flex justify-between items-center bg-gray-100 rounded-lg p-3">
-                            <span class="font-semibold">{{ $menu->menu_name }}</span>
-                            <span class="text-blue-600 font-bold">{{ $menu->sale_details_count }} ครั้ง</span>
+                            <span class="font-semibold">{{ $menu->menu->menu_name }}</span>
+                            <span class="text-blue-600 font-bold">{{ $menu->total_sold }} ครั้ง</span>
                         </li>
                     @endforeach
                 </ul>

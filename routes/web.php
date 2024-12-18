@@ -41,6 +41,27 @@ Route::controller(FeedbackController::class)->group(function () {
     Route::get('/feedbacks/review', 'review')->name('feedbacks.review');
 });
 
+
+Route::prefix('reports')->name('reports.')->group(function () {
+    Route::get('/', [ReportController::class, 'index'])->name('index');
+    Route::get('/sales-leftover', [ReportController::class, 'SalesLeftover'])->name('sales_leftover');
+    Route::get('/daily-sales', [ReportController::class, 'index'])->name('daily_sales');
+    Route::get('/weekly-sales', [ReportController::class, 'index'])->name('weekly_sales');
+    Route::get('/monthly-sales', [ReportController::class, 'index'])->name('monthly_sales');
+});
+Route::get('/reports/best-selling-menus', [ReportController::class, 'bestSellingMenus'])->name('reports.bestSellingMenus');
+Route::get('/reports/unsold-menus', [ReportController::class, 'unsoldMenus'])->name('reports.unsoldMenus');
+Route::get('/reports/menu-rotation', [ReportController::class, 'menuRotation'])->name('reports.menuRotation');
+Route::get('/reports/production-forecast', [ReportController::class, 'productionForecast'])->name('reports.productionForecast');
+Route::get('/reports/menu-trends', [ReportController::class, 'menuTrends'])->name('reports.menuTrends');
+Route::get('/reports/resource-loss', [ReportController::class, 'resourceLoss'])->name('reports.resourceLoss');
+Route::get('/reports/customer-feedback', [ReportController::class, 'customerFeedback'])->name('reports.customerFeedback');
+Route::get('/reports/menu-profitability', [ReportController::class, 'menuProfitability'])->name('reports.menuProfitability');
+Route::get('/reports/ingredient-stock', [ReportController::class, 'ingredientStock'])->name('reports.ingredientStock');
+
+
+
+
 // สร้าง Route สำหรับการล็อกอินและล็อกเอาท์
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);

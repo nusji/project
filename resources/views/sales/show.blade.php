@@ -45,6 +45,7 @@
                                             <span class="ml-2 flex-1 w-0 truncate">
                                                 @if ($detail->menu)
                                                     {{ $detail->menu->menu_name }}
+                                                    ประเภทเมนู : {{$detail->menu->menuType->menu_type_name}}
                                                 @else
                                                     <span class="text-red-500">รายการไม่พร้อมใช้งาน</span>
                                                 @endif

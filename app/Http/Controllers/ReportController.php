@@ -3,204 +3,303 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Sale;
+use App\Models\SaleDetail;
 use App\Models\Menu;
 use App\Models\Production;
 use App\Models\ProductionDetail;
-use App\Models\MenuAllocation;
 use App\Models\MenuAllocationDetail;
-use App\Models\SaleDetail;
-use App\Models\Ingredient;
-use App\Models\Payroll;
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Cache;
+use PDF; // หากต้องการสร้าง PDF
+use Illuminate\Support\Facades\DB;
+use App\Models\Feedback;
+use App\Models\Ingredient;
 
 class ReportController extends Controller
 {
-    // ฟังก์ชันแสดงหน้าแดชบอร์ดรายงาน
+    /**
+     * แสดงหน้า Reports Index
+     */
     public function index()
     {
-        // เรียกใช้ฟังก์ชันรายงานแต่ละส่วน
-        $topSellingMenus = $this->getTopSellingMenus();
-        $leastSellingMenus = $this->getLeastSellingMenus();
-        $mostUsedIngredients = $this->getMostUsedIngredients();
-        $dailySales = $this->getDailySales();
-        $feedbackAnalysis = $this->getFeedbackAnalysis();
-        $lowStockIngredients = $this->getLowStockIngredients();
-        $payrollSummary = $this->getPayrollSummary();
         $profitAnalysis = $this->getProfitAnalysis();
-        $ingredientUsage = $this->getIngredientUsage();
-        $salesByPaymentType = $this->getSalesByPaymentType();
-        $employeePerformance = $this->getEmployeePerformance();
-        $orderTrends = $this->getOrderTrends();
+        return view('reports.index', compact('profitAnalysis'));
+    }
 
-        return view('reports.index', compact(
-            'topSellingMenus',
-            'leastSellingMenus',
-            'mostUsedIngredients',
-            'dailySales',
-            'feedbackAnalysis',
-            'lowStockIngredients',
-            'payrollSummary',
-            'profitAnalysis',
-            'ingredientUsage',
-            'salesByPaymentType',
-            'employeePerformance',
-            'orderTrends'
+    public function bestSellingMenus(Request $request)
+    {
+        $startDate = $request->input('start_date', Carbon::today()->startOfMonth()->toDateString());
+        $endDate = $request->input('end_date', Carbon::today()->toDateString());
 
+        $bestSellingMenus = SaleDetail::select('menu_id', DB::raw('SUM(quantity) as total_quantity'))
+            ->whereHas('sale', function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('sale_date', [$startDate, $endDate]);
+            })
+            ->groupBy('menu_id')
+            ->orderByDesc('total_quantity')
+            ->with('menu')
+            ->take(10)
+            ->get();
+
+        // เตรียมข้อมูลสำหรับกราฟ
+        $menuNames = $bestSellingMenus->pluck('menu.menu_name');
+        $quantities = $bestSellingMenus->pluck('total_quantity');
+
+        return view('reports.best-selling-menus', compact('bestSellingMenus', 'startDate', 'endDate', 'menuNames', 'quantities'));
+    }
+
+
+    public function unsoldMenus(Request $request)
+    {
+        $date = $request->input('date', \Carbon\Carbon::today()->toDateString());
+
+        if (\Carbon\Carbon::parse($date)->isFuture()) {
+            $date = \Carbon\Carbon::today()->toDateString();
+        }
+
+        // ดึงข้อมูลการผลิตในวันที่กำหนด
+        $productions = ProductionDetail::whereHas('production', function ($query) use ($date) {
+            $query->whereDate('production_date', $date);
+        })->with('menu')->get();
+
+        // เมนูที่ขายไม่หมดในวันที่กำหนด
+        $unsoldMenus = $productions->filter(function ($item) {
+            return $item->remaining_amount > 0;
+        });
+
+        // เมนูที่ขายหมดในวันที่กำหนด
+        $soldOutMenus = $productions->filter(function ($item) {
+            return $item->remaining_amount == 0;
+        });
+
+        // รับช่วงเวลาจากผู้ใช้ หรือใช้ค่าเริ่มต้นเป็นเดือนนี้
+        $startDate = $request->input('start_date', \Carbon\Carbon::parse($date)->startOfMonth()->toDateString());
+        $endDate = $request->input('end_date', \Carbon\Carbon::parse($date)->endOfMonth()->toDateString());
+
+        // สรุปจำนวนครั้งที่เมนูขายหมดในช่วงเวลาที่กำหนด
+        $soldOutCounts = ProductionDetail::whereHas('production', function ($query) use ($startDate, $endDate) {
+            $query->whereBetween('production_date', [$startDate, $endDate]);
+        })
+            ->where('remaining_amount', 0)
+            ->groupBy('menu_id')
+            ->select('menu_id', DB::raw('count(*) as sold_out_times'))
+            ->pluck('sold_out_times', 'menu_id');
+
+        // ดึงข้อมูลเมนูทั้งหมดที่มีการขายหมดในช่วงเวลาที่กำหนด
+        $menus = Menu::whereIn('id', $soldOutCounts->keys())->get();
+        // เตรียมข้อมูลสำหรับกราฟเมนูที่ขายไม่หมด
+        $unsoldMenuNames = $unsoldMenus->pluck('menu.menu_name');
+        $unsoldMenuQuantities = $unsoldMenus->pluck('remaining_amount');
+
+        // เตรียมข้อมูลสำหรับกราฟเมนูที่ขายหมด
+        $soldOutMenuNames = $soldOutMenus->pluck('menu.menu_name');
+        $soldOutMenuCounts = $soldOutMenus->pluck('menu_id')->countBy()->values();
+
+        // เตรียมข้อมูลสำหรับกราฟสรุปการขายหมดในเดือนนี้
+        $summaryMenuNames = $menus->pluck('menu_name');
+        $summarySoldOutCounts = $menus->pluck('id')->map(function ($menuId) use ($soldOutCounts) {
+            return $soldOutCounts[$menuId];
+        });
+
+        return view('reports.unsold-menus', compact(
+            'unsoldMenus',
+            'soldOutMenus',
+            'soldOutCounts',
+            'menus',
+            'date',
+            'unsoldMenuNames',
+            'unsoldMenuQuantities',
+            'soldOutMenuNames',
+            'soldOutMenuCounts',
+            'summaryMenuNames',
+            'summarySoldOutCounts'
         ));
     }
 
-    public function getTopSellingMenus()
+    public function menuRotation(Request $request)
     {
-        return Cache::remember('top_selling_menus', 60, function () {
-            return SaleDetail::select('menu_id', DB::raw('SUM(quantity) as total_sold'))
-                ->groupBy('menu_id')
-                ->orderBy('total_sold', 'desc')
-                ->take(10)
-                ->with(['menu' => function($query) {
-                    $query->select('id', 'menu_name');
-                }])
-                ->get();
+        $startDate = $request->input('start_date', Carbon::now()->startOfMonth()->toDateString());
+        $endDate = $request->input('end_date', Carbon::now()->endOfMonth()->toDateString());
+
+        $menuAllocations = MenuAllocationDetail::select('menu_id', DB::raw('COUNT(*) as allocation_count'))
+            ->whereHas('menuAllocation', function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('allocation_date', [$startDate, $endDate]);
+            })
+            ->groupBy('menu_id')
+            ->with('menu')
+            ->orderByDesc('allocation_count')
+            ->get();
+
+        // เตรียมข้อมูลสำหรับกราฟ
+        $menuNames = $menuAllocations->pluck('menu.menu_name');
+        $allocationCounts = $menuAllocations->pluck('allocation_count');
+
+        return view('reports.menu-rotation', compact('menuAllocations', 'startDate', 'endDate', 'menuNames', 'allocationCounts'));
+    }
+
+
+    public function productionForecast(Request $request)
+    {
+        $forecastDate = $request->input('forecast_date', Carbon::tomorrow()->toDateString());
+        $days = $request->input('days', 7);
+
+        $startDate = Carbon::parse($forecastDate)->subDays($days)->toDateString();
+        $endDate = Carbon::parse($forecastDate)->subDay()->toDateString();
+
+        $forecastData = SaleDetail::select('menu_id', DB::raw('AVG(quantity) as average_quantity'))
+            ->whereHas('sale', function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('sale_date', [$startDate, $endDate]);
+            })
+            ->groupBy('menu_id')
+            ->with('menu')
+            ->get();
+
+        // เตรียมข้อมูลสำหรับกราฟ
+        $menuNames = $forecastData->pluck('menu.menu_name');
+        $averageQuantities = $forecastData->pluck('average_quantity');
+        $recommendedQuantities = $averageQuantities->map(function ($quantity) {
+            return ceil($quantity * 1.1);
         });
+
+        return view('reports.production-forecast', compact(
+            'forecastData',
+            'forecastDate',
+            'days',
+            'menuNames',
+            'averageQuantities',
+            'recommendedQuantities'
+        ));
     }
-    
-    protected function getLeastSellingMenus()
+
+
+    public function menuTrends(Request $request)
     {
-        return Cache::remember('least_selling_menus', 60, function () {
-            return SaleDetail::select('menu_id', DB::raw('SUM(quantity) as total_sold'))
-                ->groupBy('menu_id')
-                ->orderBy('total_sold', 'asc')
-                ->take(5)
-                ->with(['menu' => function($query) {
-                    $query->select('id', 'menu_name');
-                }])
-                ->get();
+        $startDate = $request->input('start_date', Carbon::now()->subDays(30)->toDateString());
+        $endDate = $request->input('end_date', Carbon::today()->toDateString());
+
+        $salesData = SaleDetail::select(
+            DB::raw('DATE(sales.sale_date) as date'),
+            'sale_details.menu_id',
+            DB::raw('SUM(quantity) as total_quantity')
+        )
+            ->join('sales', 'sale_details.sale_id', '=', 'sales.id')
+            ->whereBetween('sales.sale_date', [$startDate, $endDate])
+            ->groupBy('date', 'sale_details.menu_id')
+            ->orderBy('date')
+            ->get();
+
+        $menus = Menu::pluck('menu_name', 'id');
+
+        $dates = $salesData->pluck('date')->unique()->values()->sort()->toArray();
+
+        $trendData = [];
+
+        foreach ($menus as $menuId => $menuName) {
+            $menuSales = $salesData->where('menu_id', $menuId)->keyBy('date');
+            $salesQuantities = [];
+            foreach ($dates as $date) {
+                $salesQuantities[] = isset($menuSales[$date]) ? $menuSales[$date]->total_quantity : 0;
+            }
+            $trendData[] = [
+                'menu_name' => $menuName,
+                'sales_data' => $salesQuantities,
+                'dates' => $dates,
+            ];
+        }
+
+        return view('reports.menu-trends', compact('trendData', 'startDate', 'endDate'));
+    }
+
+
+
+    public function resourceLoss(Request $request)
+    {
+        $date = $request->input('date', Carbon::yesterday()->toDateString());
+
+        $productions = ProductionDetail::whereHas('production', function ($query) use ($date) {
+            $query->whereDate('production_date', $date);
+        })->with('menu')->get();
+
+        $lossData = $productions->map(function ($item) {
+            $productionAmount = $item->production_amount; // Adjust according to your model's field
+            $remainingAmount = $item->remaining_amount;
+            $soldAmount = $productionAmount - $remainingAmount;
+            $menuPrice = $item->menu->menu_price;
+            $portionSize = $item->menu->portion_size;
+
+            // Calculate number of unsold portions
+            $numberOfUnsoldPortions = $remainingAmount / $portionSize;
+
+            // Calculate loss
+            $loss = $menuPrice * $numberOfUnsoldPortions;
+
+            return [
+                'menu_name' => $item->menu->menu_name,
+                'production_amount' => $productionAmount,
+                'sold_amount' => $soldAmount,
+                'remaining_amount' => $remainingAmount,
+                'number_of_unsold_portions' => $numberOfUnsoldPortions,
+                'loss' => $loss,
+            ];
         });
-    }
-    
-    
 
-    protected function getMostUsedIngredients()
-    {
-        // ดึงข้อมูลเมนูที่ถูกผลิตจาก production_details
-        return DB::table('production_details')
-            ->join('menu_recipes', 'production_details.menu_id', '=', 'menu_recipes.menu_id') // เชื่อมต่อกับ menu_recipes
-            ->join('ingredients', 'menu_recipes.ingredient_id', '=', 'ingredients.id') // เชื่อมต่อกับ ingredients
-            ->select('ingredients.ingredient_name', DB::raw('count(production_details.menu_id) as total_used'))
-            ->groupBy('ingredients.ingredient_name')
-            ->orderBy('total_used', 'desc')
-            ->take(5)
-            ->get();
+        return view('reports.resource-loss', compact('lossData', 'date'));
     }
 
-    protected function getDailySales()
+
+
+    public function customerFeedback(Request $request)
     {
-        return DB::table('sale_details')
-            ->join('sales', 'sale_details.sale_id', '=', 'sales.id') // เชื่อมกับตาราง sales เพื่อดึงข้อมูลวันที่
-            ->join('menus', 'sale_details.menu_id', '=', 'menus.id') // เชื่อมกับตาราง menus เพื่อดึงข้อมูลเมนู
-            ->select(
-                DB::raw('DATE(sales.sale_date) as date'),
-                DB::raw('sum(sale_details.quantity) as total_sold'),
-                DB::raw('sum(sale_details.menu_id) as daily_sales'),
-                DB::raw('sum(sale_details.quantity * menus.menu_price) as total_revenue') // คำนวณยอดขายรวมต่อวัน
-            )
-            ->groupBy('date')
-            ->orderBy('date', 'desc')
-            ->take(7)
-            ->get();
+        $feedbacks = Feedback::with('menu')->whereHas('menu')->get();
+
+        $feedbackData = $feedbacks->groupBy('menu_id')->map(function ($item) {
+            return [
+                'menu_name' => $item->first()->menu->menu_name,
+                'average_rating' => $item->avg('rating'),
+                'total_feedbacks' => $item->count(),
+            ];
+        });
+
+        return view('reports.customer-feedback', compact('feedbackData'));
     }
 
-    public function getFeedbackAnalysis()
-    {
-        return DB::table('feedbacks')
-            ->join('menus', 'feedbacks.menu_id', '=', 'menus.id')
-            ->select(
-                'menus.menu_name',
-                DB::raw('AVG(feedbacks.rating) as average_rating'),
-                DB::raw('COUNT(feedbacks.id) as total_feedback')
-            )
-            ->groupBy('menus.menu_name')
-            ->orderBy('average_rating', 'desc')
-            ->take(10)
-            ->get();
-    }
 
-    public function getLowStockIngredients()
-    {
-        return Ingredient::whereColumn('ingredient_stock', '<', 'minimum_quantity')
-            ->get(['ingredient_name', 'ingredient_stock', 'minimum_quantity']);
-    }
-    public function getEmployeePerformance()
-    {
-        return DB::table('employees')
-            ->leftJoin('sales', 'employees.id', '=', 'sales.employee_id')
-            ->leftJoin('sale_details', 'sales.id', '=', 'sale_details.sale_id')
-            ->leftJoin('menus', 'sale_details.menu_id', '=', 'menus.id')
-            ->select(
-                'employees.name',
-                DB::raw('COUNT(sales.id) as total_sales'),
-                DB::raw('SUM(sale_details.quantity * menus.menu_price) as total_revenue')
-            )
-            ->whereMonth('sales.sale_date', '=', date('m'))
-            ->whereYear('sales.sale_date', '=', date('Y'))
-            ->groupBy('employees.name')
-            ->orderBy('total_revenue', 'desc')
-            ->get();
-    }
 
-    public function getPayrollSummary()
+    public function menuProfitability(Request $request)
     {
-        return Payroll::with('employee')
-            ->orderBy('payment_date', 'desc')
-            ->take(12) // แสดงข้อมูลเงินเดือน 12 เดือนล่าสุด
-            ->get();
-    }
-    public function getOrderTrends()
-    {
-        return DB::table('orders')
-            ->select(
-                DB::raw('DATE(order_date) as date'),
-                DB::raw('COUNT(id) as total_orders')
-            )
-            ->groupBy('date')
-            ->orderBy('date', 'desc')
-            ->take(30)
-            ->get();
-    }
+        $menus = Menu::with('recipes.ingredient')->get();
 
-    public function getSalesByPaymentType()
-    {
-        return DB::table('sales')
-            ->select('payment_type', DB::raw('SUM(sale_details.quantity * menus.menu_price) as total_revenue'))
-            ->join('sale_details', 'sales.id', '=', 'sale_details.sale_id')
-            ->join('menus', 'sale_details.menu_id', '=', 'menus.id')
-            ->whereMonth('sales.sale_date', '=', date('m'))
-            ->whereYear('sales.sale_date', '=', date('Y'))
-            ->groupBy('payment_type')
-            ->get();
-    }
+        $profitData = $menus->map(function ($menu) {
+            $totalCost = $menu->recipes->sum(function ($recipe) {
+                return $recipe->amount * $recipe->ingredient->cost;
+            });
 
-    //ไม่ได้ใช้งาน
-    public function getIngredientUsage()
-    {
-        return DB::table('menu_recipes')
-            ->join('menus', 'menu_recipes.menu_id', '=', 'menus.id')
-            ->join('ingredients', 'menu_recipes.ingredient_id', '=', 'ingredients.id')
-            ->join('sale_details', 'menus.id', '=', 'sale_details.menu_id')
-            ->join('production_details', 'menus.id', '=', 'production_details.menu_id')
-            ->select(
-                'ingredients.ingredient_name',
-                DB::raw('SUM(menu_recipes.amount * production_details.quantity) as total_used')
-            )
-            ->whereMonth('sale_details.created_at', '=', date('m'))
-            ->whereYear('sale_details.created_at', '=', date('Y'))
-            ->groupBy('ingredients.ingredient_name')
-            ->orderBy('total_used', 'desc')
-            ->take(10)
-            ->get();
+            $salesData = SaleDetail::where('menu_id', $menu->id)
+                ->with('sale')
+                ->get();
+
+            $totalRevenue = $salesData->sum(function ($saleDetail) use ($menu) {
+                return $saleDetail->quantity * $menu->menu_price;
+            });
+
+            $profit = $totalRevenue - ($totalCost * $salesData->sum('quantity'));
+
+            return [
+                'menu_name' => $menu->menu_name,
+                'total_revenue' => $totalRevenue,
+                'total_cost' => $totalCost * $salesData->sum('quantity'),
+                'profit' => $profit,
+            ];
+        });
+
+        return view('reports.menu-profitability', compact('profitData'));
     }
-    // ไม่ได้ใช้งาน
+    public function ingredientStock(Request $request)
+    {
+        $ingredients = Ingredient::all();
+
+        return view('reports.ingredient-stock', compact('ingredients'));
+    }
 
     /**
      * คำนวณกำไรจากยอดขายและยอดสั่งซื้อในช่วง 30 วันที่ผ่านมา

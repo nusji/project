@@ -14,6 +14,8 @@ use App\Models\Payroll;
 use App\Models\Production;
 use App\Models\MenuAllocation;
 use App\Models\Order;
+use App\Models\SaleDetail;
+use Illuminate\Support\Facades\Cache;
 
 
 class DashboardController extends Controller
@@ -284,10 +286,16 @@ class DashboardController extends Controller
     // 14. ฟังก์ชันดึงเมนูที่ขายดีที่สุด 5 อันดับ
     protected function getTopSellingMenus()
     {
-        return Menu::withCount('saleDetails')
-            ->orderBy('sale_details_count', 'desc')
-            ->take(5)
-            ->get();
+        return Cache::remember('top_selling_menus', 60, function () {
+            return SaleDetail::select('menu_id', DB::raw('SUM(quantity) as total_sold'))
+                ->groupBy('menu_id')
+                ->orderBy('total_sold', 'desc')
+                ->take(10)
+                ->with(['menu' => function($query) {
+                    $query->select('id', 'menu_name');
+                }])
+                ->get();
+        });
     }
 
     // 15. ฟังก์ชันดึงเมนูสำหรับพรุ่งนี้
