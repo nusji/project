@@ -9,7 +9,7 @@ class SalaryController extends Controller
 {
     public function index()
     {
-        $employees = Employee::select('id', 'name', 'salary','start_date', 'employment_type')->paginate(10);
+        $employees = Employee::select('id', 'name', 'salary', 'start_date', 'employment_type')->paginate(10);
         return view('payrolls.salaries.index', compact('employees'));
     }
 

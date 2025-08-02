@@ -6,31 +6,34 @@
             <div class="bg-white overflow-hidden">
                 <div class="flex">
                     <!-- ซ้าย: รายการเมนู -->
-                    <div class="w-2/3 p-4 min-h-screen pb-24">
+                    <div class="w-2/3 p-4 min-h-screen">
                         <div class="mb-4">
                             <div class="flex justify-between items-center mb-2">
                                 <h2 class="text-2xl font-bold" id="menu-title">เมนูวันที่ <span
                                         id="selected-date">{{ $today->format('d/m/Y') }}</span></h2>
                                 <div class="flex items-center">
-                                    <input type="date" id="date-picker" class="border rounded px-2 py-1 mr-2"
+                                    <input type="date" id="date-picker" class="border rounded-full px-2 py-1 mr-2"
                                         value="{{ $today->format('Y-m-d') }}">
                                     <button id="load-menu-btn"
-                                        class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                                        class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-1 px-4 rounded-full">
                                         โหลดเมนู
                                     </button>
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-5 gap-4" id="menu-items-container">
+                            <!-- ปรับเปลี่ยนส่วนนี้ให้มีความสูงและสามารถเลื่อนแนวตั้งได้ -->
+                            <div class="grid grid-cols-5 gap-4 h-96 overflow-y-auto" id="menu-items-container">
                                 @foreach ($menus as $menu)
                                     <div class="bg-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-200 transition menu-item"
                                         data-category="{{ $menu->menu_type_id }}" onclick="addToCart({{ $menu->id }})">
                                         @if ($menu->menu_image)
                                             <img src="{{ Storage::url($menu->menu_image) }}" alt="{{ $menu->menu_name }}"
-                                                class="menu-image h-10 w-10 rounded-md">
+                                                class="menu-image h-10 w-10 rounded-md mb-2">
                                         @endif
                                         <h3 class="font-semibold">{{ $menu->menu_name }}</h3>
                                         <p class="text-gray-600">{{ number_format($menu->menu_price, 2) }} บาท</p>
+                                        <p class="text-gray-600">เหลือ:
+                                            {{ number_format($menu->total_remaining_amount, 1) }} กิโลกรัม</p>
                                     </div>
                                 @endforeach
                             </div>
@@ -49,7 +52,7 @@
                     </div>
                     <!-- ขวา: ตะกร้าสินค้า -->
                     <div class="w-1/3 bg-gray-800 text-white p-4 z-50">
-                        <h2 class="text-2xl font-bold mb-4">ตะกร้า</h2>
+                        <h2 class="text-2xl font-bold mb-4">ตะกร้า (ทัพพี)</h2>
                         <div class="mb-4 h-96 overflow-y-auto" id="cart-items-container">
                             <!-- รายการในตะกร้าจะถูกแสดงที่นี่ -->
                         </div>
@@ -62,11 +65,11 @@
                         <div class="mb-4">
                             <label for="payment_type" class="block mb-2 font-medium text-white-700">ประเภทการชำระเงิน
                                 :</label>
-                            <div class="flex space-x-4 ">
+                            <div class="flex justify-center items-center space-x-4">
                                 <label class="relative">
                                     <input type="radio" name="payment_type" value="เงินสด" class="sr-only peer">
                                     <div
-                                        class="flex items-center px-16 py-2 border rounded-md transition-colors cursor-pointer
+                                        class="flex items-center px-14 py-2 border rounded-md transition-colors cursor-pointer
                                                 peer-checked:bg-blue-500 peer-checked:text-white peer-checked:border-blue-500
                                                 bg-white text-gray-700 border-gray-300 hover:bg-gray-50">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none"
@@ -80,7 +83,7 @@
                                 <label class="relative">
                                     <input type="radio" name="payment_type" value="โอนเงิน" class="sr-only peer">
                                     <div
-                                        class="flex items-center px-16 py-2 border rounded-md transition-colors cursor-pointer
+                                        class="flex items-center px-14 py-2 border rounded-md transition-colors cursor-pointer
                                                 peer-checked:bg-blue-500 peer-checked:text-white peer-checked:border-blue-500
                                                 bg-white text-gray-700 border-gray-300 hover:bg-gray-50">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none"
@@ -112,7 +115,7 @@
         <div class="flex justify-between items-center mb-2">
             <div>
                 <span class="font-semibold">{name}</span>
-                <span class="text-sm text-gray-400">{price} บาท x {quantity}</span>
+                <span class="text-sm text-gray-400">{price} บาท x {quantity} ({deductedAmount})</span>
             </div>
             <div class="flex items-center">
                 <button onclick="decreaseQuantity({id})" class="px-2 py-1 bg-red-500 rounded-l">-</button>
@@ -125,13 +128,16 @@
         let currentMenus = @json($menus);
 
         function loadMenuByDate() {
-            const selectedDate = document.getElementById('date-picker').value;
+            const selectedDateInput = document.getElementById('date-picker');
+            const selectedDate = selectedDateInput ? selectedDateInput.value : '{{ $today->format('Y-m-d') }}';
+
             fetch(`/sales/menus-by-date?date=${selectedDate}`)
                 .then(response => response.json())
                 .then(data => {
                     currentMenus = data.menus;
+
                     document.getElementById('selected-date').textContent = new Date(data.date).toLocaleDateString(
-                        'th-TH');
+                        'en-GB');
                     renderMenuItems();
                 })
                 .catch(error => {
@@ -140,8 +146,8 @@
                 });
         }
 
-
         function renderMenuItems() {
+            console.log('Rendering menu items:', currentMenus);
             const container = document.getElementById('menu-items-container');
             container.innerHTML = '';
 
@@ -150,17 +156,37 @@
                 menuItem.className =
                     'bg-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-200 transition menu-item';
                 menuItem.dataset.category = menu.menu_type_id;
+
+                // เช็คว่าหมดหรือไม่
+                let soldOut = menu.total_remaining_amount <= 0;
+
                 menuItem.innerHTML = `
-            ${menu.menu_image ? `<img src="${menu.menu_image}" alt="${menu.menu_name}" class="menu-image h-10 w-10">` : ''}
+            ${menu.menu_image ? `<img src="${menu.menu_image}" alt="${menu.menu_name}" class="menu-image h-10 w-10 rounded-md mb-2">` : ''}
             <h3 class="font-semibold">${menu.menu_name}</h3>
             <p class="text-gray-600">${Number(menu.menu_price).toFixed(2)} บาท</p>
+            <p class="text-gray-600">เหลือ: ${Number(menu.total_remaining_amount).toFixed(1)} กิโลกรัม</p>
+            ${soldOut ? '<p class="text-red-500 font-bold">หมด</p>' : ''}
         `;
+
+                // ถ้า sold out แต่เราสามารถทำการขายต่อได้ให้ยังสามารถคลิกได้
                 menuItem.onclick = () => addToCart(menu.id);
+
+                // กรณีหมดสต็อก
+                if (soldOut) {
+                    menuItem.classList.add('opacity-50'); // ลดความเด่นของเมนูที่หมด
+                }
+
                 container.appendChild(menuItem);
             });
         }
 
+
         document.getElementById('load-menu-btn').addEventListener('click', loadMenuByDate);
+        document.addEventListener('DOMContentLoaded', () => {
+            loadMenuByDate(); // เรียกใช้เมนูเมื่อหน้าเว็บถูกโหลด
+            filterMenuItems('all'); // แสดงทุกรายการเมนูเริ่มต้น
+        });
+
 
         // เพิ่มฟังก์ชันสำหรับกรองรายการเมนูตามประเภท
         function filterMenuItems(categoryId) {
@@ -217,6 +243,7 @@
                 .replace('{name}', item.menu_name)
                 .replace('{price}', item.menu_price.toFixed(2))
                 .replace(/{quantity}/g, item.quantity) // แทนค่าจำนวนสินค้า
+                .replace('{deductedAmount}', (item.portion_size * item.quantity).toFixed(1))
             ).join('');
 
             document.getElementById('cart-total').textContent = cart.reduce((sum, item) => sum + item.menu_price * item
@@ -245,7 +272,6 @@
 
         // ฟังก์ชันสำหรับชำระเงิน
         function checkout() {
-
             const paymentType = document.querySelector('input[name="payment_type"]:checked').value;
 
             if (cart.length === 0) {
@@ -257,12 +283,50 @@
                 return;
             }
 
-            // Log ข้อมูลที่ส่งไปยัง backend
+            // ตรวจสอบว่าสินค้ามีสต็อกพอหรือไม่
+            let outOfStock = false;
+
+            cart.forEach(item => {
+                const menuItem = currentMenus.find(menu => menu.id === item.id);
+                if (menuItem.total_remaining_amount <= 0) {
+                    outOfStock = true; // ถ้าพบเมนูที่สต็อกหมด ให้ตั้งค่าเป็น true
+                }
+            });
+
+            // ถ้าสต็อกหมดให้ถามว่าต้องการทำการขายต่อหรือไม่
+            if (outOfStock) {
+                Swal.fire({
+                    title: 'สินค้านี้สต็อกหมดแล้ว',
+                    text: 'คุณต้องการบังคับทำการขายหรือไม่?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'ใช่, บังคับขาย',
+                    cancelButtonText: 'ยกเลิก',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // ถ้าผู้ใช้กดยืนยันให้บังคับขาย
+                        processSale(paymentType, true);
+                    } else if (result.dismiss === Swal.DismissReason.cancel) {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'ยกเลิกการทำรายการ',
+                            text: 'การขายถูกยกเลิก',
+                        });
+                    }
+                });
+            } else {
+                // ถ้าไม่มีสินค้าที่สต็อกหมดให้ทำการขายตามปกติ
+                processSale(paymentType, false);
+            }
+        }
+
+        // ฟังก์ชันสำหรับทำการขาย
+        function processSale(paymentType, forceSale) {
             const dataToSend = {
                 items: cart,
                 payment_type: paymentType,
+                force_sale: forceSale ? 1 : 0,
             };
-            console.log('Sending data to backend:', dataToSend);
 
             axios.post('{{ route('sales.store') }}', dataToSend)
                 .then(response => {
@@ -274,11 +338,11 @@
                         }).then(() => {
                             cart = [];
                             renderCart();
+                            loadMenuByDate();
                         });
                     }
                 })
                 .catch(error => {
-                    console.error(error.response); // ตรวจสอบ response
                     Swal.fire({
                         icon: 'error',
                         title: 'เกิดข้อผิดพลาด',
@@ -287,10 +351,12 @@
                 });
         }
 
+
         // ฟังก์ชันสำหรับเคลียร์ตะกร้า
         function clearCart() {
             cart = []; // ล้างรายการในตะกร้า
             renderCart(); // อัปเดตการแสดงผล
+            loadMenuByDate(); // เพิ่มการเรียกฟังก์ชันนี้เพื่ออัปเดตเมนู
         }
     </script>
 @endsection

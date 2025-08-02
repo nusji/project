@@ -1,10 +1,11 @@
 @extends('layouts.app')
 @section('content')
 <div class="container mx-auto mt-5 px-4 sm:px-6 lg:px-8">
+
+        <h1 class="text-3xl font-bold text-gray-800 mb-5">ข้อมูลโปรไฟล์</h1>
+
     <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-        <div class="bg-[#E2725B] px-6 py-4">
-            <h1 class="text-3xl font-bold text-white">ข้อมูลโปรไฟล์</h1>
-        </div>
+
         <div class="p-6">
             <!-- แสดงรูปโปรไฟล์ -->
             <div class="mb-8 text-center">

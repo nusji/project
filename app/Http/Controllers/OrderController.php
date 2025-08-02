@@ -13,71 +13,92 @@ use Carbon\Carbon;
 
 class OrderController extends Controller
 {
-    protected function getOrderSummaries()
-    {
-        return Order::with(['orderDetails.ingredient', 'employee']) // Load the related models
-            ->get() // Get all orders
-            ->map(function ($order) {
-                return [
-                    'order' => $order,
-                    'ingredientCount' => $order->orderDetails->count('ingredient_id'), // Total quantity of ingredients in the order
-                    'totalPrice' => $order->orderDetails->sum(function ($detail) {
-                        return $detail->price; // Calculate total price
-                    }),
-                ];
-            })
-            ->toArray(); // Convert to array for easier access in the view
-    }
 
-    public function index()
+    public function index(Request $request)
     {
-        // ข้อมูลสรุปการสั่งซื้อ
-        $orderSummaries = $this->getOrderSummaries();
-    
-        // คำนวณยอดการสั่งซื้อรายเดือน
-        $monthlyData = Order::select(
-            DB::raw('YEAR(order_date) as year'),
-            DB::raw('MONTH(order_date) as month'),
-            DB::raw('SUM(order_details.price * order_details.quantity) as total')
-        )
-        ->join('order_details', 'orders.id', '=', 'order_details.order_id')
-        ->groupBy('year', 'month')
-        ->orderBy('year', 'asc')
-        ->orderBy('month', 'asc')
-        ->get();
-    
-        // คำนวณยอดการสั่งซื้อรายสัปดาห์
-        $weeklyData = Order::select(
-            DB::raw('YEAR(order_date) as year'),
-            DB::raw('WEEK(order_date, 1) as week'),
-            DB::raw('SUM(order_details.price * order_details.quantity) as total')
-        )
-        ->join('order_details', 'orders.id', '=', 'order_details.order_id')
-        ->groupBy('year', 'week')
-        ->orderBy('year', 'asc')
-        ->orderBy('week', 'asc')
-        ->get();
-    
-        // หาวัตถุดิบที่ถูกสั่งซื้อมากที่สุด
-        $ingredientData = OrderDetail::select(
-            'ingredients.ingredient_name',
-            DB::raw('SUM(order_details.quantity) as total_quantity')
-        )
-        ->join('ingredients', 'order_details.ingredient_id', '=', 'ingredients.id')
-        ->groupBy('ingredients.ingredient_name')
-        ->orderBy('total_quantity', 'desc')
-        ->limit(5) // แสดงเฉพาะ 5 รายการแรก
-        ->get();
-    
+        // Retrieve the search query from the request
+        $search = $request->input('search');
+
+        // Start building the query with eager loading
+        $query = Order::with(['orderDetails.ingredient', 'employee'])
+            ->orderByDesc('order_date');
+
+        // If a search query is provided, add conditions to the query
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('id', 'like', '%' . $search . '%')
+                    ->orWhereHas('employee', function ($q) use ($search) {
+                        $q->where('name', 'like', '%' . $search . '%');
+                    })
+                    ->orWhereHas('orderDetails.ingredient', function ($q) use ($search) {
+                        $q->where('ingredient_name', 'like', '%' . $search . '%');
+                    });
+            });
+        }
+
+        // Paginate the results
+        $orders = $query->paginate(20);
+
+        // Get today's date
+        $today = Carbon::today();
+        $startOfWeek = Carbon::now()->startOfWeek();
+        $startOfMonth = Carbon::now()->startOfMonth();
+        $startOfPreviousWeek = Carbon::now()->subWeek()->startOfWeek();
+        $startOfPreviousMonth = Carbon::now()->subMonth()->startOfMonth();
+
+        // Get the end dates for previous periods
+        $endOfPreviousWeek = Carbon::now()->subWeek()->endOfWeek();
+        $endOfPreviousMonth = Carbon::now()->subMonth()->endOfMonth();
+
+        // Join order_details table to calculate total order amount
+        // Orders for today
+        $ordersToday = Order::join('order_details', 'orders.id', '=', 'order_details.order_id')
+            ->whereDate('order_date', $today)
+            ->sum(DB::raw('order_details.price'));
+
+        // Orders for this week
+        $ordersThisWeek = Order::join('order_details', 'orders.id', '=', 'order_details.order_id')
+            ->whereBetween('order_date', [$startOfWeek, $today])
+            ->sum(DB::raw('order_details.price'));
+
+        // Orders for this month
+        $ordersThisMonth = Order::join('order_details', 'orders.id', '=', 'order_details.order_id')
+            ->whereBetween('order_date', [$startOfMonth, $today])
+            ->sum(DB::raw('order_details.price'));
+
+        // Orders for previous day
+        $ordersPreviousDay = Order::join('order_details', 'orders.id', '=', 'order_details.order_id')
+            ->whereDate('order_date', $today->subDay())
+            ->sum(DB::raw('order_details.price'));
+
+        // Orders for previous week
+        $ordersPreviousWeek = Order::join('order_details', 'orders.id', '=', 'order_details.order_id')
+            ->whereBetween('order_date', [$startOfPreviousWeek, $endOfPreviousWeek])
+            ->sum(DB::raw('order_details.price'));
+
+        // Orders for previous month
+        $ordersPreviousMonth = Order::join('order_details', 'orders.id', '=', 'order_details.order_id')
+            ->whereBetween('order_date', [$startOfPreviousMonth, $endOfPreviousMonth])
+            ->sum(DB::raw('order_details.price'));
+
+        // Calculate differences
+        $dailyDifference = $ordersToday - $ordersPreviousDay;
+        $weeklyDifference = $ordersThisWeek - $ordersPreviousWeek;
+        $monthlyDifference = $ordersThisMonth - $ordersPreviousMonth;
+
+        // Return the view with the orders, statistics, and the search query
         return view('orders.index', [
-            'orderSummaries' => $orderSummaries,
-            'monthlyData' => $monthlyData,
-            'weeklyData' => $weeklyData,
-            'ingredientData' => $ingredientData,
+            'orders' => $orders,
+            'search' => $search,
+            'ordersToday' => $ordersToday,
+            'ordersThisWeek' => $ordersThisWeek,
+            'ordersThisMonth' => $ordersThisMonth,
+            'dailyDifference' => $dailyDifference,
+            'weeklyDifference' => $weeklyDifference,
+            'monthlyDifference' => $monthlyDifference
         ]);
     }
-    
-    
+
 
     public function create()
     {
@@ -258,6 +279,138 @@ class OrderController extends Controller
 
         return redirect()->route('orders.index')->with('success', 'รายการสั่งซื้อถูกลบเรียบร้อยแล้ว');
     }
+    /**
+     * ดึงข้อมูลวัตถุดิบที่ถูกสั่งซื้อบ่อยที่สุด (จำนวนครั้ง)
+     */
+    public function getTopIngredientsByCount(Request $request)
+    {
+        // จำนวนวัตถุดิบที่ต้องการแสดง (เช่น 5 อันดับแรก)
+        $limit = $request->input('limit', 5);
 
-    
+        $data = OrderDetail::select(
+            'ingredients.ingredient_name',
+            DB::raw('COUNT(order_details.id) as order_count') // นับจำนวนครั้งที่สั่งซื้อ
+        )
+            ->join('ingredients', 'order_details.ingredient_id', '=', 'ingredients.id')
+            ->groupBy('ingredients.ingredient_name')
+            ->orderByDesc('order_count') // เรียงจากมากไปน้อยตามจำนวนครั้งที่สั่ง
+            ->limit($limit)
+            ->get();
+
+        return response()->json($data);
+    }
+
+    /**
+     * ดึงข้อมูลวัตถุดิบที่ถูกสั่งซื้อในปริมาณมากที่สุด (ปริมาณ)
+     */
+    public function getTopIngredientsByQuantity(Request $request)
+    {
+        // จำนวนวัตถุดิบที่ต้องการแสดง (เช่น 5 อันดับแรก)
+        $limit = $request->input('limit', 5);
+
+        $data = OrderDetail::select(
+            'ingredients.ingredient_name',
+            DB::raw('SUM(order_details.quantity) as total_quantity') // รวมปริมาณที่สั่งซื้อ
+        )
+            ->join('ingredients', 'order_details.ingredient_id', '=', 'ingredients.id')
+            ->groupBy('ingredients.ingredient_name')
+            ->orderByDesc('total_quantity') // เรียงจากมากไปน้อยตามปริมาณที่สั่ง
+            ->limit($limit)
+            ->get();
+
+        return response()->json($data);
+    }
+
+    /**
+     * ดึงข้อมูลกราฟสรุปการสั่งซื้อตามช่วงเวลา
+     */
+    public function getChartData(Request $request)
+    {
+        $period = $request->input('period', 'monthly');
+
+        switch ($period) {
+            case 'weekly':
+                $data = $this->getWeeklyData();
+                break;
+            case 'yearly':
+                $data = $this->getYearlyData();
+                break;
+            case 'monthly':
+            default:
+                $data = $this->getMonthlyData();
+                break;
+        }
+
+        return response()->json($data);
+    }
+
+    /**
+     * ดึงข้อมูลสรุปการสั่งซื้อรายเดือน
+     */
+    private function getMonthlyData()
+    {
+        $data = Order::select(
+            DB::raw('DATE_FORMAT(order_date, "%Y-%m") as month'),
+            DB::raw('COUNT(*) as count'),
+            DB::raw('SUM(order_details.price * order_details.quantity) as total')
+        )
+            ->join('order_details', 'orders.id', '=', 'order_details.order_id')
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+
+        return $this->formatChartData($data, 'month');
+    }
+
+    /**
+     * ดึงข้อมูลสรุปการสั่งซื้อรายสัปดาห์
+     */
+    private function getWeeklyData()
+    {
+        $data = Order::select(
+            DB::raw('YEARWEEK(order_date, 1) as week'),
+            DB::raw('COUNT(*) as count'),
+            DB::raw('SUM(order_details.price * order_details.quantity) as total')
+        )
+            ->join('order_details', 'orders.id', '=', 'order_details.order_id')
+            ->groupBy('week')
+            ->orderBy('week')
+            ->get();
+
+        return $this->formatChartData($data, 'week');
+    }
+
+    /**
+     * ดึงข้อมูลสรุปการสั่งซื้อรายปี
+     */
+    private function getYearlyData()
+    {
+        $data = Order::select(
+            DB::raw('YEAR(order_date) as year'),
+            DB::raw('COUNT(*) as count'),
+            DB::raw('SUM(order_details.price * order_details.quantity) as total')
+        )
+            ->join('order_details', 'orders.id', '=', 'order_details.order_id')
+            ->groupBy('year')
+            ->orderBy('year')
+            ->get();
+
+        return $this->formatChartData($data, 'year');
+    }
+
+    /**
+     * ฟอร์แมตข้อมูลสำหรับกราฟ
+     */
+    private function formatChartData($data, $labelKey)
+    {
+        $labels = $data->pluck($labelKey);
+        $counts = $data->pluck('count');
+        $totals = $data->pluck('total');
+
+        return [
+            'labels' => $labels,
+            'counts' => $counts,
+            'totals' => $totals
+        ];
+    }
 }

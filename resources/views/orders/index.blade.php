@@ -5,44 +5,91 @@
         <!-- เรียกใช้ breadcrumb component -->
         <x-breadcrumb :paths="[['label' => 'ระบบสั่งซื้อวัตถุดิบ', 'url' => route('orders.index')], ['label' => '']]" />
         <h2 class="text-2xl font-bold text-gray-800 mb-4">ระบบสั่งซื้อวัตถุดิบ</h2>
-        <div class="bg-white shadow-lg rounded-lg p-6 flex flex-col h-full">
-            <div style="display: flex;">
-                <h2>ยอดการสั่งซื้อรายเดือน</h2>
-                <div style="flex: 1;">
-                    <canvas id="monthlyChart" width="50" height="50" class="size-40"></canvas>
+        <div class="bg-white shadow-lg rounded-lg p-6 flex flex-col space-y-4 h-full mb-10">
+            <div class="flex flex-wrap -mx-2">
+                <!-- เพิ่ม dropdown สำหรับเลือกจำนวนวัตถุดิบที่จะแสดง -->
+                <!-- กราฟที่ 1: วัตถุดิบที่ถูกสั่งซื้อบ่อยที่สุด (จำนวนครั้ง) -->
+                <div class="w-full md:w-1/3 px-2 mb-4">
+
+                    <div class="mb-3">
+                        <label for="topLimit" class="form-label">จำนวนวัตถุดิบที่จะแสดง</label>
+                        <select id="topLimit" onchange="fetchTopIngredients()" class="form-control w-full">
+                            <option value="5" selected>5 อันดับแรก</option>
+                            <option value="10">10 อันดับแรก</option>
+                            <option value="15">15 อันดับแรก</option>
+                        </select>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">วัตถุดิบที่ถูกสั่งซื้อบ่อยที่สุด</h5>
+                            <canvas id="topIngredientsChart" width="100%" height="50"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- กราฟที่ 2: วัตถุดิบที่ถูกสั่งซื้อในปริมาณมากที่สุด -->
+                <div class="w-full md:w-1/3 px-2 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">วัตถุดิบที่ถูกสั่งซื้อในปริมาณมากที่สุด</h5>
+                            <canvas id="topIngredientsChartByQuantity" width="100%" height="50"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-full md:w-1/3 px-2 mb-4">
+                    <h2 class="text-2xl font-bold mb-4">สรุปยอดสั่งซื้อ</h2>
+                    <div class="flex gap-4">
+                        <div class="bg-gray-100 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold mb-2">ยอดสั่งซื้อวันนี้</h4>
+                            <p class="text-xl font-bold text-green-500">{{ $ordersToday }} บาท</p>
+                            <p class="text-gray-500">เปรียบเทียบกับเมื่อวาน: {{ $dailyDifference }} บาท</p>
+                        </div>
+                        <div class="bg-gray-100 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold mb-2">ยอดสั่งซื้อสัปดาห์นี้</h4>
+                            <p class="text-xl font-bold text-green-500">{{ $ordersThisWeek }} บาท</p>
+                            <p class="text-gray-500">เปรียบเทียบกับสัปดาห์ก่อน: {{ $weeklyDifference }} บาท</p>
+                        </div>
+                        <div class="bg-gray-100 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold mb-2">ยอดสั่งซื้อเดือนนี้</h4>
+                            <p class="text-xl font-bold text-green-500">{{ $ordersThisMonth }} บาท</p>
+                            <p class="text-gray-500">เปรียบเทียบกับเดือนก่อน: {{ $monthlyDifference }} บาท</p>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0 md:space-x-4">
-            <div class="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
-                <a href="{{ route('orders.create') }}"
-                    class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-300 ease-in-out shadow-md">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 6v6m0 0v6m0-6h6m-6 0H6">
-                        </path>
-                    </svg>
-                    บันทึกรายการสั่งซื้อใหม่
-                </a>
-            </div>
-            <form action="#" method="GET" class="flex-grow md:max-w-md">
-                <div class="relative">
-                    <input type="text" name="search" placeholder="ค้นหา..." value="{{ request('search') }}"
-                        class="w-full px-4 py-2 rounded-md border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <button type="submit"
-                        class="absolute inset-y-0 right-0 flex items-center px-4 text-gray-700 bg-gray-100 border-l border-gray-300 rounded-r-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-300 ease-in-out">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
-                    </button>
-                </div>
-            </form>
         </div>
     </div>
 
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0 md:space-x-4">
+        <div class="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+            <a href="{{ route('orders.create') }}"
+                class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-300 ease-in-out shadow-md">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6">
+                    </path>
+                </svg>
+                บันทึกรายการสั่งซื้อใหม่
+            </a>
+        </div>
+        <form action="#" method="GET" class="flex-grow md:max-w-md">
+            <div class="relative">
+                <input type="text" name="search" placeholder="ค้นหา..." value="{{ request('search') }}"
+                    class="w-full px-4 py-2 rounded-md border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <button type="submit"
+                    class="absolute inset-y-0 right-0 flex items-center px-4 text-gray-700 bg-white-800 border-l border-gray-300 rounded-r-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-300 ease-in-out">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    </div>
     <!-- ส่วนของตาราง-->
     <div class="p-6">
         <h1 class="text-xl font-bold text-gray-800 mb-4">ประวัติการสั่งซื้อวัตถุดิบ</h1>
@@ -71,132 +118,217 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">
-                    @foreach ($orderSummaries as $summary)
+                    @if ($orders->isEmpty())
                         <tr>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                {{ $summary['order']->order_date->format('d/m/Y H:i') }}
+                            <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                                ไม่มีข้อมูลการสั่งซื้อวัตถุดิบ
                             </td>
-                            <td class="px-2 py-4 whitespace-nowrap">
-                                @php
-                                    $ingredients = $summary['order']->orderDetails->pluck('ingredient.ingredient_name');
-                                @endphp
-                                {{ $ingredients->take(3)->implode(', ') }}{{ $ingredients->count() > 3 ? '...' : '' }}
-                            </td>
+                        </tr>
+                    @else
+                        @foreach ($orders as $order)
+                            @php
+                                $ingredientCount = $order->orderDetails->count('ingredient_id');
+                                $totalPrice = $order->orderDetails->sum('price');
+                                $ingredients = $order->orderDetails->pluck('ingredient.ingredient_name');
+                            @endphp
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {{ $order->order_date->format('d/m/Y H:i') }}
+                                </td>
+                                <td class="px-2 py-4 whitespace-nowrap">
+                                    {{ $ingredients->take(3)->implode(', ') }}{{ $ingredients->count() > 3 ? '...' : '' }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {{ $ingredientCount }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {{ number_format($totalPrice, 2) }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {{ $order->employee->name }}
+                                    @if ($order->employee->deleted_at)
+                                        <span style="color: red;">(ลาออก)</span>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2 text-center">
 
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                {{ $summary['ingredientCount'] }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                {{ number_format($summary['totalPrice'], 2) }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                {{ $summary['order']->employee->name }}
-                                @if ($summary['order']->employee->deleted_at)
-                                    <span style="color: red;">(ลาออก)</span>
-                                @endif
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2 text-center">
-
-                                <a href="{{ route('orders.show', $summary['order']->id) }}"
-                                    class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-indigo-700 bg-white hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                    <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                    </svg>
-                                    ดูรายละเอียด
-                                </a>
-                                @if (auth()->user()->role === 'owner')
-                                    <a href="{{ route('orders.edit', $summary['order']->id) }}"
-                                        class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    <a href="{{ route('orders.show', $order->id) }}"
+                                        class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-indigo-700 bg-white hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                                         <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none"
                                             viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                         </svg>
-                                        แก้ไข
+                                        ดูรายละเอียด
                                     </a>
-
-                                    <form id="delete-form-{{ $summary['order']->id }}"
-                                        action="{{ route('orders.destroy', $summary['order']->id) }}" method="POST"
-                                        class="inline-block">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="button"
-                                            class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                                            onclick="confirmDelete({{ $summary['order']->id }})">
+                                    @if (auth()->user()->role === 'owner')
+                                        <a href="{{ route('orders.edit', $order->id) }}"
+                                            class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                                             <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none"
                                                 viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                             </svg>
-                                            ลบ
-                                        </button>
-                                        <script>
-                                            function confirmDelete(orderId) {
-                                                Swal.fire({
-                                                    title: 'คุณแน่ใจหรือไม่?',
-                                                    html: 'การลบรายการสั่งซื้อจะไม่สามารถกู้คืนได้!<br><br>' +
-                                                        '<span style="color: red; font-weight: bold;">จำนวนวัตถุดิบ จะถูกลบออกตามด้วย</span>',
-                                                    icon: 'warning',
-                                                    showCancelButton: true,
-                                                    confirmButtonColor: '#3085d6',
-                                                    cancelButtonColor: '#d33',
-                                                    confirmButtonText: 'ใช่, ลบเลย!',
-                                                    cancelButtonText: 'ยกเลิก'
-                                                }).then((result) => {
-                                                    if (result.isConfirmed) {
-                                                        // หากผู้ใช้ยืนยันการลบ, ส่งแบบฟอร์ม
-                                                        document.getElementById('delete-form-' + orderId).submit();
-                                                    }
-                                                });
-                                            }
-                                        </script>
-                                    </form>
-                                @endif
-                            </td>
-                        </tr>
-                    @endforeach
+                                            แก้ไข
+                                        </a>
+
+                                        <form id="delete-form-{{ $order->id }}"
+                                            action="{{ route('orders.destroy', $order->id) }}" method="POST"
+                                            class="inline-block">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="button"
+                                                class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                                                onclick="confirmDelete({{ $order->id }})">
+                                                <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg"
+                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                                ลบ
+                                            </button>
+                                            <script>
+                                                function confirmDelete(orderId) {
+                                                    Swal.fire({
+                                                        title: 'คุณแน่ใจหรือไม่?',
+                                                        html: 'การลบรายการสั่งซื้อจะไม่สามารถกู้คืนได้!<br><br>' +
+                                                            '<span style="color: red; font-weight: bold;">จำนวนวัตถุดิบ จะถูกลบออกตามด้วย</span>',
+                                                        icon: 'warning',
+                                                        showCancelButton: true,
+                                                        confirmButtonColor: '#3085d6',
+                                                        cancelButtonColor: '#d33',
+                                                        confirmButtonText: 'ใช่, ลบเลย!',
+                                                        cancelButtonText: 'ยกเลิก'
+                                                    }).then((result) => {
+                                                        if (result.isConfirmed) {
+                                                            // หากผู้ใช้ยืนยันการลบ, ส่งแบบฟอร์ม
+                                                            document.getElementById('delete-form-' + orderId).submit();
+                                                        }
+                                                    });
+                                                }
+                                            </script>
+                                        </form>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    @endif
                 </tbody>
             </table>
+
+
+        </div>
+        <!-- Pagination Links -->
+        <div class="mt-4">
+            {{ $orders->links() }}
         </div>
     </div>
 
+    <!-- เพิ่ม JavaScript สำหรับกราฟ -->
     <script>
-        const monthlyLabels = {!! json_encode(
-            $monthlyData->map(function ($item) {
-                return $item->year . '-' . str_pad($item->month, 2, '0', STR_PAD_LEFT);
-            }),
-        ) !!};
+        let topIngredientsChart;
+        let topIngredientsChartByQuantity;
 
-        const monthlyTotals = {!! json_encode($monthlyData->pluck('total')) !!};
+        window.onload = function() {
+            fetchTopIngredients();
+        };
 
-        const monthlyChartCtx = document.getElementById('monthlyChart').getContext('2d');
-        new Chart(monthlyChartCtx, {
-            type: 'bar',
-            data: {
-                labels: monthlyLabels,
-                datasets: [{
-                    label: 'ยอดการสั่งซื้อ (บาท)',
-                    data: monthlyTotals,
-                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1,
-                }]
-            },
-            options: {
-                scales: {
-                    x: {
-                        display: true
-                    },
-                    y: {
-                        display: true,
-                        beginAtZero: true
+        function fetchTopIngredients() {
+            const limit = document.getElementById('topLimit').value;
+
+            // ดึงข้อมูลวัตถุดิบที่ถูกสั่งซื้อบ่อยที่สุด (จำนวนครั้ง)
+            fetch(`/orders/top-ingredients/count?limit=${limit}`)
+                .then(response => response.json())
+                .then(data => {
+                    const ctx = document.getElementById('topIngredientsChart').getContext('2d');
+
+                    if (topIngredientsChart) {
+                        topIngredientsChart.destroy();
                     }
-                }
-            }
-        });
+
+                    topIngredientsChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: data.map(item => item.ingredient_name),
+                            datasets: [{
+                                label: 'จำนวนครั้งที่สั่งซื้อ',
+                                data: data.map(item => item.order_count),
+                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    title: {
+                                        display: true,
+                                        text: 'จำนวนครั้งที่สั่งซื้อ'
+                                    }
+                                },
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'วัตถุดิบ'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching top ingredients by count:', error);
+                });
+
+            // ดึงข้อมูลวัตถุดิบที่ถูกสั่งซื้อในปริมาณมากที่สุด (ปริมาณ)
+            fetch(`/orders/top-ingredients/quantity?limit=${limit}`)
+                .then(response => response.json())
+                .then(data => {
+                    const ctx = document.getElementById('topIngredientsChartByQuantity').getContext('2d');
+
+                    if (topIngredientsChartByQuantity) {
+                        topIngredientsChartByQuantity.destroy();
+                    }
+
+                    topIngredientsChartByQuantity = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: data.map(item => item.ingredient_name),
+                            datasets: [{
+                                label: 'ปริมาณที่สั่งซื้อ',
+                                data: data.map(item => item.total_quantity),
+                                backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                                borderColor: 'rgba(255, 206, 86, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    title: {
+                                        display: true,
+                                        text: 'ปริมาณที่สั่งซื้อ'
+                                    }
+                                },
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'วัตถุดิบ'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching top ingredients by quantity:', error);
+                });
+        }
     </script>
 @endsection

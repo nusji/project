@@ -14,6 +14,7 @@ class ProductionDetail extends Model
         'production_id',
         'menu_id',
         'quantity',
+        'remaining_amount',
         'is_sold_out', // Add this line
     ];
 
@@ -25,6 +26,10 @@ class ProductionDetail extends Model
     public function menu()
     {
         return $this->belongsTo(Menu::class)->withTrashed();
+    }
+
+    public function menuAllocationDetail() {
+        return $this->belongsTo(MenuAllocationDetail::class, 'menu_id', 'menu_id');
     }
     
 }

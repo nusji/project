@@ -4,48 +4,77 @@
         <!-- เรียกใช้ breadcrumb component -->
         <x-breadcrumb :paths="[['label' => 'ระบบเมนูข้าวแกง', 'url' => route('menus.index')], ['label' => '']]" />
         <h2 class="text-2xl font-bold text-gray-800 mb-4">ระบบจัดการเมนูข้าวแกง</h2>
-        <div class="bg-white shadow-lg rounded-lg p-6 flex flex-col h-full mb-2">
-            <h3 class="text-xl font-semibold text-gray-800 mb-4">วัตถุดิบตามประเภท</h3>
-            <div style="display: flex;">
-                <!-- ส่วนของกราฟ -->
-                <div style="flex: 1;">
-                    <canvas id="menuTypeChart" width="300" height="300"></canvas>
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <div class="bg-white shadow-lg rounded-lg p-6 flex flex-col h-full mb-2">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">เมนูตามประเภท</h3>
+                <div style="display: flex;">
+                    <!-- ส่วนของกราฟ -->
+                    <div style="flex: 1;">
+                        <canvas id="menuTypeChart" width="200" height="200"></canvas>
+                    </div>
+                    <!-- ส่วนของข้อความกำกับข้างๆ กราฟ -->
+                    <div id="chartLabels" style="flex: 1; padding-left: 0 px;">
+                        <!-- ข้อความจะถูกเติมในนี้ผ่าน JavaScript -->
+                    </div>
                 </div>
-                <!-- ส่วนของข้อความกำกับข้างๆ กราฟ -->
-                <div id="chartLabels" style="flex: 1; padding-left: 20px;">
-                    <!-- ข้อความจะถูกเติมในนี้ผ่าน JavaScript -->
-                </div>
+            </div>
+            <!-- ส่วนแสดงเมนูที่มีคะแนนเฉลี่ยต่ำ -->
+            <div class="bg-white shadow-lg rounded-lg p-6 flex flex-col h-full mb-2 border-red-50">
+                <h3 class="text-xl font-semibold text-red-800 mb-4">เมนูที่มีคะแนนเฉลี่ยต่ำ</h3>
+                @if ($lowRatedMenus->isEmpty())
+                    <p class="text-gray-700">ไม่มีเมนูที่มีการให้คะแนน</p>
+                @else
+                    <ul class="list-disc list-inside space-y-2">
+                        @foreach ($lowRatedMenus as $menu)
+                            <li>
+                                <span class="font-semibold">{{ $menu->menu_name }}</span>
+                                <span class="text-gray-600">- คะแนนเฉลี่ย:
+                                    {{ number_format($menu->feedbacks_avg_rating, 1) }} / 5</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
             </div>
         </div>
         <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0 md:space-x-4">
             @if (auth()->user()->role === 'owner')
-            <div class="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
-                <a href="{{ route('menus.create') }}"
-                    class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-300 ease-in-out shadow-md">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 6v6m0 0v6m0-6h6m-6 0H6">
-                        </path>
-                    </svg>
-                    เพิ่มเมนูใหม่
-                </a>
-                <a href="{{ route('menu_types.index') }}"
-                    class="inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-300 ease-in-out shadow-md">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 6h16M4 10h16M4 14h16M4 18h16">
-                        </path>
-                    </svg>
-                    จัดการประเภท
-                </a>
-            </div>
+                <div class="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                    <a href="{{ route('menus.create') }}"
+                        class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-300 ease-in-out shadow-md">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 6v6m0 0v6m0-6h6m-6 0H6">
+                            </path>
+                        </svg>
+                        เพิ่มเมนูใหม่
+                    </a>
+                    <a href="{{ route('menu_types.index') }}"
+                        class="inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-300 ease-in-out shadow-md">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 10h16M4 14h16M4 18h16">
+                            </path>
+                        </svg>
+                        จัดการประเภท
+                    </a>
+                </div>
             @endif
-            <div>
-                <!-- เรียกใช้ search form component -->
-                <x-search-form :search="$search" />
-            </div>
+            <form action="#" method="GET" class="flex-grow md:max-w-md">
+                <div class="relative">
+                    <input type="text" name="search" placeholder="ค้นหา..." value="{{ request('search') }}"
+                        class="w-full px-4 py-2 rounded-md border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <button type="submit"
+                        class="absolute inset-y-0 right-0 flex items-center px-4 text-gray-700 bg-white-800 border-l border-gray-300 rounded-r-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-300 ease-in-out">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </form>
         </div>
         <!-- ส่วนของตาราง-->
         <div class="p-6">
@@ -64,10 +93,10 @@
                                 ราคา
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                สถานะขาย
+                                รูปเมนู
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                รูปเมนู
+                                การขาย(ทัพพี)
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 จัดการ
@@ -94,12 +123,6 @@
                                         {{ number_format($menu->menu_price, 2) }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <span
-                                            class="@if ($menu->menu_status) bg-green-200 text-green-600 @else bg-red-200 text-red-600 @endif py-1 px-3 rounded-full text-xs">
-                                            {{ $menu->menu_status ? 'พร้อมขาย' : 'ไม่พร้อมขาย' }}
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
                                         @if ($menu->menu_image)
                                             <img src="{{ asset('storage/' . $menu->menu_image) }}"
                                                 alt="{{ $menu->menu_name }}" class="w-16 h-16 object-cover rounded-md">
@@ -107,7 +130,9 @@
                                             <span class="text-gray-400">ไม่มีรูปภาพ</span>
                                         @endif
                                     </td>
-
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        {{ $menu->saleDetails->sum('quantity') }} ทัพพี
+                                    </td>
                                     <!-- ส่วนของการจัดการ -->
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2 text-center">
                                         <a href="{{ route('menus.show', $menu) }}"
@@ -132,8 +157,8 @@
                                                 แก้ไขเมนู
                                             </a>
                                             <form id="delete-form-{{ $menu->id }}"
-                                                action="{{ route('menus.destroy', ['menu' => $menu->id]) }}" method="POST"
-                                                class="inline-block">
+                                                action="{{ route('menus.destroy', ['menu' => $menu->id]) }}"
+                                                method="POST" class="inline-block">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="button"
@@ -185,7 +210,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             var ctx = document.getElementById('menuTypeChart').getContext('2d');
             var data = @json($menuTypes);
-    
+
             // สร้างกราฟโดนัท
             new Chart(ctx, {
                 type: 'doughnut',
@@ -213,12 +238,13 @@
                     }
                 }
             });
-    
+
             // สร้างข้อความกำกับข้างๆ กราฟ
             var chartLabels = document.getElementById('chartLabels');
             data.forEach(function(item, index) {
                 var label = document.createElement('p');
-                label.innerHTML = `<span style="color: ${['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82ca9d', '#a4de6c', '#d0ed57', '#ffc658', '#8884d8'][index]};">●</span> ${item.type} : ${item.count} รายการ`;
+                label.innerHTML =
+                    `<span style="color: ${['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82ca9d', '#a4de6c', '#d0ed57', '#ffc658', '#8884d8'][index]};">●</span> ${item.type} : ${item.count} เมนู`;
                 chartLabels.appendChild(label);
             });
         });

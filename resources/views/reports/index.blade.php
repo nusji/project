@@ -1,156 +1,140 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold text-gray-800 mb-8">รายงานและสถิติ</h1>
+    <div class="container mx-auto px-4 py-0">
+        <!-- เรียกใช้ breadcrumb component -->
+        <x-breadcrumb :paths="[['label' => 'ระบบรายงานและสถิติ', 'url' => route('reports.index')], ['label' => '']]" />
+        <h1 class="text-3xl font-bold mb-8 text-center">ระบบรายงานและสถิติ</h1>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <!-- Top Selling Menus -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-xl font-semibold text-gray-700 mb-4">เมนูขายดีที่สุด</h2>
-            <canvas id="topSellingMenusChart"></canvas>
+        <!-- แสดงการ์ดหรือปุ่มสำหรับเข้าถึงรายงานต่างๆ -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            <!-- รายงานเมนูขายดี -->
+            <a href="{{ route('reports.bestSellingMenus') }}"
+                class="block bg-blue-500 hover:bg-blue-700 text-white font-bold py-6 px-4 rounded-lg text-center">
+                <span class="text-xl">รายงานเมนูขายดี</span>
+            </a>
+
+            <!-- รายงานเมนูขายไม่หมด -->
+            <a href="{{ route('reports.unsoldMenus') }}"
+                class="block bg-red-500 hover:bg-red-700 text-white font-bold py-6 px-4 rounded-lg text-center">
+                <span class="text-xl">รายงานเมนูขายไม่หมด</span>
+            </a>
+
+            <!-- รายงานการหมุนเวียนเมนู -->
+            <a href="{{ route('reports.menuRotation') }}"
+                class="block bg-green-500 hover:bg-green-700 text-white font-bold py-6 px-4 rounded-lg text-center">
+                <span class="text-xl">รายงานการหมุนเวียนเมนู</span>
+            </a>
+
+            <!-- รายงานคาดการณ์ปริมาณการผลิต -->
+            <a href="{{ route('reports.productionForecast') }}"
+                class="block bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-6 px-4 rounded-lg text-center">
+                <span class="text-xl">รายงานคาดการณ์การผลิต</span>
+            </a>
+
+            <!-- รายงานแนวโน้มความนิยมของเมนู -->
+            <a href="{{ route('reports.menuTrends') }}"
+                class="block bg-purple-500 hover:bg-purple-700 text-white font-bold py-6 px-4 rounded-lg text-center">
+                <span class="text-xl">รายงานแนวโน้มความนิยมของเมนู</span>
+            </a>
+
+            <!-- รายงานการสูญเสียทรัพยากร -->
+            <a href="{{ route('reports.resourceLoss') }}"
+                class="block bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-6 px-4 rounded-lg text-center">
+                <span class="text-xl">รายงานการสูญเสียทรัพยากร</span>
+            </a>
+
+            <!-- รายงานความพึงพอใจของลูกค้า -->
+            <a href="{{ route('reports.customerFeedback') }}"
+                class="block bg-teal-500 hover:bg-teal-700 text-white font-bold py-6 px-4 rounded-lg text-center">
+                <span class="text-xl">รายงานความพึงพอใจของลูกค้า</span>
+            </a>
+
+            <!-- รายงานต้นทุนและกำไรของเมนู -->
+            <a href="{{ route('reports.menuProfitability') }}"
+                class="block bg-orange-500 hover:bg-orange-700 text-white font-bold py-6 px-4 rounded-lg text-center">
+                <span class="text-xl">รายงานต้นทุนและกำไรของเมนู</span>
+            </a>
+
+            <!-- รายงานปริมาณวัตถุดิบคงเหลือ -->
+            <a href="{{ route('reports.ingredientStock') }}"
+                class="block bg-gray-500 hover:bg-gray-700 text-white font-bold py-6 px-4 rounded-lg text-center">
+                <span class="text-xl">รายงานปริมาณวัตถุดิบคงเหลือ</span>
+            </a>
         </div>
 
-        <!-- Least Selling Menus -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-xl font-semibold text-gray-700 mb-4">เมนูขายไม่ค่อยดี</h2>
-            <canvas id="leastSellingMenusChart"></canvas>
+        <!-- Profit Analysis -->
+        <div class="bg-white rounded-lg shadow-md p-6 mt-8">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">การวิเคราะห์กำไรจากยอดขาย (30 วันล่าสุด)</h2>
+            <p class="text-xl font-semibold text-gray-700 mb-4">(ยอดขายรวม) - (ราคารวมสั่งซื้อวัตถุดิบ)</p>
+            <canvas id="profitAnalysisChart" height="100" width="400"></canvas>
         </div>
 
-        <!-- Most Used Ingredients -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-xl font-semibold text-gray-700 mb-4">วัตถุดิบที่ถูกใช้มากที่สุด</h2>
-            <canvas id="mostUsedIngredientsChart"></canvas>
-        </div>
-
-        <!-- Daily Sales -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-xl font-semibold text-gray-700 mb-4">ยอดขายรายวัน</h2>
-            <canvas id="dailySalesChart"></canvas>
-        </div>
     </div>
-</div>
-<script>
-    const chartOptions = {
-        responsive: true,
-        plugins: {
-            legend: {
-                position: 'top',
+    <script>
+        const chartOptions = {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    font: {
+                        size: 16
+                    }
+                }
             },
-            title: {
-                display: true,
-                font: {
-                    size: 16
+            scales: {
+                y: {
+                    beginAtZero: true
                 }
             }
-        },
-        scales: {
-            y: {
-                beginAtZero: true
-            }
-        }
-    };
-
-    // Top Selling Menus Chart
-    new Chart(document.getElementById('topSellingMenusChart'), {
-        type: 'bar',
-        data: {
-            labels: {!! json_encode($topSellingMenus->pluck('menu.menu_name')) !!},
-            datasets: [{
-                label: 'Total Sold',
-                data: {!! json_encode($topSellingMenus->pluck('total_sold')) !!},
-                backgroundColor: 'rgba(59, 130, 246, 0.5)', // Tailwind blue-500 with opacity
-                borderColor: 'rgb(59, 130, 246)', // Tailwind blue-500
-                borderWidth: 1
-            }]
-        },
-        options: {
-            ...chartOptions,
-            plugins: {
-                ...chartOptions.plugins,
-                title: {
-                    ...chartOptions.plugins.title,
-                    text: 'Top Selling Menus'
+        };
+        // Profit Analysis Chart
+        new Chart(document.getElementById('profitAnalysisChart'), {
+            type: 'line', // ใช้ประเภทแผนภูมิเส้นเพื่อแสดงแนวโน้มกำไร
+            data: {
+                labels: {!! json_encode($profitAnalysis->pluck('date')) !!},
+                datasets: [{
+                        label: 'ยอดขายรวม',
+                        data: {!! json_encode($profitAnalysis->pluck('total_sales')) !!},
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)', // Tailwind blue-500 with opacity
+                        borderColor: 'rgb(59, 130, 246)', // Tailwind blue-500
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0.1
+                    },
+                    {
+                        label: 'ราคาสั่งซื้อรวม',
+                        data: {!! json_encode($profitAnalysis->pluck('total_purchase')) !!},
+                        backgroundColor: 'rgba(239, 68, 68, 0.2)', // Tailwind red-500 with opacity
+                        borderColor: 'rgb(239, 68, 68)', // Tailwind red-500
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0.1
+                    },
+                    {
+                        label: 'กำไร',
+                        data: {!! json_encode($profitAnalysis->pluck('profit')) !!},
+                        backgroundColor: 'rgba(34, 197, 94, 0.2)', // Tailwind green-500 with opacity
+                        borderColor: 'rgb(34, 197, 94)', // Tailwind green-500
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0.1
+                    }
+                ]
+            },
+            options: {
+                ...chartOptions,
+                plugins: {
+                    ...chartOptions.plugins,
+                    title: {
+                        ...chartOptions.plugins.title,
+                        text: 'การวิเคราะห์กำไรจากยอดขาย (30 วันล่าสุด)'
+                    }
                 }
             }
-        }
-    });
-
-    // Least Selling Menus Chart
-    new Chart(document.getElementById('leastSellingMenusChart'), {
-        type: 'bar',
-        data: {
-            labels: {!! json_encode($leastSellingMenus->pluck('menu.menu_name')) !!},
-            datasets: [{
-                label: 'Total Sold',
-                data: {!! json_encode($leastSellingMenus->pluck('total_sold')) !!},
-                backgroundColor: 'rgba(239, 68, 68, 0.5)', // Tailwind red-500 with opacity
-                borderColor: 'rgb(239, 68, 68)', // Tailwind red-500
-                borderWidth: 1
-            }]
-        },
-        options: {
-            ...chartOptions,
-            plugins: {
-                ...chartOptions.plugins,
-                title: {
-                    ...chartOptions.plugins.title,
-                    text: 'Least Selling Menus'
-                }
-            }
-        }
-    });
-
-    // Most Used Ingredients Chart
-    new Chart(document.getElementById('mostUsedIngredientsChart'), {
-        type: 'bar',
-        data: {
-            labels: {!! json_encode($mostUsedIngredients->pluck('ingredient_name')) !!},
-            datasets: [{
-                label: 'Total Used',
-                data: {!! json_encode($mostUsedIngredients->pluck('total_used')) !!},
-                backgroundColor: 'rgba(16, 185, 129, 0.5)', // Tailwind green-500 with opacity
-                borderColor: 'rgb(16, 185, 129)', // Tailwind green-500
-                borderWidth: 1
-            }]
-        },
-        options: {
-            ...chartOptions,
-            plugins: {
-                ...chartOptions.plugins,
-                title: {
-                    ...chartOptions.plugins.title,
-                    text: 'Most Used Ingredients'
-                }
-            }
-        }
-    });
-
-    // Daily Sales Chart
-    new Chart(document.getElementById('dailySalesChart'), {
-        type: 'line',
-        data: {
-            labels: {!! json_encode($dailySales->pluck('date')) !!},
-            datasets: [{
-                label: 'Total Sales',
-                data: {!! json_encode($dailySales->pluck('daily_sales')) !!},
-                backgroundColor: 'rgba(139, 92, 246, 0.5)', // Tailwind purple-500 with opacity
-                borderColor: 'rgb(139, 92, 246)', // Tailwind purple-500
-                borderWidth: 2,
-                fill: false,
-                tension: 0.1
-            }]
-        },
-        options: {
-            ...chartOptions,
-            plugins: {
-                ...chartOptions.plugins,
-                title: {
-                    ...chartOptions.plugins.title,
-                    text: 'Daily Sales'
-                }
-            }
-        }
-    });
-</script>
+        });
+    </script>
 @endsection

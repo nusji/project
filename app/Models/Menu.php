@@ -20,6 +20,7 @@ class Menu extends Model
         'menu_status',
         'menu_taste',
         'menu_image',
+        'portion_size',
     ];
 
     public function menuType()
@@ -49,5 +50,19 @@ class Menu extends Model
         return $this->hasMany(ProductionDetail::class, 'menu_id'); // ความสัมพันธ์แบบ One-to-Many
     }
 
+    public function saleDetails()
+    {
+        return $this->hasMany(SaleDetail::class, 'menu_id'); // ความสัมพันธ์แบบ One-to-Many
+    }
+
+    public function feedbacks()
+    {
+        return $this->hasMany(Feedback::class, 'menu_id'); // ความสัมพันธ์แบบ One-to-Many
+    }
+
+    public function sales()
+    {
+        return $this->hasMany(Sale::class, 'menu_id', 'id');
+    }
 
 }

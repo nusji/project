@@ -4,6 +4,20 @@
         <!-- เรียกใช้ breadcrumb component -->
         <x-breadcrumb :paths="[['label' => 'ระบบจัดการผลิต', 'url' => route('productions.index')], ['label' => '']]" />
         <h2 class="text-2xl font-bold text-gray-800 mb-4">ระบบจัดการผลิต</h2>
+        <div class="grid grid-cols-1 gap-4 mb-4">
+            <div class="bg-white shadow-lg rounded-lg p-6 flex flex-col h-full mb-2">
+                <h3 class="text-xl font-semibold text-gray-700 mb-4">กราฟการผลิตเมนูที่ผลิตมากที่สุด</h3>
+                <div style="display: flex;">
+                    <!-- ส่วนของกราฟ -->
+                    <div style="flex: 1;">
+                        <canvas id="menuProductionChart" width="400" height="200"></canvas>
+                        <!-- ข้อความจะถูกเติมในนี้ผ่าน JavaScript -->
+                    </div>
+                   
+                </div>
+            </div>
+        </div>
+
         @if (auth()->user()->role === 'owner')
             <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0 md:space-x-4">
                 <div class="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
@@ -19,24 +33,27 @@
                     </a>
                 </div>
         @endif
-        <a href="{{ route('allocations.index') }}" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-            View Menu Allocations
-        </a>
-        
-        <form action="#" method="GET" class="flex-grow md:max-w-md">
-            <div class="relative">
-                <input type="text" name="search" placeholder="ค้นหา..." value="{{ request('search') }}"
-                    class="w-full px-4 py-2 rounded-md border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                <button type="submit"
-                    class="absolute inset-y-0 right-0 flex items-center px-4 text-gray-700 bg-gray-100 border-l border-gray-300 rounded-r-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-300 ease-in-out">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
-                </button>
-            </div>
-        </form>
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <form action="#" method="GET" class="flex-grow md:max-w-md">
+                <div class="relative">
+                    <input type="text" name="search" placeholder="ค้นหา..." value="{{ request('search') }}"
+                        class="w-full px-4 py-2 rounded-md border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <button type="submit"
+                        class="absolute inset-y-0 right-0 flex items-center px-4 text-gray-700 bg-gray-100 border-l border-gray-300 rounded-r-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-300 ease-in-out">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </form>
+            
+            <a href="{{ route('allocations.index') }}" class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-300 ease-in-out shadow-md">
+                ดูรายการจัดสรรเมนูรายวัน
+            </a>
+        </div>
+
 
     </div>
 
@@ -57,10 +74,7 @@
                             รายละเอียด
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            เมนูที่ผลิต
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            จำนวนกิโลกรัมที่ผลิต
+                            จำนวนเมนูที่ผลิตทั้งหมด
                         </th>
                         <th
                             class="text-center px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -88,14 +102,7 @@
                                     {{ $production->production_detail }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <ul>
-                                        @foreach ($production->productionDetails as $detail)
-                                            <li>{{ $detail->menu->menu_name }} ({{ $detail->quantity }})</li>
-                                        @endforeach
-                                    </ul>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    {{ $production->productionDetails->sum('quantity') }}
+                                    {{ $production->productionDetails->count('menu_id') }}
                                 </td>
                                 <!-- ส่วนของการจัดการ -->
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2 text-center">
@@ -163,6 +170,54 @@
                 </tbody>
             </table>
         </div>
+        <div class="m-5">
+            {{ $productions->links() }}
+        </div>
     </div>
-
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var ctx = document.getElementById('menuProductionChart').getContext('2d');
+            var menuProductionChart = new Chart(ctx, {
+                type: 'bar', // สามารถเปลี่ยนเป็น 'pie', 'line' ตามต้องการ
+                data: {
+                    labels: @json($chartLabels),
+                    datasets: [{
+                        label: 'จำนวนการผลิต',
+                        data: @json($chartData),
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'จำนวนการผลิต'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'เมนู'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: false,
+                            text: 'จำนวนการผลิตเมนู'
+                        }
+                    }
+                }
+            });
+        });
+    </script>
 @endsection

@@ -24,4 +24,5 @@ class SaleDetail extends Model
     {
         return $this->belongsTo(Menu::class);
     }
+    
 }

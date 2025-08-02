@@ -17,6 +17,7 @@ class Payroll extends Model
         'net_salary',
         'payment_date',
         'payment_method',
+        'slip_image',
     ];
 
     // Relationship with Employee

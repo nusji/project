@@ -16,23 +16,60 @@ class ProductionController extends Controller
 {
     public function index()
     {
-        $productions = Production::with('productionDetails.menu')->get();
-        return view('productions.index', compact('productions'));
+        $productions = Production::with('productionDetails.menu')
+            ->orderBy('id', 'desc')
+            ->paginate(20);
+
+        // ดึงข้อมูลการผลิตรวมต่อเมนู
+        $menuProductionCounts = ProductionDetail::select('menu_id', DB::raw('SUM(quantity) as total_produced'))
+            ->groupBy('menu_id')
+            ->orderBy('total_produced', 'desc')
+            ->take(10) // แสดงเฉพาะ 10 เมนูที่ผลิตมากที่สุด
+            ->with('menu')
+            ->get();
+
+        // เตรียมข้อมูลสำหรับกราฟ
+        $chartLabels = $menuProductionCounts->pluck('menu.menu_name')->toArray();
+        $chartData = $menuProductionCounts->pluck('total_produced')->toArray();
+
+        return view('productions.index', compact('productions', 'chartLabels', 'chartData'));
     }
+
 
     public function create()
     {
-        $menus = Menu::all(); // Assuming you have a Menu model
-        $menuCategories = MenuType::all(); // MenuCategory เป็นโมเดลของตารางประเภทเมนู
-        return view('productions.create', compact('menus', 'menuCategories'));
+        // ดึงเมนูที่ขายดีที่สุด โดยนับจำนวนยอดขายในตาราง sale_details
+        $bestSellingMenus = Menu::withCount('saleDetails') // ใช้ 'saleDetails' แทน 'sales'
+            ->orderBy('sale_details_count', 'desc') // เรียงจากยอดขายสูงสุด
+            ->take(10) // ดึงเฉพาะเมนูที่ขายดีที่สุด 10 เมนู
+            ->get();
+
+        // ดึงเมนูที่ไม่ใช่เมนูที่ขายดีที่สุด
+        $regularMenus = Menu::whereNotIn('id', $bestSellingMenus->pluck('id'))
+            ->get();
+
+        // ดึงประเภทเมนูทั้งหมด
+        $menuTypes = MenuType::all();
+
+        // ดึงข้อมูลวัตถุดิบทั้งหมดจากฐานข้อมูล
+        $ingredients = Ingredient::all();
+
+        // ดึงข้อมูลสูตรเมนูจากตาราง menu_recipes
+        $menuRecipes = MenuRecipe::with('ingredient')->get(); // เชื่อมโยงกับวัตถุดิบ
+
+        // รวมเมนูทั้งหมดเพื่อใช้ในการแสดงผลในฟอร์ม
+        $menus = $bestSellingMenus->concat($regularMenus);
+
+        return view('productions.create', compact('bestSellingMenus', 'regularMenus', 'menuTypes', 'menus', 'ingredients', 'menuRecipes'));
     }
+
 
     public function store(Request $request)
     {
         $validatedData = $request->validate(
             [
                 'production_date' => 'required|date',
-                'production_detail' => 'required|string',
+                'production_detail' => 'nullable|string',
                 'menus' => 'required|array',
                 'menus.*.id' => 'required|exists:menus,id',
                 'menus.*.quantity' => 'required|numeric|min:1',
@@ -40,7 +77,6 @@ class ProductionController extends Controller
             [
                 'production_date.required' => 'กรุณาเลือกวันที่ผลิต',
                 'production_date.date' => 'รูปแบบวันที่ผิดพลาด',
-                'production_detail.required' => 'กรุณากรอกรายละเอียดการผลิต',
                 'menus.required' => 'กรุณาเลือกเมนูที่ต้องการผลิต',
                 'menus.*.id.required' => 'เมนูไม่ถูกต้อง',
                 'menus.*.id.exists' => 'เมนูไม่ถูกต้อง',
@@ -54,24 +90,51 @@ class ProductionController extends Controller
 
         try {
             $insufficientIngredients = [];
+            $totalRequiredIngredients = [];
 
+            // สะสมจำนวนวัตถุดิบที่ต้องการทั้งหมด
             foreach ($validatedData['menus'] as $menuData) {
-                $menu = Menu::findOrFail($menuData['id']);
+                $menu = Menu::with('recipes.ingredient')->findOrFail($menuData['id']);
                 $quantityToProduce = $menuData['quantity'];
 
-                // ตรวจสอบวัตถุดิบในสูตรของเมนู (menu_recipes)
                 foreach ($menu->recipes as $recipe) {
-                    $ingredient = $recipe->ingredient;
-                    $totalRequired = $recipe->amount * $quantityToProduce;
+                    $ingredientId = $recipe->ingredient->id;
+                    $requiredAmount = $recipe->amount * $quantityToProduce;
 
-                    if ($ingredient->ingredient_stock < $totalRequired) {
-                        $insufficientIngredients[] = [
-                            'menu_name' => $menu->menu_name,
-                            'ingredient_name' => $ingredient->ingredient_name,
-                            'required' => $totalRequired,
-                            'available' => $ingredient->ingredient_stock,
-                            'unit' => $ingredient->ingredient_unit,
-                        ];
+                    if (!isset($totalRequiredIngredients[$ingredientId])) {
+                        $totalRequiredIngredients[$ingredientId] = 0;
+                    }
+
+                    $totalRequiredIngredients[$ingredientId] += $requiredAmount;
+                }
+            }
+
+            // ตรวจสอบว่าวัตถุดิบเพียงพอ
+            foreach ($totalRequiredIngredients as $ingredientId => $requiredAmount) {
+                $ingredient = Ingredient::findOrFail($ingredientId);
+
+                if ($ingredient->ingredient_stock < $requiredAmount) {
+                    // หาเมนูที่ต้องใช้วัตถุดิบนี้
+                    $affectedMenus = collect($validatedData['menus'])->filter(function ($menuData) use ($ingredientId) {
+                        $menu = Menu::with('recipes')->find($menuData['id']);
+                        return $menu->recipes->contains(function ($recipe) use ($ingredientId) {
+                            return $recipe->ingredient_id == $ingredientId;
+                        });
+                    });
+
+                    foreach ($affectedMenus as $menuData) {
+                        $menu = Menu::with('recipes.ingredient')->findOrFail($menuData['id']);
+                        foreach ($menu->recipes as $recipe) {
+                            if ($recipe->ingredient_id == $ingredientId) {
+                                $insufficientIngredients[] = [
+                                    'menu_name' => $menu->menu_name,
+                                    'ingredient_name' => $ingredient->ingredient_name,
+                                    'required' => $recipe->amount * $menuData['quantity'],
+                                    'available' => $ingredient->ingredient_stock,
+                                    'unit' => $ingredient->ingredient_unit,
+                                ];
+                            }
+                        }
                     }
                 }
             }
@@ -91,12 +154,20 @@ class ProductionController extends Controller
             $production->save();
 
             foreach ($validatedData['menus'] as $menuData) {
-                $production->menus()->attach($menuData['id'], ['quantity' => $menuData['quantity']]);
+                $menu = Menu::with('recipes.ingredient')->findOrFail($menuData['id']);
+                $production->menus()->attach($menuData['id'], [
+                    'quantity' => $menuData['quantity'],
+                    'remaining_amount' => $menuData['quantity'], // จำนวนที่เหลือ
+                ]);
 
                 // หักลบสต็อกวัตถุดิบ
                 foreach ($menu->recipes as $recipe) {
                     $ingredient = $recipe->ingredient;
                     $deductAmount = $recipe->amount * $menuData['quantity'];
+                    // ตรวจสอบอีกครั้งก่อนหักสต็อก
+                    if ($ingredient->ingredient_stock < $deductAmount) {
+                        throw new \Exception("สต็อกวัตถุดิบ {$ingredient->ingredient_name} ไม่เพียงพอสำหรับการหักลบ");
+                    }
                     $ingredient->decrement('ingredient_stock', $deductAmount);
                 }
             }
@@ -109,6 +180,7 @@ class ProductionController extends Controller
             return redirect()->back()->with('error', 'เกิดข้อผิดพลาดในการบันทึกรายการผลิต: ' . $e->getMessage())->withInput();
         }
     }
+
 
     public function show(Production $production)
     {
@@ -148,51 +220,5 @@ class ProductionController extends Controller
             Log::error('Production destroy error: ' . $e->getMessage());
             return redirect()->route('productions.index')->with('error', 'เกิดข้อผิดพลาดในการยกเลิกรายการผลิต: ' . $e->getMessage());
         }
-    }
-
-    // แสดงเมนูที่ผลิตในวันนี้ ในฝั่งของคนดู
-    public function showWelcomePage()
-    {
-        // กำหนดวันที่วันนี้
-        $today = now()->startOfDay();
-
-        // ดึงข้อมูลจากตาราง production โดยใช้ created_at จากตาราง production
-        $menus = Production::whereDate('created_at', $today)
-            ->with(['productionDetails.menu'])  // เชื่อมโยงกับ production_details และ menu
-            ->get()
-            ->pluck('productionDetails.*.menu')  // ดึงเฉพาะข้อมูลเมนู
-            ->flatten();  // แบนข้อมูลเพื่อให้อยู่ในรูปแบบที่ง่ายต่อการใช้งาน
-
-        // ตรวจสอบว่าเมนูมีค่าของ menu_image
-        foreach ($menus as $menu) {
-            if (empty($menu->menu_image)) {
-
-                Log::warning('Menu ' . $menu->name . ' does not have an image.');
-            }
-        }
-
-        return view('welcome', compact('menus'));
-    }
-    public function showMenuToday()
-    {
-        // กำหนดวันที่วันนี้
-        $today = now()->startOfDay();
-
-        // ดึงข้อมูลจากตาราง production โดยใช้ created_at จากตาราง production
-        $menus = Production::whereDate('created_at', $today)
-            ->with(['productionDetails.menu'])
-            ->get()
-            ->pluck('productionDetails.*.menu')
-            ->flatten();
-
-        // ตรวจสอบว่าเมนูมีค่าของ menu_image
-        foreach ($menus as $menu) {
-            if (empty($menu->menu_image)) {
-
-                Log::warning('Menu ' . $menu->name . ' does not have an image.');
-            }
-        }
-
-        return view('menu-today', compact('menus'));
     }
 }

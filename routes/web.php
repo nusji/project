@@ -16,13 +16,51 @@ use App\Http\Controllers\SalaryController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\MenuAllocationController;
 use App\Http\Controllers\FinanceController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\ReportController;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+
 Route::get('/no-access', function () {
     return view('no-access');
 });
+
+Route::controller(HomeController::class)->group(function () {
+    Route::get('/', 'showWelcomePage')->name('welcome');
+    Route::get('/home', 'showWelcomePage')->name('home');
+    Route::get('/about', 'showAboutPage')->name('about');
+    Route::get('/survey-suggest', 'showSurvey')->name('survey-suggest');
+    Route::post('/survey-suggest/query-menus', 'queryMenus')->name('survey-suggest.queryMenus');
+    Route::get('menu-today', 'showMenu')->name('menu-today');
+});
+
+Route::controller(FeedbackController::class)->group(function () {
+    Route::get('/feedbacks', 'index')->name('feedbacks.index');
+    Route::get('/feedbacks/create', 'create')->name('feedbacks.create');
+    Route::post('/feedbacks', 'store')->name('feedbacks.store');
+    Route::get('/feedbacks/review', 'review')->name('feedbacks.review');
+});
+
+
+Route::prefix('reports')->name('reports.')->group(function () {
+    Route::get('/', [ReportController::class, 'index'])->name('index');
+    Route::get('/sales-leftover', [ReportController::class, 'SalesLeftover'])->name('sales_leftover');
+    Route::get('/daily-sales', [ReportController::class, 'index'])->name('daily_sales');
+    Route::get('/weekly-sales', [ReportController::class, 'index'])->name('weekly_sales');
+    Route::get('/monthly-sales', [ReportController::class, 'index'])->name('monthly_sales');
+});
+Route::get('/reports/best-selling-menus', [ReportController::class, 'bestSellingMenus'])->name('reports.bestSellingMenus');
+Route::get('/reports/unsold-menus', [ReportController::class, 'unsoldMenus'])->name('reports.unsoldMenus');
+Route::get('/reports/menu-rotation', [ReportController::class, 'menuRotation'])->name('reports.menuRotation');
+Route::get('/reports/production-forecast', [ReportController::class, 'productionForecast'])->name('reports.productionForecast');
+Route::get('/reports/menu-trends', [ReportController::class, 'menuTrends'])->name('reports.menuTrends');
+Route::get('/reports/resource-loss', [ReportController::class, 'resourceLoss'])->name('reports.resourceLoss');
+Route::get('/reports/customer-feedback', [ReportController::class, 'customerFeedback'])->name('reports.customerFeedback');
+Route::get('/reports/menu-profitability', [ReportController::class, 'menuProfitability'])->name('reports.menuProfitability');
+Route::get('/reports/ingredient-stock', [ReportController::class, 'ingredientStock'])->name('reports.ingredientStock');
+
+
+
 
 // สร้าง Route สำหรับการล็อกอินและล็อกเอาท์
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -32,9 +70,6 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // สร้าง Route สำหรับการลงทะเบียนและยืนยันการลงทะเบียน
 Route::get('/profile/complete', [ProfileController::class, 'showCompleteForm'])->name('employees.complete_profile')->middleware('auth');
 Route::post('/profile/complete', [ProfileController::class, 'completeProfile'])->name('employees.update_profile')->middleware('auth');
-
-//Route for Guest
-Route::get('/menu-today', [ProductionController::class, 'showMenuToday'])->name('menu-today');
 
 //สิทธิ์เฉพาะสำหรับพนักงานเท่านั้น
 Route::middleware(['auth', 'role:employee', 'check.profile'])->group(function () {
@@ -46,7 +81,7 @@ Route::middleware(['auth', 'role:employee', 'check.profile'])->group(function ()
 
 //สิทธิ์เฉพาะสำหรับเจ้าของร้านเท่านั้น
 Route::middleware(['auth', 'role:owner', 'check.profile'])->group(function () {
-    Route::get('/owner', [DashboardController::class, 'owner'])->name('dashboard.owner');
+    Route::get('/owner', [DashboardController::class, 'dashboard'])->name('dashboard.owner');
     Route::resource('finance', FinanceController::class);
 });
 
@@ -59,27 +94,34 @@ Route::get('/profile/{id}/change-password', [ProfileController::class, 'changePa
 Route::post('/profile/{id}/change-password', [ProfileController::class, 'updatePassword'])->name('profile.update_password')->middleware('auth');
 Route::get('/password/reset-custom', [ProfileController::class, 'showCustomPasswordResetForm'])->name('profile.reset_custom');
 Route::post('/password/reset-custom', [ProfileController::class, 'resetPasswordWithVerification'])->name('profile.reset_custom.post');
+Route::get('/sales/manage-sold-out', [SaleController::class, 'manageSoldOut'])->name('sales.manageSoldOut');
+Route::post('/sales/reset-sold-out/{id}', [SaleController::class, 'resetSoldOut'])->name('sales.resetSoldOut');
+Route::get('/owner', [DashboardController::class, 'dashboard'])->name('dashboard.owner');
+Route::get('/employee', [DashboardController::class, 'dashboard'])->name('dashboard.employee');
 
-use App\Http\Controllers\FeedbackController;
-
-Route::resource('feedbacks', FeedbackController::class);
-
-use App\Http\Controllers\ReportController;
-use App\Models\Production;
-
+// เส้นทางสำหรับดึงข้อมูลวัตถุดิบที่ถูกสั่งซื้อบ่อยที่สุด
+Route::get('/orders/top-ingredients/count', [OrderController::class, 'getTopIngredientsByCount'])->name('orders.top-ingredients.count');
+// เส้นทางสำหรับดึงข้อมูลวัตถุดิบที่ถูกสั่งซื้อในปริมาณมากที่สุด
+Route::get('/orders/top-ingredients/quantity', [OrderController::class, 'getTopIngredientsByQuantity'])->name('orders.top-ingredients.quantity');
+// เส้นทางสำหรับดึงข้อมูลกราฟสรุปการสั่งซื้อตามช่วงเวลา
+Route::get('/orders/chart-data', [OrderController::class, 'getChartData'])->name('orders.chart-data');
 Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
-
-Route::get('/', [ProductionController::class, 'showWelcomePage'])->name('welcome');
-
 Route::get('/sales/menus-by-date', [SaleController::class, 'getMenusByDate'])->name('sales.menusByDate');
+
+Route::put('/allocations/{allocation}/update-production', [MenuAllocationController::class, 'updateProduction'])->name('allocations.updateProduction');
+Route::get('/reports/profit-analysis', [ReportController::class, 'getProfitAnalysisJson'])->name('reports.profitAnalysis');
+
+Route::get('/allocations/{allocation}/productions/create', [MenuAllocationController::class, 'createProduction'])->name('alloproductions.create');
+Route::post('/allocations/{allocation}/productions', [MenuAllocationController::class, 'storeProduction'])->name('alloproductions.store');
+
+Route::get('sales/export', [SaleController::class, 'exportCsv'])->name('sales.export');
+Route::get('sales/export-pdf', [SaleController::class, 'exportPdf'])->name('sales.export-pdf');
 
 //สิทธิ์เฉพาะสำหรับเจ้าของร้านและพนักงานเท่านั้น
 Route::middleware(['auth', 'check.profile'])->group(function () {
 
     //จัดการพนักงาน แบบ Resourceful Routes ประกอบด้วย index, create, store, show, edit, update, destroy
     Route::resource('employees', EmployeeController::class);
-
-
 
     //จัดการประเภทวัตถุดิบ แบบ Resourceful Routes ประกอบด้วย index, create, store, show, edit, update, destroy
     Route::resource('ingredient_types', IngredientTypeController::class);
@@ -105,7 +147,8 @@ Route::middleware(['auth', 'check.profile'])->group(function () {
     //จัดการการขาย แบบ Resourceful Routes ประกอบด้วย index, create, store, show, edit, update, destroy
     route::resource('sales', SaleController::class);
     Route::get('sales/menus-by-date', [SaleController::class, 'getMenusByDate'])->name('sales.menus-by-date');
-    Route::get('sales/manage-sold', [SaleController::class, 'manage_sold'])->name('sales.manage-sold');
+    Route::get('sales/update-sold-out-status', [SaleController::class, 'updateSoldOutStatus'])->name('sales.update-sold-out-status');
+
 
     // สำหรับการดึงรายละเอียดเมนู
     Route::post('menus/details', [MenuController::class, 'getMenuDetails'])->name('menus.details');
